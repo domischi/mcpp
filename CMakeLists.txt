@@ -1,0 +1,67 @@
+PROJECT(mc++)
+
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+
+#if you don't want the full compiler output, set to "OFF"
+SET(CMAKE_VERBOSE_MAKEFILE OFF)
+
+#-------------------------------------------------------------------
+# ALPS
+#-------------------------------------------------------------------
+# find ALPS Library
+find_package(ALPS REQUIRED PATHS ${ALPS_ROOT_DIR} $ENV{ALPS_HOME} NO_SYSTEM_ENVIRONMENT_PATH)
+message(STATUS "Found ALPS: ${ALPS_ROOT_DIR} (revision: ${ALPS_VERSION})")
+include(${ALPS_USE_FILE})
+
+enable_language(C CXX)
+set(LIBS "${LIBS} ${ALPS_LIBRARIES}")
+#-------------------------------------------------------------------
+# Options
+#-------------------------------------------------------------------
+option(USE_MPI TRUE)
+option(USE_OPENMP TRUE)
+option(OPTIMIZE TRUE)
+option(DEBUG FALSE)
+
+#-------------------------------------------------------------------
+# Flags
+#-------------------------------------------------------------------
+SET(COMMON_FLAGS "-w")
+
+IF(DEBUG)
+    SET(COMMON_FLAGS "${COMMON_FLAGS} -pg -g -Wall")
+    ELSE(DEBUG)
+    SET(COMMON_FLAGS "${COMMON_FLAGS} -DNDEBUG")
+ENDIF(DEBUG)
+
+IF(OPTIMIZE)
+    SET(COMMON_FLAGS "${COMMON_FLAGS} -O3 -ffast-math")
+ENDIF(OPTIMIZE)
+
+IF(USE_MPI)
+    SET(COMMON_FLAGS "${COMMON_FLAGS} -DUSE_MPI -DMPICH_IGNORE_CXX_SEEK")
+ENDIF(USE_MPI)
+
+IF(USE_OPENMP)
+    SET(COMMON_FLAGS "${COMMON_FLAGS} -fopenmp -DUSE_OPENMP")
+ENDIF(USE_OPENMP)
+
+SET(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS} ${COMMON_FLAGS}")
+SET(CMAKE_CXX_SOURCE_FILE_EXTENSIONS ,"cpp")
+
+#-------------------------------------------------------------------
+# Directories
+#-------------------------------------------------------------------
+SET(LIBRARY_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/lib" CACHE PATH "Single output directory for building all libraries")
+SET(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin" CACHE PATH "Single output directory for building all executables")
+SET(CMAKE_INSTALL_PREFIX "$ENV{HOME}" CACHE PATH "Default install to home directory")
+SET(PROJECT_CMAKE "${CMAKE_SOURCE_DIR}/CMake")
+SET(BUILD_DIR "${CMAKE_SOURCE_DIR}/build")
+
+#-------------------------------------------------------------------
+# mc++
+#-------------------------------------------------------------------
+SET(SRCS ${SRCS} src/main.cpp)
+ADD_EXECUTABLE(mc++ ${SRCS})
+TARGET_LINK_LIBRARIES(mc++ ${LIBS})
+INSTALL(TARGETS mc++ DESTINATION $ENV{HOME}/bin)
