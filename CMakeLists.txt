@@ -14,7 +14,7 @@ message(STATUS "Found ALPS: ${ALPS_ROOT_DIR} (revision: ${ALPS_VERSION})")
 include(${ALPS_USE_FILE})
 
 enable_language(C CXX)
-set(LIBS "${LIBS} ${ALPS_LIBRARIES}")
+set(LIBS "${ALPS_LIBRARIES}")
 #-------------------------------------------------------------------
 # Options
 #-------------------------------------------------------------------
