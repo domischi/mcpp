@@ -9,8 +9,12 @@
 #include <alps/expression.h>
 #include <alps/lattice.h>
 
+#include <cmath>
 #include <iostream>
 #include <vector>
+#include <map>
+#include <cassert>
+#include <utility> //pair
 //#include "../spins/xy.h"
 
 class ssf : public alps::scheduler::LatticeMCRun<>{
@@ -26,33 +30,17 @@ public :
         D(params.value_or_default("D",1.)),
         cutoff_distance(params.value_or_default("cutoff_distance",3.)),
         Step_Number(0),
-        mx(1.),
+        mx(num_sites()),
         my(0.) {
             //Initialize Spins and the local observables
             spins.resize(N, 0.); 
             
-            //coordinate(site_iterator) is a function provided by the graph_helper, 
-            //this class is inherited by it, therefore it is here usable,
-            //it returns the coordinate as a vector<double> type 
-            std::cout << "lattice vectors:" <<std::endl<< /*graph_helper*/coordinate(site(0)).size()<<std::endl;
             //Initialize the measurements
             measurements << alps::RealObservable("Energy");
             measurements << alps::RealObservable("|Magnetization|");
             measurements << alps::RealObservable("Mx");
             
-            //TODO get the distance right and implement an angle function between the two points
-            //TODO make a table with r_ij^3
             Init_Lookup_Tables(); 
-            //TODO also move the neighbour list generation in this lookup_table function 
-            //Initialize the neighbour list
-            for(int i=0;i<N;++i){
-                std::vector<int> tmp;
-                for(int j=0;j<N;++j){
-                    if(i!=j && distance(i,j)<cutoff_distance) tmp.push_back(j);
-                    //std::cout << "i="<<std::setw(4)<<i<<"\tj="<<std::setw(4)<<j<<"\tdist(i,j)="<<std::setw(4)<<distance(site(i),site(j))<<std::endl;
-                }
-                neighbour_list.push_back(tmp);
-            }
 
             En=Energy();
         }
@@ -94,7 +82,8 @@ private:
     double D;
     double cutoff_distance;
 
-    typedef std::pair<int,int> spin_pair;
+    std::map<std::pair<int,int>,double> dist_3;
+    std::map<std::pair<int,int>,double> phi;
 
     std::vector<std::vector<int>> neighbour_list; //saves which neighbours are relevant (as not only nearest neighbours count in dipole )
 
@@ -124,18 +113,64 @@ private:
         }
     }
 
-    void Init_Lookup_Tables(){//TODO implement this in a general fashion, this is just rediculous....
-        for(site_iterator s_iter= sites().first; s_iter!=sites().second; ++s_iter){
-            std::cout << "The coods of site "<<*s_iter<<" are: (" <<coordinate(*s_iter)[0]<<","<<coordinate(*s_iter)[1]<<")"<<std::endl;
+    void Init_Lookup_Tables(){ //TODO somewhere here happens a seg fault, check this!
+        std::cout <<"\tInitialize Lookup Tables..."<<std::flush;
+        //TODO i need to find the graph_helper function which returns the vector which is describing the super lattice
+        std::vector<vector_type> basis;
+        basis_vector_iterator v, v_end;
+        for(std::tie(v,v_end)=basis_vectors();v!= v_end;++v){
+            basis.push_back(*v);
         }
+        std::vector<vector_type> periodic_translations;
+        //TODO generalize to more than 2D, and probably also make it nicer
+        for(int i=-1;i<=1;++i)
+        for(int j=-1;j<=1;++j){
+            vector_type vec, b1, b2;
+            b1=basis[0];
+            b2=basis[1];
+            vec.push_back(b1[0]*i+b2[0]*j);
+            vec.push_back(b1[1]*i+b2[1]*j);
+            periodic_translations.push_back(vec);
+        }
+        for(int i=0;i<num_sites();++i) neighbour_list.push_back(std::vector<int>());
+        std::map<std::pair<int,int>,double> dist_map;
+        for(site_iterator s_iter= sites().first; s_iter!=sites().second; ++s_iter)
+        for(site_iterator s_iter2= sites().first; s_iter2!=sites().second; ++s_iter2)
+        for(auto& p : periodic_translations)
+            if(*s_iter!=*s_iter2){
+                vector_type c1(coordinate(*s_iter));
+                vector_type c2(coordinate(*s_iter2));
+                double dist=distance(c1,c2,p);
+                std::pair<int,int> pair_ = std::make_pair(*s_iter,*s_iter2);
+                if(dist<cutoff_distance && dist_map[pair_]>0 && dist<dist_map[pair_]){ //new value is smaller than the previous calculated for this pair
+                    std::pair<int,int> pair_inverse=std::make_pair(pair_.second,pair_.first);
+                    dist_3[pair_]=std::pow(dist,-3);
+                    dist_3[pair_inverse]=std::pow(dist,-3);
+                    phi[pair_]=std::atan2((c1[1]-c2[1]),(c1[0]-c2[0]));
+                    phi[pair_inverse]=std::atan2((c1[1]-c2[1]),(c1[0]-c2[0]));
+                    neighbour_list[*s_iter].push_back(*s_iter2);
+                    neighbour_list[*s_iter2].push_back(*s_iter);
+                }
+        }
+        std::cout <<"done"<<std::endl;
     }
 
-    double distance(int i, int j){
-        return 1.;
+    inline double distance(vector_type& x, vector_type& y, vector_type& periodic){
+        return std::sqrt(std::pow(x[0]-y[0]+periodic[0],2)+std::pow(x[1]-y[1]+periodic[1],2));
     }
 
-    double angle_w_x(int i, int j){
-        return 0.;
+    double inv_distance_cubed(int i,int j) {return inv_distance_cubed(std::make_pair(i,j));}
+
+    double inv_distance_cubed(std::pair<int,int> pair_){
+        double ret_val=dist_3[pair_];
+        assert(ret_val>0.);
+        return ret_val;
+    }
+
+    double angle_w_x(int i, int j) {return angle_w_x(std::make_pair(i,j));}
+
+    double angle_w_x(std::pair<int,int> pair_){
+        return phi[pair_];
     }
 
     void measure(){
@@ -155,7 +190,7 @@ private:
     double single_site_Energy(int i){
         double e=0.;
         for(int j : neighbour_list[i]){
-            e-=D/std::pow(distance(i,j),3)*(1.5*std::cos(spins[i]+spins[j]-2*angle_w_x(i,j))+0.5*std::cos(spins[i]-spins[j]));
+            e-=D*inv_distance_cubed(i,j)*(1.5*std::cos(spins[i]+spins[j]-2*angle_w_x(i,j))+0.5*std::cos(spins[i]-spins[j]));
         }
         return e;
     }

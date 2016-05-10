@@ -1,0 +1,7 @@
+# ignore potentially generated files
+*.xml
+*.xsl
+*.h5
+*.out
+*.run1
+
