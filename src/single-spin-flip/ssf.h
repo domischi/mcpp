@@ -94,7 +94,7 @@ private:
     void update(){
         //Choose a site
         int site=random_int(num_sites());
-        
+     
         //propose a new state
         double new_state=random_real(0.,2*M_PI);
         double old_energy=single_site_Energy(site);
@@ -102,6 +102,7 @@ private:
 
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);
+        //std::cout << "old:"<<std::setw(10)<<old_energy<<"\tnew:"<<std::setw(10)<<new_energy<<std::endl;
         if(random_real()<=std::exp(-(new_energy-old_energy)/T)){//check this line, as this is not yet checked
             //update variables due to local change
             mx+=std::cos(new_state)-std::cos(old_state);
@@ -122,14 +123,14 @@ private:
             basis.push_back(*v);
         }
         std::vector<vector_type> periodic_translations;
-        //TODO generalize to more than 2D, and probably also make it nicer
+        //TODO generalize to more than 2D, and probably also make it nicer (maybe with a valarray)
         for(int i=-1;i<=1;++i)
         for(int j=-1;j<=1;++j){
             vector_type vec, b1, b2;
             b1=basis[0];
             b2=basis[1];
-            vec.push_back(b1[0]*i+b2[0]*j);
-            vec.push_back(b1[1]*i+b2[1]*j);
+            vec.push_back(b1[0]*L*i+b2[0]*L*j);
+            vec.push_back(b1[1]*L*i+b2[1]*L*j);
             periodic_translations.push_back(vec);
         }
         for(int i=0;i<num_sites();++i) neighbour_list.push_back(std::vector<int>());
@@ -142,7 +143,8 @@ private:
                 vector_type c2(coordinate(*s_iter2));
                 double dist=distance(c1,c2,p);
                 std::pair<int,int> pair_ = std::make_pair(*s_iter,*s_iter2);
-                if(dist<cutoff_distance && dist_map[pair_]>0 && dist<dist_map[pair_]){ //new value is smaller than the previous calculated for this pair
+                if(dist<cutoff_distance && (dist_map[pair_]==0. || dist<dist_map[pair_])){ //new value is smaller than the previous calculated for this pair
+                    dist_map[pair_]=dist;
                     std::pair<int,int> pair_inverse=std::make_pair(pair_.second,pair_.first);
                     dist_3[pair_]=std::pow(dist,-3);
                     dist_3[pair_inverse]=std::pow(dist,-3);
