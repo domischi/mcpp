@@ -37,7 +37,7 @@ public :
             
             //Initialize the measurements
             measurements << alps::RealObservable("Energy");
-            measurements << alps::RealObservable("|Magnetization|");
+            measurements << alps::RealObservable("M");
             measurements << alps::RealObservable("Mx");
             
             Init_Lookup_Tables(); 
@@ -117,6 +117,16 @@ private:
         }
     }
 
+    void measure(){
+        measurements["Energy"]<<En/num_sites();
+        double M= std::sqrt(mx*mx+my*my)/num_sites();
+        measurements["M"]<<M;
+        measurements["M^2"]<<M*M;
+        measurements["M^4"]<<M*M*M*M;
+        double Mx = mx/num_sites();
+        measurements["Mx"]<<Mx; 
+        measurements["Mx^2"]<<Mx*Mx;  
+    }
     //Calculate the properties like the Binder Cumulant, the susceptibility and so on.
     void evaluate(){
         // Binder cumulant
@@ -126,6 +136,25 @@ private:
             alps::RealObsevaluator binder = m2*m2/m4;
             measurements.addObservable(binder); 
         } else std::cout << "Binder cumulant will not be calculated"<<std::endl;
+        // c_V 
+        if(measurements.has("Energy")&&measurements.has("Energy^2")){
+            alps::RealObsevaluator E = measurements["Energy"];
+            alps::RealObsevaluator E2 = measurements["Energy^2"];
+            alps::RealObsevaluator c_V= beta()*beta() * (E2-E*E); //TODO divide by num_sites()?
+            measurements.addObservable(c_V); 
+        } else std::cout << "c_V will not be calculated"<<std::endl;
+        // susceptibility 
+        if(measurements.has("Mx")&&measurements.has("Mx^2")){
+            alps::RealObsevaluator Mx = measurements["Mx"];
+            alps::RealObsevaluator Mx2 = measurements["Mx^2"];
+            alps::RealObsevaluator chi= beta() * (Mx2-Mx*Mx); //TODO divide by num_sites()?
+            measurements.addObservable(chi); 
+        } else std::cout << "susceptibility will not be calculated"<<std::endl;
+    }
+
+    //TODO decide in which units of measurement to measure...(natural, eV and K, SI?)
+    inline double beta(){ 
+        return 1./T;
     }
 
     void Init_Lookup_Tables(){ 
@@ -189,11 +218,6 @@ private:
         return phi[pair_];
     }
 
-    void measure(){
-        measurements["Energy"]<<En/num_sites();    
-        measurements["|Magnetization|"]<<std::sqrt(mx*mx+my*my)/num_sites();    
-        measurements["Mx"]<<mx/num_sites();    
-    }
 
     double Energy(){
         double e=0.;
