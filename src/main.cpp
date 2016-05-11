@@ -10,6 +10,7 @@ int main(int argc,char** argv){
     //    return 1;
     //}
     //else{
+    // TODO this needs to be generalized for any potential factory.... 
         return alps::scheduler::start(argc,argv, ssf_factory());
     //}
 }

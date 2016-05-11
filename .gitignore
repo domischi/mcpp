@@ -5,3 +5,5 @@
 *.out
 *.run1
 
+#ignore my Ideas.txt file
+Ideas.txt

@@ -63,6 +63,9 @@ public :
         if(Step_Number%Each_Measurement && Step_Number>0){
             measure();
         }
+        if(Step_Number==Measure_Sweeps+Thermalization_Sweeps){
+            evaluate();
+        }
     }
     bool is_thermalized() const {
         return Step_Number >= Thermalization_Sweeps;   
@@ -114,7 +117,18 @@ private:
         }
     }
 
-    void Init_Lookup_Tables(){ //TODO somewhere here happens a seg fault, check this!
+    //Calculate the properties like the Binder Cumulant, the susceptibility and so on.
+    void evaluate(){
+        // Binder cumulant
+        if(measurements.has("M^4")&&measurements.has("M^2")){
+            alps::RealObsevaluator m2 = measurements["M^2"];
+            alps::RealObsevaluator m4 = measurements["M^4"];
+            alps::RealObsevaluator binder = m2*m2/m4;
+            measurements.addObservable(binder); 
+        } else std::cout << "Binder cumulant will not be calculated"<<std::endl;
+    }
+
+    void Init_Lookup_Tables(){ 
         std::cout <<"\tInitialize Lookup Tables..."<<std::flush;
         //TODO i need to find the graph_helper function which returns the vector which is describing the super lattice
         std::vector<vector_type> basis;
