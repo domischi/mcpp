@@ -2,6 +2,7 @@
 #define MCPP_SSF_H
 
 #include <alps/scheduler.h>
+#include <alps/parapack/worker.h>
 #include <alps/alea.h>
 #include <alps/scheduler/montecarlo.h>
 #include <alps/osiris.h>
@@ -17,10 +18,11 @@
 #include <utility> //pair
 //#include "../spins/xy.h"
 
-class ssf : public alps::scheduler::LatticeMCRun<>{
+class ssf_worker : public alps::parapack::lattice_mc_worker<>{
 public :
-    ssf(const alps::ProcessList & where,const alps::Parameters& params, int node) :
-        alps::scheduler::LatticeMCRun<>(where,params,node), 
+    //ssf_worker(const alps::ProcessList & where,const alps::Parameters& params, int node) :
+    ssf_worker(const alps::Parameters& params) :
+        alps::parapack::lattice_mc_worker<>(params), 
         Thermalization_Sweeps(params.value_or_default("THERMALIZATION",10000)),
         Measure_Sweeps(params.value_or_default("SWEEPS",50000)),
         Each_Measurement(params.value_or_default("Each_Measurement",100)),
@@ -30,21 +32,44 @@ public :
         D(params.value_or_default("D",1.)),
         cutoff_distance(params.value_or_default("cutoff_distance",3.)),
         Step_Number(0),
-        mx(num_sites()),
-        my(0.) {
+        mx(0.),
+        my(0.),
+        mx_stag(num_sites()),//stagered in stripes
+        my_stag(0.),
+        accepted(0){
             //Initialize Spins and the local observables
-            spins.resize(N, 0.); 
-            
-            //Initialize the measurements
-            measurements << alps::RealObservable("Energy");
-            measurements << alps::RealObservable("M");
-            measurements << alps::RealObservable("Mx");
-            
+            spins.resize(N, 0.);
+            if(is_bipartite()&&true)//TODO implement check if ground state is striped as used below
+                for(site_iterator s_iter= sites().first; s_iter!=sites().second; ++s_iter){
+                    if(!(((*s_iter)/L)%2)){//even y site
+                        spins[*s_iter]=M_PI;
+                    }
+                }
+            else {
+                std::cerr <<"Ground state not explicitly defined, for this lattice, implement this or assume all spins to point in the x direction";
+            }
+            //Init the lookup tables
             Init_Lookup_Tables(); 
 
             En=Energy();
         }
     
+    void init_observables(alps::Parameters const&, alps::ObservableSet& obs){
+            obs << alps::RealObservable("Energy");
+            obs << alps::RealObservable("Energy^2");
+            obs << alps::RealObservable("M");
+            obs << alps::RealObservable("M^2");
+            obs << alps::RealObservable("M^4");
+            obs << alps::RealObservable("Mx");
+            obs << alps::RealObservable("Mx^2");
+            obs << alps::RealObservable("M staggered");
+            obs << alps::RealObservable("M staggered^2");
+            obs << alps::RealObservable("M staggered^4");
+            obs << alps::RealObservable("Mx staggered");
+            obs << alps::RealObservable("Mx staggered^2");
+            obs << alps::RealObservable("Acceptance Rate"); //Probably very useful for debugging
+    }
+
     static void print_copyright(std::ostream & out){
         out << "You are using mc++"<<std::endl
             << "copyright (c) by Dominik Schildknecht"<<std::endl
@@ -57,20 +82,18 @@ public :
     void load(alps::IDump &dump){
         dump >> L >> N>> T>> Step_Number >> spins;
     }
-    void dostep(){
+    void run(alps::ObservableSet& obs){
         ++Step_Number;
         update();
         if(Step_Number%Each_Measurement && Step_Number>0){
-            measure();
-        }
-        if(Step_Number==Measure_Sweeps+Thermalization_Sweeps){
-            evaluate();
+            measure(obs);
+            accepted=0;
         }
     }
     bool is_thermalized() const {
         return Step_Number >= Thermalization_Sweeps;   
     }
-    double work_done() const {
+    double progress() const {
         return Step_Number/(static_cast<double>(Measure_Sweeps+Thermalization_Sweeps));
     }
 private:
@@ -93,6 +116,9 @@ private:
     double En;
     double mx;
     double my;
+    double mx_stag;
+    double my_stag;
+    int accepted;
     
     void update(){
         //Choose a site
@@ -105,76 +131,71 @@ private:
 
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);
-        //std::cout << "old:"<<std::setw(10)<<old_energy<<"\tnew:"<<std::setw(10)<<new_energy<<std::endl;
         if(random_real()<=std::exp(-(new_energy-old_energy)/T)){//check this line, as this is not yet checked
             //update variables due to local change
             mx+=std::cos(new_state)-std::cos(old_state);
             my+=std::sin(new_state)-std::sin(old_state);
+
+            //update with the corresponding prefactor
+            int prefactor=1;
+            if(!((site/L)%2)) prefactor=-1; //for even sites
+            mx_stag+=prefactor*(std::cos(new_state)-std::cos(old_state));
+            my_stag+=prefactor*(std::sin(new_state)-std::sin(old_state));
+            
             En+=(new_energy-old_energy)/2;
+            ++accepted;
         }
         else{ //switch back
             spins[site]=old_state;
         }
     }
 
-    void measure(){
-        measurements["Energy"]<<En/num_sites();
+    void measure(alps::ObservableSet& obs){
+        obs["Energy"]<<En/num_sites();
+        obs["Energy^2"]<<std::pow(En/num_sites(),2);
         double M= std::sqrt(mx*mx+my*my)/num_sites();
-        measurements["M"]<<M;
-        measurements["M^2"]<<M*M;
-        measurements["M^4"]<<M*M*M*M;
-        double Mx = mx/num_sites();
-        measurements["Mx"]<<Mx; 
-        measurements["Mx^2"]<<Mx*Mx;  
+        obs["M"]<<M;
+        obs["M^2"]<<M*M;
+        obs["M^4"]<<M*M*M*M;
+        double Mx=mx/num_sites();
+        obs["Mx"]<<Mx; 
+        obs["Mx^2"]<<Mx*Mx;
+        M= std::sqrt(mx_stag*mx_stag+my_stag*my_stag)/num_sites();
+        obs["M staggered"]<<M;
+        obs["M staggered^2"]<<M*M;
+        obs["M staggered^4"]<<M*M*M*M;
+        Mx=mx_stag/num_sites();
+        obs["Mx staggered"]<<Mx; 
+        obs["Mx staggered^2"]<<Mx*Mx;
+        obs["Acceptance Rate"] << (1.0*accepted)/Each_Measurement;
     }
-    //Calculate the properties like the Binder Cumulant, the susceptibility and so on.
-    void evaluate(){
-        // Binder cumulant
-        if(measurements.has("M^4")&&measurements.has("M^2")){
-            alps::RealObsevaluator m2 = measurements["M^2"];
-            alps::RealObsevaluator m4 = measurements["M^4"];
-            alps::RealObsevaluator binder = m2*m2/m4;
-            measurements.addObservable(binder); 
-        } else std::cout << "Binder cumulant will not be calculated"<<std::endl;
-        // c_V 
-        if(measurements.has("Energy")&&measurements.has("Energy^2")){
-            alps::RealObsevaluator E = measurements["Energy"];
-            alps::RealObsevaluator E2 = measurements["Energy^2"];
-            alps::RealObsevaluator c_V= beta()*beta() * (E2-E*E); //TODO divide by num_sites()?
-            measurements.addObservable(c_V); 
-        } else std::cout << "c_V will not be calculated"<<std::endl;
-        // susceptibility 
-        if(measurements.has("Mx")&&measurements.has("Mx^2")){
-            alps::RealObsevaluator Mx = measurements["Mx"];
-            alps::RealObsevaluator Mx2 = measurements["Mx^2"];
-            alps::RealObsevaluator chi= beta() * (Mx2-Mx*Mx); //TODO divide by num_sites()?
-            measurements.addObservable(chi); 
-        } else std::cout << "susceptibility will not be calculated"<<std::endl;
-    }
-
     //TODO decide in which units of measurement to measure...(natural, eV and K, SI?)
     inline double beta(){ 
         return 1./T;
     }
 
     void Init_Lookup_Tables(){ 
-        std::cout <<"\tInitialize Lookup Tables..."<<std::flush;
-        //TODO i need to find the graph_helper function which returns the vector which is describing the super lattice
         std::vector<vector_type> basis;
         basis_vector_iterator v, v_end;
         for(std::tie(v,v_end)=basis_vectors();v!= v_end;++v){
             basis.push_back(*v);
         }
         std::vector<vector_type> periodic_translations;
-        //TODO generalize to more than 2D, and probably also make it nicer (maybe with a valarray)
-        for(int i=-1;i<=1;++i)
-        for(int j=-1;j<=1;++j){
-            vector_type vec, b1, b2;
-            b1=basis[0];
-            b2=basis[1];
-            vec.push_back(b1[0]*L*i+b2[0]*L*j);
-            vec.push_back(b1[1]*L*i+b2[1]*L*j);
-            periodic_translations.push_back(vec);
+        int dim = dimension();
+        assert(dim==basis[0].size());
+        periodic_translations.push_back(vector_type(dim,0.));
+        vector_type pmb(dimension()),ppb(dimension()); //periodic_translation+-L*basis
+        for(auto& actual_basis_vector : basis){
+            int size_periodic_translations=periodic_translations.size();
+            for(int i=0;i<size_periodic_translations;++i){//to avoid double counting a specific vector, and to not have a segfault
+                vector_type p = periodic_translations[i];
+                for(int d =0;d<dimension();++d){
+                    pmb[d]=(p[d]-L*(actual_basis_vector[d]));
+                    ppb[d]=(p[d]+L*(actual_basis_vector[d]));
+                }
+                periodic_translations.push_back(pmb);
+                periodic_translations.push_back(ppb);
+            }
         }
         for(int i=0;i<num_sites();++i) neighbour_list.push_back(std::vector<int>());
         std::map<std::pair<int,int>,double> dist_map;
@@ -218,6 +239,12 @@ private:
         return phi[pair_];
     }
 
+    int random_int(int j){
+        return static_cast<int>(j*uniform_01());
+    }
+    double random_real(double a=0,double b=1){
+        return a+(b-a)*uniform_01();
+    }
 
     double Energy(){
         double e=0.;
@@ -236,5 +263,56 @@ private:
     }
 };
 
-typedef alps::scheduler::SimpleMCFactory<ssf> ssf_factory;
+
+class ssf_evaluator : public alps::parapack::simple_evaluator {
+private:
+    double T;
+    double beta() const {
+        return 1./T;
+    }
+public:
+    ssf_evaluator(alps::Parameters const& params) : T(params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"])) {}
+    void evaluate(alps::ObservableSet& obs) const {
+        // Binder cumulant
+        if(obs.has("M^4")&&obs.has("M^2")){
+            alps::RealObsevaluator m2 = obs["M^2"];
+            alps::RealObsevaluator m4 = obs["M^4"];
+            alps::RealObsevaluator binder("BinderCumulant"); 
+            binder = m2*m2/m4;
+            obs.addObservable(binder); 
+        } else std::cerr << "Binder cumulant will not be calculated"<<std::endl;
+        if(obs.has("M staggered^4")&&obs.has("M staggered^2")){
+            alps::RealObsevaluator m2 = obs["M staggered^2"];
+            alps::RealObsevaluator m4 = obs["M staggered^4"];
+            alps::RealObsevaluator binder("BinderCumulant staggered"); 
+            binder = m2*m2/m4;
+            obs.addObservable(binder); 
+        } else std::cerr << "Binder stag cumulant will not be calculated"<<std::endl;
+        // c_V //TODO for some reason this resets the temperature... 
+        if(obs.has("Energy")&&obs.has("Energy^2")){
+            alps::RealObsevaluator E = obs["Energy"];
+            alps::RealObsevaluator E2 = obs["Energy^2"];
+            alps::RealObsevaluator c_V("c_V");
+            c_V = beta()*beta() * (E2-E*E); //TODO divide by num_sites()?
+
+            obs.addObservable(c_V); 
+        } else std::cerr << "c_V will not be calculated"<<std::endl;
+        // susceptibility //TODO for some reason this resets the temperature...
+        if(obs.has("Mx")&&obs.has("Mx^2")){
+            alps::RealObsevaluator Mx = obs["Mx"];
+            alps::RealObsevaluator Mx2 = obs["Mx^2"];
+            alps::RealObsevaluator chi("susceptibility");
+            chi = beta() * (Mx2-Mx*Mx); //TODO divide by num_sites()?
+            obs.addObservable(chi); 
+        } else std::cerr << "susceptibility will not be calculated"<<std::endl;
+        if(obs.has("Mx staggered")&&obs.has("Mx staggered^2")){
+            alps::RealObsevaluator Mx = obs["Mx staggered"];
+            alps::RealObsevaluator Mx2 = obs["Mx staggered^2"];
+            alps::RealObsevaluator chi("susceptibility staggered");
+            chi = beta() * (Mx2-Mx*Mx); //TODO divide by num_sites()?
+            obs.addObservable(chi); 
+        } else std::cerr << "susceptibility staggered will not be calculated"<<std::endl;
+    }
+
+};
 #endif //MCPP_SSF_H
