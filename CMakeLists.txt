@@ -61,7 +61,7 @@ SET(BUILD_DIR "${CMAKE_SOURCE_DIR}/build")
 #-------------------------------------------------------------------
 # mc++
 #-------------------------------------------------------------------
-SET(SRCS ${SRCS} src/main.cpp)
+SET(SRCS ${SRCS} src/main.cpp src/parapack_register.cpp)
 ADD_EXECUTABLE(mc++ ${SRCS})
 TARGET_LINK_LIBRARIES(mc++ ${LIBS})
 INSTALL(TARGETS mc++ DESTINATION $ENV{HOME}/bin)
