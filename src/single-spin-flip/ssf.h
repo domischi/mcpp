@@ -44,11 +44,12 @@ public :
             if(is_bipartite()&&true)//TODO implement check if ground state is striped as used below
                 for(site_iterator s_iter= sites().first; s_iter!=sites().second; ++s_iter){
                     if((((*s_iter)/L)%2)){//odd y site
-                        spins[*s_iter]=1.5*M_PI;
+                        //spins[*s_iter]=1.5*M_PI;
+                        spins[*s_iter]=M_PI;
                     }
-                    else{
-                        spins[*s_iter]=M_PI/2;
-                    }
+                    //else{
+                    //    spins[*s_iter]=M_PI/2;
+                    //}
                 }
             else {
                 std::cerr <<"Ground state not explicitly defined, for this lattice, implement this or assume all spins to point in the x direction";
@@ -92,7 +93,7 @@ public :
         for(int i = 0;i<N;++i){
             update();
         }
-        if(Step_Number%Each_Measurement && Step_Number>Thermalization_Sweeps){
+        if(!(Step_Number%Each_Measurement) && Step_Number>Thermalization_Sweeps){
             measure(obs);
             accepted=0;
         }
@@ -129,8 +130,8 @@ private:
     
     void update(){
         //Choose a site
-        //int site=random_int(num_sites());
-        int site=0;
+        int site=random_int(num_sites());
+        //int site=0;
         //propose a new state
         double new_state=random_real(0.,2*M_PI);
         double old_energy=single_site_Energy(site);
@@ -138,20 +139,27 @@ private:
         
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);
+        //std::cout << old_energy << "\t"<<new_energy<< "\t" << std::exp(-(new_energy-old_energy)/T)<<std::endl;
         if(random_real()<=std::exp(-(new_energy-old_energy)/T)){//check this line, as this is not yet checked
+            std::cout<< "in here\t" <<old_energy << "\t"<<new_energy<< "\t" << std::exp(-(new_energy-old_energy)/T)<<"\t"<<old_state/M_PI<<std::endl;
             //update variables due to local change
             mx+=std::cos(new_state)-std::cos(old_state);
             my+=std::sin(new_state)-std::sin(old_state);
 
             //update with the corresponding prefactor
-            int prefactor=1;
-            if(!((site/L)%2)) prefactor=-1; //for even sites
-            mx_stag+=prefactor*(std::cos(new_state)-std::cos(old_state));
-            my_stag+=prefactor*(std::sin(new_state)-std::sin(old_state));
-            
+            int prefactor_x=1;
+            int prefactor_y=1;
+            if(((site/L)%2)) prefactor_x=-1; //for even y sites -1
+            if(((site%L)%2)) prefactor_y=-1; //for even x sites -1
+            std::cout<<std::sqrt(mx_stag*mx_stag+my_stag*my_stag)/num_sites()<<"\t"; 
+            mx_stag+=prefactor_x*(std::cos(new_state)-std::cos(old_state));
+            my_stag+=prefactor_y*(std::sin(new_state)-std::sin(old_state));
+            std::cout<<std::sqrt(mx_stag*mx_stag+my_stag*my_stag)/num_sites()<<std::endl;
+            //if(site==0) std::cout<<old_state/M_PI<<"\t"<<new_state/M_PI<<std::endl;
             En+=(new_energy-old_energy)/2;
             ++accepted;
-        }
+            //std::cout <<std::sqrt(mx_stag*mx_stag+my_stag*my_stag)/num_sites() << std::endl;
+        }0za
         else{ //switch back
             spins[site]=old_state;
         }
@@ -263,8 +271,7 @@ private:
     double single_site_Energy(int i){
         double e=0.;
         for(int j : neighbour_list[i]){
-            //std::cout <<"in ssE"<< i<<"\t"<< j <<"\t\t"<<D*inv_distance_cubed(i,j)*(1.5*std::cos(spins[i]+spins[j]-2*angle_w_x(i,j))+0.5*std::cos(spins[i]-spins[j]))<<std::endl;
-            e-=D*inv_distance_cubed(i,j)*(1.5*std::cos(spins[i]+spins[j]-2*angle_w_x(i,j))+0.5*std::cos(spins[i]-spins[j]));
+            e+=D*inv_distance_cubed(i,j)*(1.5*std::cos(spins[i]+spins[j]-2*angle_w_x(i,j))+0.5*std::cos(spins[i]-spins[j]));
         }
         return e;
     }

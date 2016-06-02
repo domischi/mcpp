@@ -13,26 +13,27 @@ from numpy import linspace
 
 #prepare the input parameters
 parms = []
-for l in [4,8,16]: 
-    for t in linspace(0,2.5,25):
+for l in [16]: 
+    for t in linspace(0,12.0,100):
+#for l in [8]: 
+#    for t in [0]:
         parms.append(
             { 
                  'LATTICE'        : "square lattice", 
                  'T'              : t,
-                 'D'              : 1 ,
-                 'THERMALIZATION' : 10000,
-                 'SWEEPS'         : 4000000,
+                 'THERMALIZATION' : 100000,
+                 'SWEEPS'         : 400000,
                  'UPDATE'         : "ssf",
-                 'cutoff_distance': 3.,
+                 'cutoff_distance': 2*l,
                  'L'              : l
                }
            )
 
 #write the input file and run the simulation
 input_file = pyalps.writeInputFiles('parm',parms)
-pyalps.runApplication('mc++',input_file,Tmin=5)
+#pyalps.runApplication('mc++',input_file,Tmin=5)
 # use the following instead if you have MPI
-#pyalps.runApplication('mc++',input_file,Tmin=5,MPI=2)
+pyalps.runApplication('mc++',input_file,Tmin=5,MPI=7)
 
 #load the susceptibility and collect it as function of temperature T
 data = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm'),['M staggered', 'c_V', 'BinderCumulant staggered', 'susceptibility staggered'])
@@ -65,3 +66,5 @@ pyalps.plot.plot(binder)
 plt.xlabel('Temperature $T$')
 plt.ylabel('Binder Cumulant')
 plt.title('2D XY model with dipolar interaction')
+
+plt.show()
