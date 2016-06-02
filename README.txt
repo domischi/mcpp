@@ -7,9 +7,9 @@ Installation Guide:
     - Download the ALPS library (http://alps.comp-phys.org/) and extract it
     - Set the environment variable ALPS_DIR to where ever you installed the library to (e.g. /opt/alps/share/alps)
     - Clone the mc++ program
-        git clone TODO get path
+        git clone https://github.com/domischi/mcpp.git
     - Change into mc++ folder
-        cd mc++
+        cd mcpp
     - Go into the build directory and use cmake & make
         cd build; cmake ..; make
 
