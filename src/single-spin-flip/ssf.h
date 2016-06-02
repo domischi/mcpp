@@ -23,26 +23,31 @@ public :
     //ssf_worker(const alps::ProcessList & where,const alps::Parameters& params, int node) :
     ssf_worker(const alps::Parameters& params) :
         alps::parapack::lattice_mc_worker<>(params), 
-        Thermalization_Sweeps(params.value_or_default("THERMALIZATION",10000)),
-        Measure_Sweeps(params.value_or_default("SWEEPS",50000)),
-        Each_Measurement(params.value_or_default("Each_Measurement",100)),
+        Thermalization_Sweeps(params.value_or_default("THERMALIZATION",100)),
+        Measure_Sweeps(params.value_or_default("SWEEPS",5000)),
+        Each_Measurement(params.value_or_default("Each_Measurement",1)),
         L(params["L"]),
         N(L*L),
         T(params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"])),
         D(params.value_or_default("D",1.)),
-        cutoff_distance(params.value_or_default("cutoff_distance",3.)),
         Step_Number(0),
         mx(0.),
         my(0.),
         mx_stag(num_sites()),//stagered in stripes
         my_stag(0.),
         accepted(0){
+            cutoff_distance=params.value_or_default("cutoff_distance",3.);
+            double a=params.value_or_default("a",1.);
+            cutoff_distance*=a;
             //Initialize Spins and the local observables
             spins.resize(N, 0.);
             if(is_bipartite()&&true)//TODO implement check if ground state is striped as used below
                 for(site_iterator s_iter= sites().first; s_iter!=sites().second; ++s_iter){
-                    if(!(((*s_iter)/L)%2)){//even y site
-                        spins[*s_iter]=M_PI;
+                    if((((*s_iter)/L)%2)){//odd y site
+                        spins[*s_iter]=1.5*M_PI;
+                    }
+                    else{
+                        spins[*s_iter]=M_PI/2;
                     }
                 }
             else {
@@ -84,8 +89,10 @@ public :
     }
     void run(alps::ObservableSet& obs){
         ++Step_Number;
-        update();
-        if(Step_Number%Each_Measurement && Step_Number>0){
+        for(int i = 0;i<N;++i){
+            update();
+        }
+        if(Step_Number%Each_Measurement && Step_Number>Thermalization_Sweeps){
             measure(obs);
             accepted=0;
         }
@@ -122,13 +129,13 @@ private:
     
     void update(){
         //Choose a site
-        int site=random_int(num_sites());
-     
+        //int site=random_int(num_sites());
+        int site=0;
         //propose a new state
         double new_state=random_real(0.,2*M_PI);
         double old_energy=single_site_Energy(site);
         double old_state=spins[site];
-
+        
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);
         if(random_real()<=std::exp(-(new_energy-old_energy)/T)){//check this line, as this is not yet checked
@@ -218,7 +225,6 @@ private:
                     neighbour_list[*s_iter2].push_back(*s_iter);
                 }
         }
-        std::cout <<"done"<<std::endl;
     }
 
     inline double distance(vector_type& x, vector_type& y, vector_type& periodic){
@@ -257,6 +263,7 @@ private:
     double single_site_Energy(int i){
         double e=0.;
         for(int j : neighbour_list[i]){
+            //std::cout <<"in ssE"<< i<<"\t"<< j <<"\t\t"<<D*inv_distance_cubed(i,j)*(1.5*std::cos(spins[i]+spins[j]-2*angle_w_x(i,j))+0.5*std::cos(spins[i]-spins[j]))<<std::endl;
             e-=D*inv_distance_cubed(i,j)*(1.5*std::cos(spins[i]+spins[j]-2*angle_w_x(i,j))+0.5*std::cos(spins[i]-spins[j]));
         }
         return e;
