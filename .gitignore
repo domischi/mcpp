@@ -4,6 +4,7 @@
 *.h5
 *.out
 *.run1
+*.tmp
 
 #ignore my Ideas.txt file
 Ideas.txt
