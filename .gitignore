@@ -5,6 +5,7 @@
 *.out
 *.run1
 *.tmp
+*.clone*
 
 #ignore my Ideas.txt file
 Ideas.txt
