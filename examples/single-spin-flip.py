@@ -13,18 +13,18 @@ from numpy import linspace
 
 #prepare the input parameters
 parms = []
-for l in [16]: 
-    for t in linspace(0,12.0,100):
+for l in [4,8,16]: 
+    for t in linspace(0,4,25):
 #for l in [8]: 
 #    for t in [0]:
         parms.append(
             { 
                  'LATTICE'        : "square lattice", 
                  'T'              : t,
-                 'THERMALIZATION' : 100000,
-                 'SWEEPS'         : 400000,
+                 'THERMALIZATION' : 1000,
+                 'SWEEPS'         : 4000,
                  'UPDATE'         : "ssf",
-                 'cutoff_distance': 2*l,
+                 'cutoff_distance': 3.,
                  'L'              : l
                }
            )
