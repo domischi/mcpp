@@ -131,7 +131,6 @@ private:
     void update(){
         //Choose a site
         int site=random_int(num_sites());
-        //int site=0;
         //propose a new state
         double new_state=random_real(0.,2*M_PI);
         double old_energy=single_site_Energy(site);
@@ -139,9 +138,7 @@ private:
         
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);
-        //std::cout << old_energy << "\t"<<new_energy<< "\t" << std::exp(-(new_energy-old_energy)/T)<<std::endl;
-        if(random_real()<=std::exp(-(new_energy-old_energy)/T)){//check this line, as this is not yet checked
-            std::cout<< "in here\t" <<old_energy << "\t"<<new_energy<< "\t" << std::exp(-(new_energy-old_energy)/T)<<"\t"<<old_state/M_PI<<std::endl;
+        if(random_real()<=std::exp(-(new_energy-old_energy)/T)){
             //update variables due to local change
             mx+=std::cos(new_state)-std::cos(old_state);
             my+=std::sin(new_state)-std::sin(old_state);
@@ -151,15 +148,11 @@ private:
             int prefactor_y=1;
             if(((site/L)%2)) prefactor_x=-1; //for even y sites -1
             if(((site%L)%2)) prefactor_y=-1; //for even x sites -1
-            std::cout<<std::sqrt(mx_stag*mx_stag+my_stag*my_stag)/num_sites()<<"\t"; 
             mx_stag+=prefactor_x*(std::cos(new_state)-std::cos(old_state));
             my_stag+=prefactor_y*(std::sin(new_state)-std::sin(old_state));
-            std::cout<<std::sqrt(mx_stag*mx_stag+my_stag*my_stag)/num_sites()<<std::endl;
-            //if(site==0) std::cout<<old_state/M_PI<<"\t"<<new_state/M_PI<<std::endl;
             En+=(new_energy-old_energy)/2;
             ++accepted;
-            //std::cout <<std::sqrt(mx_stag*mx_stag+my_stag*my_stag)/num_sites() << std::endl;
-        }0za
+        }
         else{ //switch back
             spins[site]=old_state;
         }
@@ -215,7 +208,7 @@ private:
         for(int i=0;i<num_sites();++i) neighbour_list.push_back(std::vector<int>());
         std::map<std::pair<int,int>,double> dist_map;
         for(site_iterator s_iter= sites().first; s_iter!=sites().second; ++s_iter)
-        for(site_iterator s_iter2= sites().first; s_iter2!=sites().second; ++s_iter2)
+        for(site_iterator s_iter2= s_iter; s_iter2!=sites().second; ++s_iter2)
         for(auto& p : periodic_translations)
             if(*s_iter!=*s_iter2){
                 vector_type c1(coordinate(*s_iter));
@@ -228,11 +221,11 @@ private:
                     dist_3[pair_]=std::pow(dist,-3);
                     dist_3[pair_inverse]=std::pow(dist,-3);
                     phi[pair_]=std::atan2((c1[1]-c2[1]),(c1[0]-c2[0]));
-                    phi[pair_inverse]=std::atan2((c1[1]-c2[1]),(c1[0]-c2[0]));
+                    phi[pair_inverse]=std::atan2(-(c1[1]-c2[1]),-(c1[0]-c2[0]));
                     neighbour_list[*s_iter].push_back(*s_iter2);
                     neighbour_list[*s_iter2].push_back(*s_iter);
                 }
-        }
+            }
     }
 
     inline double distance(vector_type& x, vector_type& y, vector_type& periodic){
