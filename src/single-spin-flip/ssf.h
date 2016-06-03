@@ -3,6 +3,7 @@
 
 #include <alps/parapack/worker.h>
 #include <alps/alea.h>
+#include <alps/alea/mcanalyze.hpp>
 #include <alps/scheduler/montecarlo.h>
 #include <alps/osiris.h>
 #include <alps/osiris/dump.h>
@@ -33,7 +34,11 @@ public :
         my(0.),
         mx_stag(num_sites()),//stagered in stripes
         my_stag(0.),
-        accepted(0){
+        accepted(0),
+        auto_correlation_time_measured(false),
+        safety_factor(params.value_or_default("safety_factor",3)),
+        autocorrelation(Measure_Sweeps*10), //should be smaller, otherwise we have a big problem
+        order_param_simple("order param simple"){
             cutoff_distance=params.value_or_default("cutoff_distance",3.);
             double a=params.value_or_default("a",1.);
             cutoff_distance*=a;
@@ -74,11 +79,11 @@ public :
             obs << alps::RealObservable("Acceptance Rate"); //Probably very useful for debugging
     }
 
-    static void print_copyright(std::ostream & out){
-        out << "You are using mc++"<<std::endl
-            << "copyright (c) by Dominik Schildknecht"<<std::endl
-            << "if you reuse this project, please mention the ALPS project and me as a fair user"<<std::endl;
-    }
+    //static void print_copyright(std::ostream & out){
+    //    out << "You are using mc++"<<std::endl
+    //        << "copyright (c) by Dominik Schildknecht"<<std::endl
+    //        << "if you reuse this project, please mention the ALPS project and me as a fair user"<<std::endl;
+    //}
 
     void save(alps::ODump &dump) const{
         dump << L << N<< T<< Step_Number << spins;
@@ -88,10 +93,23 @@ public :
     }
     void run(alps::ObservableSet& obs){
         ++Step_Number;
-        for(int i = 0;i<N;++i){
+        int n_steps = auto_correlation_time_measured ? autocorrelation*safety_factor : N;
+        for(int i = 0;i<n_steps;++i){
             update();
+            if(!auto_correlation_time_measured) {
+                double M= std::sqrt(mx_stag*mx_stag+my_stag*my_stag)/num_sites();
+                order_param_simple<<M;
+            }
         }
-        if(!(Step_Number%Each_Measurement) && Step_Number>Thermalization_Sweeps){
+        alps::alea::mctimeseries<double> autocorrelation_view(order_param_simple);
+        autocorrelation = alps::alea::exponential_autocorrelation_time_distance(autocorrelation_view,1,order_param_simple.count()-1).second;
+        std::cout<<"guessed autocorrelation time:" <<autocorrelation<<std::endl;
+        if(Step_Number*N>safety_factor*autocorrelation){ //autocorrelation time is determined
+            auto_correlation_time_measured=true;
+            obs <<alps::RealObservable("autocorrelation");
+            obs["autocorrelation"]<<autocorrelation;
+        }
+        if(!(Step_Number%Each_Measurement) && is_thermalized()){
             measure(obs);
             accepted=0;
         }
@@ -113,6 +131,11 @@ private:
     double T;
     double D;
     double cutoff_distance;
+    
+    alps::SimpleRealObservable order_param_simple;
+    bool auto_correlation_time_measured;
+    double safety_factor;
+    double autocorrelation;
 
     std::map<std::pair<int,int>,double> dist_3;
     std::map<std::pair<int,int>,double> phi;
@@ -133,7 +156,7 @@ private:
         double new_state=random_real(0.,2*M_PI);
         double old_energy=single_site_Energy(site);
         double old_state=spins[site];
-        
+         
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);
         if(random_real()<=std::exp(-(new_energy-old_energy)/T)){
