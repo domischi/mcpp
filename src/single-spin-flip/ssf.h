@@ -1,7 +1,6 @@
 #ifndef MCPP_SSF_H
 #define MCPP_SSF_H
 
-#include <alps/scheduler.h>
 #include <alps/parapack/worker.h>
 #include <alps/alea.h>
 #include <alps/scheduler/montecarlo.h>
@@ -16,7 +15,6 @@
 #include <map>
 #include <cassert>
 #include <utility> //pair
-//#include "../spins/xy.h"
 
 class ssf_worker : public alps::parapack::lattice_mc_worker<>{
 public :
