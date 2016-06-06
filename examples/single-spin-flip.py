@@ -14,15 +14,13 @@ from numpy import linspace
 #prepare the input parameters
 parms = []
 for l in [4,8,16]: 
-    for t in linspace(0,4,25):
-#for l in [8]: 
-#    for t in [0]:
+    for t in linspace(0,2.5,25):
         parms.append(
             { 
                  'LATTICE'        : "square lattice", 
                  'T'              : t,
-                 'THERMALIZATION' : 1000,
-                 'SWEEPS'         : 4000,
+                 'THERMALIZATION' : 4000,
+                 'SWEEPS'         : 5000,
                  'UPDATE'         : "ssf",
                  'cutoff_distance': 3.,
                  'L'              : l
@@ -41,6 +39,16 @@ M = pyalps.collectXY(data,x='T',y='M staggered',foreach=['L'])
 chi = pyalps.collectXY(data,x='T',y='susceptibility staggered',foreach=['L'])
 c_v= pyalps.collectXY(data,x='T',y='c_V',foreach=['L'])
 binder = pyalps.collectXY(data,x='T',y='BinderCumulant staggered',foreach=['L'])
+
+for mag in M:
+    mag.props['label']='L='+str(mag.props['L'])
+for c in chi:
+    c.props['label']='L='+str(c.props['L'])
+for c in c_v:
+    c.props['label']='L='+str(c.props['L'])
+for b in binder:
+    b.props['label']='L='+str(b.props['L'])
+
 
 #make plots
 plt.figure()
