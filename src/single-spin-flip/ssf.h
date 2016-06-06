@@ -141,7 +141,6 @@ private:
         double new_energy=single_site_Energy(site);
         if(random_real()<=std::exp(-(new_energy-old_energy)/T)){
             //update variables due to local change
-            //std::cout <<std::setw(10)<< old_energy<<std::setw(10)<<new_energy<<std::endl;
             mx+=std::cos(new_state)-std::cos(old_state);
             my+=std::sin(new_state)-std::sin(old_state);
 
@@ -228,16 +227,6 @@ private:
                     neighbour_list[*s_iter2].push_back(*s_iter);
                 }
             }
-        std::vector<double> tmp1,tmp2;
-        for(int i=0;i<neighbour_list[0].size();++i) {
-            tmp1.push_back(angle_w_x(0,(neighbour_list[0])[i]));    
-            tmp2.push_back(angle_w_x(136,(neighbour_list[136])[i]));    
-        }
-        std::sort(tmp1.begin(),tmp1.end());
-        std::sort(tmp2.begin(),tmp2.end());
-        for(int i=0;i<neighbour_list[0].size();++i) {
-            std::cout <<std::setw(10) <<tmp1[i]/M_PI<<"\t"<<tmp2[i]/M_PI<< std::endl;
-        }
     }
 
     inline double distance(vector_type& x, vector_type& y, vector_type& periodic){
