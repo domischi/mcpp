@@ -132,6 +132,7 @@ private:
     void update(){
         //Choose a site
         int site=random_int(num_sites());
+        //int site=L;
         //propose a new state
         double new_state=random_real(0.,2*M_PI);
         double old_energy=single_site_Energy(site);
@@ -144,6 +145,7 @@ private:
             mx+=std::cos(new_state)-std::cos(old_state);
             my+=std::sin(new_state)-std::sin(old_state);
 
+            
             //update with the corresponding prefactor
             int prefactor_x=1;
             int prefactor_y=1;
@@ -222,7 +224,7 @@ private:
                     dist_3[pair_]=std::pow(dist,-3);
                     dist_3[pair_inverse]=std::pow(dist,-3);
                     phi[pair_]=std::atan2((c1[1]+p[1]-c2[1]),(c1[0]+p[0]-c2[0]));
-                    phi[pair_inverse]=std::atan2(-(c1[1]+p[0]-c2[1]),-(c1[0]+p[0]-c2[0]));
+                    phi[pair_inverse]=std::atan2(-(c1[1]+p[1]-c2[1]),-(c1[0]+p[0]-c2[0]));
                     neighbour_list[*s_iter].push_back(*s_iter2);
                     neighbour_list[*s_iter2].push_back(*s_iter);
                 }
@@ -288,14 +290,14 @@ public:
             alps::RealObsevaluator m2 = obs["M^2"];
             alps::RealObsevaluator m4 = obs["M^4"];
             alps::RealObsevaluator binder("BinderCumulant"); 
-            binder = m2*m2/m4;
+            binder = m4/(m2*m2);
             obs.addObservable(binder); 
         } else std::cerr << "Binder cumulant will not be calculated"<<std::endl;
         if(obs.has("M staggered^4")&&obs.has("M staggered^2")){
             alps::RealObsevaluator m2 = obs["M staggered^2"];
             alps::RealObsevaluator m4 = obs["M staggered^4"];
             alps::RealObsevaluator binder("BinderCumulant staggered"); 
-            binder = m2*m2/m4;
+            binder = m4/(m2*m2);
             obs.addObservable(binder); 
         } else std::cerr << "Binder stag cumulant will not be calculated"<<std::endl;
         // c_V 
@@ -319,7 +321,7 @@ public:
             alps::RealObsevaluator Mx = obs["Mx staggered"];
             alps::RealObsevaluator Mx2 = obs["Mx staggered^2"];
             alps::RealObsevaluator chi("susceptibility staggered");
-            chi = /*beta()* */(Mx2-Mx*Mx) * N; 
+            chi = beta()* (Mx2-Mx*Mx) * N; 
             obs.addObservable(chi); 
         } else std::cerr << "susceptibility staggered will not be calculated"<<std::endl;
     }
