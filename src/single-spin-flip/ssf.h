@@ -15,6 +15,7 @@
 #include <vector>
 #include <map>
 #include <cassert>
+#include <algorithm> //sort
 #include <utility> //pair
 //#include "../spins/xy.h"
 
@@ -140,6 +141,7 @@ private:
         double new_energy=single_site_Energy(site);
         if(random_real()<=std::exp(-(new_energy-old_energy)/T)){
             //update variables due to local change
+            //std::cout <<std::setw(10)<< old_energy<<std::setw(10)<<new_energy<<std::endl;
             mx+=std::cos(new_state)-std::cos(old_state);
             my+=std::sin(new_state)-std::sin(old_state);
 
@@ -215,17 +217,27 @@ private:
                 vector_type c2(coordinate(*s_iter2));
                 double dist=distance(c1,c2,p);
                 std::pair<int,int> pair_ = std::make_pair(*s_iter,*s_iter2);
-                if(dist<cutoff_distance && (dist_map[pair_]==0. || dist<dist_map[pair_])){ //new value is smaller than the previous calculated for this pair
+                if(dist<=cutoff_distance && (dist_map[pair_]==0. || dist<dist_map[pair_])){ //new value is smaller than the previous calculated for this pair
                     dist_map[pair_]=dist;
                     std::pair<int,int> pair_inverse=std::make_pair(pair_.second,pair_.first);
                     dist_3[pair_]=std::pow(dist,-3);
                     dist_3[pair_inverse]=std::pow(dist,-3);
-                    phi[pair_]=std::atan2((c1[1]-c2[1]),(c1[0]-c2[0]));
-                    phi[pair_inverse]=std::atan2(-(c1[1]-c2[1]),-(c1[0]-c2[0]));
+                    phi[pair_]=std::atan2((c1[1]+p[1]-c2[1]),(c1[0]+p[0]-c2[0]));
+                    phi[pair_inverse]=std::atan2(-(c1[1]+p[0]-c2[1]),-(c1[0]+p[0]-c2[0]));
                     neighbour_list[*s_iter].push_back(*s_iter2);
                     neighbour_list[*s_iter2].push_back(*s_iter);
                 }
             }
+        std::vector<double> tmp1,tmp2;
+        for(int i=0;i<neighbour_list[0].size();++i) {
+            tmp1.push_back(angle_w_x(0,(neighbour_list[0])[i]));    
+            tmp2.push_back(angle_w_x(136,(neighbour_list[136])[i]));    
+        }
+        std::sort(tmp1.begin(),tmp1.end());
+        std::sort(tmp2.begin(),tmp2.end());
+        for(int i=0;i<neighbour_list[0].size();++i) {
+            std::cout <<std::setw(10) <<tmp1[i]/M_PI<<"\t"<<tmp2[i]/M_PI<< std::endl;
+        }
     }
 
     inline double distance(vector_type& x, vector_type& y, vector_type& periodic){
@@ -274,11 +286,13 @@ private:
 class ssf_evaluator : public alps::parapack::simple_evaluator {
 private:
     double T;
+    int L;
+    int N;
     double beta() const {
         return 1./T;
     }
 public:
-    ssf_evaluator(alps::Parameters const& params) : T(params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"])) {}
+    ssf_evaluator(alps::Parameters const& params) : T(params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"])),L(params["L"]),N(L*L) {}
     void evaluate(alps::ObservableSet& obs) const {
         // Binder cumulant
         if(obs.has("M^4")&&obs.has("M^2")){
@@ -295,28 +309,28 @@ public:
             binder = m2*m2/m4;
             obs.addObservable(binder); 
         } else std::cerr << "Binder stag cumulant will not be calculated"<<std::endl;
-        // c_V //TODO for some reason this resets the temperature... 
+        // c_V 
         if(obs.has("Energy")&&obs.has("Energy^2")){
             alps::RealObsevaluator E = obs["Energy"];
             alps::RealObsevaluator E2 = obs["Energy^2"];
             alps::RealObsevaluator c_V("c_V");
-            c_V = beta()*beta() * (E2-E*E); //TODO divide by num_sites()?
+            c_V = beta()*beta() * (E2-E*E) * N;
 
             obs.addObservable(c_V); 
         } else std::cerr << "c_V will not be calculated"<<std::endl;
-        // susceptibility //TODO for some reason this resets the temperature...
+        // susceptibility 
         if(obs.has("Mx")&&obs.has("Mx^2")){
             alps::RealObsevaluator Mx = obs["Mx"];
             alps::RealObsevaluator Mx2 = obs["Mx^2"];
             alps::RealObsevaluator chi("susceptibility");
-            chi = beta() * (Mx2-Mx*Mx); //TODO divide by num_sites()?
+            chi = /*beta()* */ (Mx2-Mx*Mx) * N; //TODO divide by num_sites()?
             obs.addObservable(chi); 
         } else std::cerr << "susceptibility will not be calculated"<<std::endl;
         if(obs.has("Mx staggered")&&obs.has("Mx staggered^2")){
             alps::RealObsevaluator Mx = obs["Mx staggered"];
             alps::RealObsevaluator Mx2 = obs["Mx staggered^2"];
             alps::RealObsevaluator chi("susceptibility staggered");
-            chi = beta() * (Mx2-Mx*Mx); //TODO divide by num_sites()?
+            chi = /*beta()* */(Mx2-Mx*Mx) * N; 
             obs.addObservable(chi); 
         } else std::cerr << "susceptibility staggered will not be calculated"<<std::endl;
     }
