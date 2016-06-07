@@ -314,14 +314,14 @@ public:
             alps::RealObsevaluator Mx = obs["Mx"];
             alps::RealObsevaluator Mx2 = obs["Mx^2"];
             alps::RealObsevaluator chi("susceptibility");
-            chi = /*beta()* */ (Mx2-Mx*Mx) * N; //TODO divide by num_sites()?
+            chi = beta()* (Mx2-Mx*Mx); //TODO divide by num_sites()?
             obs.addObservable(chi); 
         } else std::cerr << "susceptibility will not be calculated"<<std::endl;
-        if(obs.has("Mx staggered")&&obs.has("Mx staggered^2")){
-            alps::RealObsevaluator Mx = obs["Mx staggered"];
-            alps::RealObsevaluator Mx2 = obs["Mx staggered^2"];
+        if(obs.has("M staggered")&&obs.has("M staggered^2")){
+            alps::RealObsevaluator Mx = obs["M staggered"];
+            alps::RealObsevaluator Mx2 = obs["M staggered^2"];
             alps::RealObsevaluator chi("susceptibility staggered");
-            chi = beta()* (Mx2-Mx*Mx) * N; 
+            chi = beta() * (Mx2-Mx*Mx) * N; 
             obs.addObservable(chi); 
         } else std::cerr << "susceptibility staggered will not be calculated"<<std::endl;
     }
