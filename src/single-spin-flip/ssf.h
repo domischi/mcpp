@@ -9,7 +9,6 @@
 #include <alps/osiris/dump.h>
 #include <alps/expression.h>
 #include <alps/lattice.h>
-
 #include <cmath>
 #include <iostream>
 #include <vector>
@@ -19,12 +18,10 @@
 
 class ssf_worker : public alps::parapack::lattice_mc_worker<>{
 public :
-    //ssf_worker(const alps::ProcessList & where,const alps::Parameters& params, int node) :
     ssf_worker(const alps::Parameters& params) :
         alps::parapack::lattice_mc_worker<>(params), 
         Thermalization_Sweeps(params.value_or_default("THERMALIZATION",100)),
         Measure_Sweeps(params.value_or_default("SWEEPS",5000)),
-        Each_Measurement(params.value_or_default("Each_Measurement",1)),
         L(params["L"]),
         N(L*L),
         T(params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"])),
@@ -35,10 +32,11 @@ public :
         mx_stag(num_sites()),//stagered in stripes
         my_stag(0.),
         accepted(0),
-        auto_correlation_time_measured(false),
+        ac_measured(false),
         safety_factor(params.value_or_default("safety_factor",3)),
-        autocorrelation(Measure_Sweeps*10), //should be smaller, otherwise we have a big problem
-        order_param_simple("order param simple"){
+        autocorrelation(0),
+        ac_N(0),
+        ac_obs("autocorr obs"){
             cutoff_distance=params.value_or_default("cutoff_distance",3.);
             double a=params.value_or_default("a",1.);
             cutoff_distance*=a;
@@ -47,20 +45,19 @@ public :
             if(is_bipartite()&&true)//TODO implement check if ground state is striped as used below
                 for(site_iterator s_iter= sites().first; s_iter!=sites().second; ++s_iter){
                     if((((*s_iter)/L)%2)){//odd y site
-                        //spins[*s_iter]=1.5*M_PI;
                         spins[*s_iter]=M_PI;
                     }
-                    //else{
-                    //    spins[*s_iter]=M_PI/2;
-                    //}
                 }
             else {
-                std::cerr <<"Ground state not explicitly defined, for this lattice, implement this or assume all spins to point in the x direction";
+                std::cerr <<"Ground state not explicitly defined, for this lattice, implement this or assume all spins to point in the x direction"<<std::endl;
             }
             //Init the lookup tables
             Init_Lookup_Tables(); 
-
             En=Energy();
+            if(T<=1e-3){ //at T=0 there is a problem with this, as the system doesn't move at all (0/0 problem) 
+                ac_measured=true;
+                autocorrelation=1;
+            }
         }
     
     void init_observables(alps::Parameters const&, alps::ObservableSet& obs){
@@ -79,12 +76,6 @@ public :
             obs << alps::RealObservable("Acceptance Rate"); //Probably very useful for debugging
     }
 
-    //static void print_copyright(std::ostream & out){
-    //    out << "You are using mc++"<<std::endl
-    //        << "copyright (c) by Dominik Schildknecht"<<std::endl
-    //        << "if you reuse this project, please mention the ALPS project and me as a fair user"<<std::endl;
-    //}
-
     void save(alps::ODump &dump) const{
         dump << L << N<< T<< Step_Number << spins;
     }
@@ -92,24 +83,28 @@ public :
         dump >> L >> N>> T>> Step_Number >> spins;
     }
     void run(alps::ObservableSet& obs){
+        using namespace alps::alea;
         ++Step_Number;
-        int n_steps = auto_correlation_time_measured ? autocorrelation*safety_factor : N;
+        int MAX_STEPS_AC = 1e6;
+        int n_steps = ac_measured ? autocorrelation*safety_factor+1 : 0;
         for(int i = 0;i<n_steps;++i){
             update();
-            if(!auto_correlation_time_measured) {
-                double M= std::sqrt(mx_stag*mx_stag+my_stag*my_stag)/num_sites();
-                order_param_simple<<M;
+        } 
+        if(!ac_measured && is_thermalized()) { //the ac_time still needs to be determined
+            for(int i = 0;i<MAX_STEPS_AC;++i){
+                update();
+                ac_obs<<En;
+                if(!(i % 512)) { //only with full bins the ac time can be measured
+                    measure_ac_time();
+                    if(ac_measured) break;
+                }
+                if(i==MAX_STEPS_AC-1) {
+                    std::cerr << "didn't find any meaningful autocorrelation time!!"<<std::endl;
+                    std::exit(13);
+                }
             }
         }
-        alps::alea::mctimeseries<double> autocorrelation_view(order_param_simple);
-        autocorrelation = alps::alea::exponential_autocorrelation_time_distance(autocorrelation_view,1,order_param_simple.count()-1).second;
-        std::cout<<"guessed autocorrelation time:" <<autocorrelation<<std::endl;
-        if(Step_Number*N>safety_factor*autocorrelation){ //autocorrelation time is determined
-            auto_correlation_time_measured=true;
-            obs <<alps::RealObservable("autocorrelation");
-            obs["autocorrelation"]<<autocorrelation;
-        }
-        if(!(Step_Number%Each_Measurement) && is_thermalized()){
+        if(ac_measured && is_thermalized()){
             measure(obs);
             accepted=0;
         }
@@ -123,7 +118,6 @@ public :
 private:
     int Thermalization_Sweeps;
     int Measure_Sweeps;
-    int Each_Measurement; //do Each_Measurement steps, then measure
     int Step_Number;
     int L;
     int N; //L^2
@@ -131,9 +125,10 @@ private:
     double T;
     double D;
     double cutoff_distance;
-    
-    alps::SimpleRealObservable order_param_simple;
-    bool auto_correlation_time_measured;
+
+    alps::RealObservable ac_obs;
+    bool ac_measured;
+    int ac_N;
     double safety_factor;
     double autocorrelation;
 
@@ -148,6 +143,23 @@ private:
     double mx_stag;
     double my_stag;
     int accepted;
+
+    double measure_ac_time(){
+        if(is_thermalized()&&!ac_measured) {
+            if(std::isfinite(N*ac_obs.tau()) && N*ac_obs.tau()>0&&N*ac_obs.tau()>autocorrelation){ 
+                autocorrelation=N*ac_obs.tau();
+                ac_N=0;
+            }
+            else
+                ++ac_N;
+
+            if(ac_N>=10){//autocorrelation time is stable 
+                ac_measured=true;
+            }
+            ac_obs.reset(true);
+        }
+        return autocorrelation;
+    }
     
     void update(){
         //Choose a site
@@ -196,7 +208,7 @@ private:
         Mx=mx_stag/num_sites();
         obs["Mx staggered"]<<Mx; 
         obs["Mx staggered^2"]<<Mx*Mx;
-        obs["Acceptance Rate"] << (1.0*accepted)/Each_Measurement;
+        obs["Acceptance Rate"] << (1.0*accepted)/(autocorrelation*safety_factor+1);
     }
     //TODO decide in which units of measurement to measure...(natural, eV and K, SI?)
     inline double beta(){ 
@@ -252,17 +264,17 @@ private:
     inline double distance(vector_type& x, vector_type& y, vector_type& periodic){
         return std::sqrt(std::pow(x[0]-y[0]+periodic[0],2)+std::pow(x[1]-y[1]+periodic[1],2));
     }
-
-    double inv_distance_cubed(int i,int j) {return inv_distance_cubed(std::make_pair(i,j));}
-
+    double inv_distance_cubed(int i,int j) {
+        return inv_distance_cubed(std::make_pair(i,j));
+    }
     double inv_distance_cubed(std::pair<int,int> pair_){
         double ret_val=dist_3[pair_];
         assert(ret_val>0.);
         return ret_val;
     }
-
-    double angle_w_x(int i, int j) {return angle_w_x(std::make_pair(i,j));}
-
+    double angle_w_x(int i, int j) { 
+        return angle_w_x(std::make_pair(i,j));
+    }
     double angle_w_x(std::pair<int,int> pair_){
         return phi[pair_];
     }
@@ -316,7 +328,7 @@ public:
             binder = m2*m2/m4;
             obs.addObservable(binder); 
         } else std::cerr << "Binder stag cumulant will not be calculated"<<std::endl;
-        // c_V //TODO for some reason this resets the temperature... 
+        // c_V  
         if(obs.has("Energy")&&obs.has("Energy^2")){
             alps::RealObsevaluator E = obs["Energy"];
             alps::RealObsevaluator E2 = obs["Energy^2"];
@@ -325,7 +337,7 @@ public:
 
             obs.addObservable(c_V); 
         } else std::cerr << "c_V will not be calculated"<<std::endl;
-        // susceptibility //TODO for some reason this resets the temperature...
+        // susceptibility 
         if(obs.has("Mx")&&obs.has("Mx^2")){
             alps::RealObsevaluator Mx = obs["Mx"];
             alps::RealObsevaluator Mx2 = obs["Mx^2"];
