@@ -357,10 +357,10 @@ public:
             obs.addObservable(chi); 
         } else std::cerr << "susceptibility will not be calculated"<<std::endl;
         if(obs.has("M staggered")&&obs.has("M staggered^2")){
-            alps::RealObsevaluator Mx = obs["M staggered"];
-            alps::RealObsevaluator Mx2 = obs["M staggered^2"];
+            alps::RealObsevaluator M = obs["M staggered"];
+            alps::RealObsevaluator M2 = obs["M staggered^2"];
             alps::RealObsevaluator chi("susceptibility staggered");
-            chi = beta() * (Mx2-Mx*Mx) * N; 
+            chi = beta() * (M2-M*M) * N; 
             obs.addObservable(chi); 
         } else std::cerr << "susceptibility staggered will not be calculated"<<std::endl;
     }
