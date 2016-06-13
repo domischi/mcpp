@@ -31,7 +31,7 @@ public:
     //second index: symmetric parts (for example two diag terms, here)
     //third index: all pairs which are in a specific S_alpha (for example in a four spin interaction)
     static const std::vector<std::vector<std::vector<std::pair<int,int>>>> interactions;
-    static inline int n_interactions(){ //TODO check if this needs first to be initialized or the compiler does this at compile time
+    static inline int n_interactions(){ 
         return interactions.size();
     }
 
@@ -53,7 +53,7 @@ public:
             //calculate <S_alpha S_beta> - <S_alpha> <S_beta>
             //and save it into obs
             assert(OUT.size()==IN.size());
-            obs["S_alpha" + std::to_string(iteration)]<<OUT;
+            obs["MCRG S_alpha" + std::to_string(iteration)]<<OUT;
             std::valarray<double> outout(IN.size()*IN.size()),outin(IN.size()*IN.size());
             for(int i=0;i<IN.size();++i){
                 for(int j=0;j<IN.size();++j){
@@ -61,17 +61,17 @@ public:
                     outin[i*IN.size()+j]=OUT[i]*IN[j];
                 }
             }
-            obs["S_alpha S_beta same iteration"+ std::to_string(iteration)]<<outout;
-            obs["S_alpha S_beta next iteration"+ std::to_string(iteration)]<<outin;
+            obs["MCRG S_alpha S_beta same iteration"+ std::to_string(iteration)]<<outout;
+            obs["MCRG S_alpha S_beta next iteration"+ std::to_string(iteration)]<<outin;
         }
         return OUT; 
     }
 
     void init_observables(alps::ObservableSet& obs){
         for(int i =1; i<=iteration;++i){
-            obs << alps::RealVectorObservable("S_alpha" + std::to_string(i));
-            obs << alps::RealVectorObservable("S_alpha S_beta same iteration" + std::to_string(i));
-            obs << alps::RealVectorObservable("S_alpha S_beta next iteration" + std::to_string(i));
+            obs << alps::RealVectorObservable("MCRG S_alpha" + std::to_string(i));
+            obs << alps::RealVectorObservable("MCRG S_alpha S_beta same iteration" + std::to_string(i));
+            obs << alps::RealVectorObservable("MCRG S_alpha S_beta next iteration" + std::to_string(i));
         }
     }
 

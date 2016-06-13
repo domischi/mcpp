@@ -238,9 +238,8 @@ private:
         obs["Mx staggered"]<<Mx; 
         obs["Mx staggered^2"]<<Mx*Mx;
         obs["Acceptance Rate"] << (1.0*accepted)/(autocorrelation*safety_factor+1);
-        //std::cout << std::endl<<std::endl<<std::endl<<std::endl<<std::endl<<std::endl<<std::endl<<std::endl<<mcrg_it_depth<std::endl<<std::endl<<std::endl<<std::endl<<std::endl;
         if(measure_mcrg) 
-            /*obs["n_alpha"]<<*/mcrg_->measure(spins, obs).size();
+            mcrg_->measure(spins, obs).size();
     }
     //TODO decide in which units of measurement to measure...(natural, eV and K, SI?)
     inline double beta(){ 
@@ -391,32 +390,32 @@ public:
         } else std::cerr << "susceptibility staggered will not be calculated"<<std::endl;
         if(measure_mcrg){
             for(int it=1;it<=mcrg_it_depth;++it){
-                if (!(obs.has("S_alpha" + std::to_string(it)) &&
-                      obs.has("S_alpha S_beta same iteration"+ std::to_string(it)) &&
-                      obs.has("S_alpha S_beta next iteration"+ std::to_string(it)))) 
+                if (!(obs.has("MCRG S_alpha" + std::to_string(it)) &&
+                      obs.has("MCRG S_alpha S_beta same iteration"+ std::to_string(it)) &&
+                      obs.has("MCRG S_alpha S_beta next iteration"+ std::to_string(it)))) 
                     std::cerr << "NOT ALL INFORMATION FOR A MCRG ANALYSIS WAS GIVEN"<<std::endl;
                 else{ //calculate the dS^(n)/dK^(n-1) and dS^(n)/dK^(n)
-                    alps::RealVectorObsevaluator S_a = obs["S_alpha"+std::to_string(it)];
+                    alps::RealVectorObsevaluator S_a = obs["MCRG S_alpha"+std::to_string(it)];
+                    alps::RealVectorObsevaluator S_a_n_S_b_n = obs["MCRG S_alpha S_beta same iteration"+std::to_string(it)]; 
+                    alps::RealVectorObsevaluator S_a_n_S_b_nm1 = obs["MCRG S_alpha S_beta next iteration"+std::to_string(it)];
                     //std::vector<alps::RealObsevaluator> m_S_a_m_S_b; // <S_a><S_b>
                     std::vector<double> m_S_a_m_S_b;
                     int n_alpha=mcrg::n_interactions();
-                    std::cout << "in eval with n_alpha="<<n_alpha<<std::endl;
                     for(int i=0;i<n_alpha;++i)
                         for(int j=0;j<n_alpha;++j){
-                            m_S_a_m_S_b.push_back((S_a[i]*S_a[j]).mean());
+                            m_S_a_m_S_b.push_back((S_a[i].mean()*S_a[j].mean()));
                         }
                     std::valarray<double> mSamSb(m_S_a_m_S_b.data(),m_S_a_m_S_b.size());
-                    //alps::RealVectorObsevaluator mSamSb(m_S_a_m_S_b);
-                    alps::RealVectorObsevaluator S_a_n_S_b_n = obs["S_alpha S_beta same iteration"+std::to_string(it)];
-                    alps::RealVectorObsevaluator S_a_n_S_b_nm1 = obs["S_alpha S_beta next iteration"+std::to_string(it)];
-                        if(S_a.count()>0 &&S_a_n_S_b_n.count()>0&&S_a_n_S_b_nm1.count()>0){
-                            
-                            alps::RealVectorObsevaluator dS_n_dK_n("dSdK same time"+ std::to_string(it));
-                            alps::RealVectorObsevaluator dS_n_dK_nm1("dSdK next time"+ std::to_string(it));
-                            dS_n_dK_n = S_a_n_S_b_n - mSamSb;
-                            dS_n_dK_nm1 = S_a_n_S_b_nm1 - mSamSb;
-                        } else 
-                            std::cerr << "NO MEASUREMENTS WERE MADE IN THE OBSERVABLES NEEDED FOR MCRG";
+                    //alps::RealVectorObsevaluator mSamSb1(mSamSb);
+                    if(S_a.count()>0 &&S_a_n_S_b_n.count()>0&&S_a_n_S_b_nm1.count()>0){
+                        alps::RealVectorObsevaluator dS_n_dK_n("MCRG dSdK same time"+ std::to_string(it));
+                        alps::RealVectorObsevaluator dS_n_dK_nm1("MCRG dSdK next time"+ std::to_string(it));
+                        dS_n_dK_n = S_a_n_S_b_n - mSamSb;
+                        dS_n_dK_nm1 = S_a_n_S_b_nm1 - mSamSb;
+                        obs.addObservable(dS_n_dK_n);
+                        obs.addObservable(dS_n_dK_nm1);
+                    } else 
+                        std::cerr << "NO MEASUREMENTS WERE MADE IN THE OBSERVABLES NEEDED FOR MCRG";
                 }
             }
         }
