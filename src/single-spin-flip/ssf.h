@@ -10,13 +10,18 @@
 #include <alps/expression.h>
 #include <alps/lattice.h>
 
+#include <thread> //sleep_for
+#include <chrono>
 #include <cmath>
 #include <iostream>
+#include <string>
 #include <vector>
 #include <map>
 #include <cassert>
 #include <algorithm> //sort
 #include <utility> //pair
+
+#include "../special-observables/mcrg.h"
 
 class ssf_worker : public alps::parapack::lattice_mc_worker<>{
 public :
@@ -38,7 +43,10 @@ public :
         safety_factor(params.value_or_default("safety_factor",3)),
         autocorrelation(0),
         ac_N(0),
-        ac_obs("autocorr obs"){
+        ac_obs("autocorr obs"),
+        mcrg_it_depth(params.value_or_default("mcrg_iteration_depth",-1))
+        {
+            measure_mcrg=(mcrg_it_depth>0);
             cutoff_distance=params.value_or_default("cutoff_distance",3.);
             double a=params.value_or_default("a",1.);
             cutoff_distance*=a;
@@ -61,6 +69,9 @@ public :
                 ac_measured=true;
                 autocorrelation=1;
             }
+            if(measure_mcrg){
+                mcrg_=std::make_shared<mcrg>(params,mcrg_it_depth);
+            }
         }
     
     void init_observables(alps::Parameters const&, alps::ObservableSet& obs){
@@ -77,6 +88,10 @@ public :
             obs << alps::RealObservable("Mx staggered");
             obs << alps::RealObservable("Mx staggered^2");
             obs << alps::RealObservable("Acceptance Rate"); //Probably very useful for debugging
+            if(measure_mcrg){
+                //obs << alps::RealObservable("n_alpha"); //bad thing to use it like this, however I don't find a better way of implementing it...
+                mcrg_->init_observables(obs);
+            }
     }
 
     static void print_copyright(std::ostream & out){
@@ -125,6 +140,7 @@ public :
         return Step_Number/(static_cast<double>(Measure_Sweeps+Thermalization_Sweeps));
     }
 private:
+    //System parameters
     int Thermalization_Sweeps;
     int Measure_Sweeps;
     int Step_Number;
@@ -135,23 +151,29 @@ private:
     double D;
     double cutoff_distance;
 
+    //autocorrelation time parameters
     alps::RealObservable ac_obs;
     bool ac_measured;
     int ac_N;
     double safety_factor;
     double autocorrelation;
 
+    //Lookup tables 
     std::map<std::pair<int,int>,double> dist_3;
     std::map<std::pair<int,int>,double> phi;
-
     std::vector<std::vector<int>> neighbour_list; //saves which neighbours are relevant (as not only nearest neighbours count in dipole )
 
+    //Easy observables
     double En;
     double mx;
     double my;
     double mx_stag;
     double my_stag;
     int accepted;
+    //Complex observables
+    bool measure_mcrg;
+    std::shared_ptr<mcrg> mcrg_;
+    int mcrg_it_depth; //to which depth the mcrg is done
 
     double measure_ac_time(){
         if(is_thermalized()&&!ac_measured) {
@@ -169,7 +191,6 @@ private:
         }
         return autocorrelation;
     }
-    
     void update(){
         //Choose a site
         int site=random_int(num_sites());
@@ -199,7 +220,6 @@ private:
             spins[site]=old_state;
         }
     }
-
     void measure(alps::ObservableSet& obs){
         obs["Energy"]<<En/num_sites();
         obs["Energy^2"]<<std::pow(En/num_sites(),2);
@@ -218,12 +238,14 @@ private:
         obs["Mx staggered"]<<Mx; 
         obs["Mx staggered^2"]<<Mx*Mx;
         obs["Acceptance Rate"] << (1.0*accepted)/(autocorrelation*safety_factor+1);
+        //std::cout << std::endl<<std::endl<<std::endl<<std::endl<<std::endl<<std::endl<<std::endl<<std::endl<<mcrg_it_depth<std::endl<<std::endl<<std::endl<<std::endl<<std::endl;
+        if(measure_mcrg) 
+            /*obs["n_alpha"]<<*/mcrg_->measure(spins, obs).size();
     }
     //TODO decide in which units of measurement to measure...(natural, eV and K, SI?)
     inline double beta(){ 
         return 1./T;
     }
-
     void Init_Lookup_Tables(){ 
         std::vector<vector_type> basis;
         basis_vector_iterator v, v_end;
@@ -269,7 +291,6 @@ private:
                 }
             }
     }
-
     inline double distance(vector_type& x, vector_type& y, vector_type& periodic){
         return std::sqrt(std::pow(x[0]-y[0]+periodic[0],2)+std::pow(x[1]-y[1]+periodic[1],2));
     }
@@ -287,14 +308,12 @@ private:
     double angle_w_x(std::pair<int,int> pair_){
         return phi[pair_];
     }
-
     int random_int(int j){
         return static_cast<int>(j*uniform_01());
     }
     double random_real(double a=0,double b=1){
         return a+(b-a)*uniform_01();
     }
-
     double Energy(){
         double e=0.;
         for(int i =0;i<N;++i){
@@ -302,7 +321,6 @@ private:
         }
         return e/2;
     }
-    
     double single_site_Energy(int i){
         double e=0.;
         for(int j : neighbour_list[i]){
@@ -318,11 +336,19 @@ private:
     double T;
     int L;
     int N;
+    int mcrg_it_depth;
+    bool measure_mcrg;
     double beta() const {
         return 1./T;
     }
 public:
-    ssf_evaluator(alps::Parameters const& params) : T(params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"])),L(params["L"]),N(L*L) {}
+    ssf_evaluator(alps::Parameters const& params) : 
+        T(params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"])),
+        L(params["L"]),
+        N(L*L),
+        mcrg_it_depth(params.value_or_default("mcrg_iteration_depth",-1)),
+        measure_mcrg(mcrg_it_depth>0)
+        {}
     void evaluate(alps::ObservableSet& obs) const {
         // Binder cumulant
         if(obs.has("M^4")&&obs.has("M^2")){
@@ -363,7 +389,38 @@ public:
             chi = beta() * (M2-M*M) * N; 
             obs.addObservable(chi); 
         } else std::cerr << "susceptibility staggered will not be calculated"<<std::endl;
+        if(measure_mcrg){
+            for(int it=1;it<=mcrg_it_depth;++it){
+                if (!(obs.has("S_alpha" + std::to_string(it)) &&
+                      obs.has("S_alpha S_beta same iteration"+ std::to_string(it)) &&
+                      obs.has("S_alpha S_beta next iteration"+ std::to_string(it)))) 
+                    std::cerr << "NOT ALL INFORMATION FOR A MCRG ANALYSIS WAS GIVEN"<<std::endl;
+                else{ //calculate the dS^(n)/dK^(n-1) and dS^(n)/dK^(n)
+                    alps::RealVectorObsevaluator S_a = obs["S_alpha"+std::to_string(it)];
+                    //std::vector<alps::RealObsevaluator> m_S_a_m_S_b; // <S_a><S_b>
+                    std::vector<double> m_S_a_m_S_b;
+                    int n_alpha=mcrg::n_interactions();
+                    std::cout << "in eval with n_alpha="<<n_alpha<<std::endl;
+                    for(int i=0;i<n_alpha;++i)
+                        for(int j=0;j<n_alpha;++j){
+                            m_S_a_m_S_b.push_back((S_a[i]*S_a[j]).mean());
+                        }
+                    std::valarray<double> mSamSb(m_S_a_m_S_b.data(),m_S_a_m_S_b.size());
+                    //alps::RealVectorObsevaluator mSamSb(m_S_a_m_S_b);
+                    alps::RealVectorObsevaluator S_a_n_S_b_n = obs["S_alpha S_beta same iteration"+std::to_string(it)];
+                    alps::RealVectorObsevaluator S_a_n_S_b_nm1 = obs["S_alpha S_beta next iteration"+std::to_string(it)];
+                        if(S_a.count()>0 &&S_a_n_S_b_n.count()>0&&S_a_n_S_b_nm1.count()>0){
+                            
+                            alps::RealVectorObsevaluator dS_n_dK_n("dSdK same time"+ std::to_string(it));
+                            alps::RealVectorObsevaluator dS_n_dK_nm1("dSdK next time"+ std::to_string(it));
+                            dS_n_dK_n = S_a_n_S_b_n - mSamSb;
+                            dS_n_dK_nm1 = S_a_n_S_b_nm1 - mSamSb;
+                        } else 
+                            std::cerr << "NO MEASUREMENTS WERE MADE IN THE OBSERVABLES NEEDED FOR MCRG";
+                }
+            }
+        }
     }
-
 };
+
 #endif //MCPP_SSF_H
