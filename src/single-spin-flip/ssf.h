@@ -391,27 +391,32 @@ public:
         if(measure_mcrg){
             for(int it=1;it<=mcrg_it_depth;++it){
                 if (!(obs.has("MCRG S_alpha" + std::to_string(it)) &&
+                      obs.has("MCRG S_alpha"+ std::to_string(it-1)) &&
                       obs.has("MCRG S_alpha S_beta same iteration"+ std::to_string(it)) &&
                       obs.has("MCRG S_alpha S_beta next iteration"+ std::to_string(it)))) 
                     std::cerr << "NOT ALL INFORMATION FOR A MCRG ANALYSIS WAS GIVEN"<<std::endl;
                 else{ //calculate the dS^(n)/dK^(n-1) and dS^(n)/dK^(n)
-                    alps::RealVectorObsevaluator S_a = obs["MCRG S_alpha"+std::to_string(it)];
+                    alps::RealVectorObsevaluator S_a_n = obs["MCRG S_alpha"+std::to_string(it)];
+                    alps::RealVectorObsevaluator S_a_nm1 = obs["MCRG S_alpha"+std::to_string(it-1)];
                     alps::RealVectorObsevaluator S_a_n_S_b_n = obs["MCRG S_alpha S_beta same iteration"+std::to_string(it)]; 
                     alps::RealVectorObsevaluator S_a_n_S_b_nm1 = obs["MCRG S_alpha S_beta next iteration"+std::to_string(it)];
                     //std::vector<alps::RealObsevaluator> m_S_a_m_S_b; // <S_a><S_b>
-                    std::vector<double> m_S_a_m_S_b;
+                    std::vector<double> m_S_a_m_S_b_st;
+                    std::vector<double> m_S_a_m_S_b_nt;
                     int n_alpha=mcrg::n_interactions();
                     for(int i=0;i<n_alpha;++i)
                         for(int j=0;j<n_alpha;++j){
-                            m_S_a_m_S_b.push_back((S_a[i].mean()*S_a[j].mean()));
+                            m_S_a_m_S_b_st.push_back((S_a_n[i].mean()*S_a_n[j].mean()));
+                            m_S_a_m_S_b_nt.push_back((S_a_nm1[i].mean()*S_a_nm1[j].mean()));
                         }
-                    std::valarray<double> mSamSb(m_S_a_m_S_b.data(),m_S_a_m_S_b.size());
+                    std::valarray<double> mSamSb_st(m_S_a_m_S_b_st.data(),m_S_a_m_S_b_st.size());
+                    std::valarray<double> mSamSb_nt(m_S_a_m_S_b_nt.data(),m_S_a_m_S_b_nt.size());
                     //alps::RealVectorObsevaluator mSamSb1(mSamSb);
-                    if(S_a.count()>0 &&S_a_n_S_b_n.count()>0&&S_a_n_S_b_nm1.count()>0){
+                    if(S_a_n.count()>0 &&S_a_nm1.count()>0 &&S_a_n_S_b_n.count()>0&&S_a_n_S_b_nm1.count()>0){
                         alps::RealVectorObsevaluator dS_n_dK_n("MCRG dSdK same time"+ std::to_string(it));
                         alps::RealVectorObsevaluator dS_n_dK_nm1("MCRG dSdK next time"+ std::to_string(it));
-                        dS_n_dK_n = S_a_n_S_b_n - mSamSb;
-                        dS_n_dK_nm1 = S_a_n_S_b_nm1 - mSamSb;
+                        dS_n_dK_n = S_a_n_S_b_n - mSamSb_st;
+                        dS_n_dK_nm1 = S_a_n_S_b_nm1 - mSamSb_nt;
                         obs.addObservable(dS_n_dK_n);
                         obs.addObservable(dS_n_dK_nm1);
                     } else 

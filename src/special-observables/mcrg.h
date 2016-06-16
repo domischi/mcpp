@@ -24,7 +24,6 @@ public:
         if(iteration>0) {
             descendant=std::make_shared<mcrg>(p_descendant,Iteration_-1);
         }
-        //init_interactions();
     }
                 
     //first index: which interaction
@@ -46,6 +45,7 @@ public:
             OUT_vec.push_back(tmp/interactions[i].size());
         }
         std::valarray<double> OUT(OUT_vec.data(),OUT_vec.size());
+        obs["MCRG S_alpha" + std::to_string(iteration)]<<OUT;
         if(iteration>0){//This is not the last instantation of the mcrg
             //reduce the lattice and call the descendant on the renormalized system
             std::vector<spin_type> reduced_spins = reduce(spins);
@@ -53,7 +53,6 @@ public:
             //calculate <S_alpha S_beta> - <S_alpha> <S_beta>
             //and save it into obs
             assert(OUT.size()==IN.size());
-            obs["MCRG S_alpha" + std::to_string(iteration)]<<OUT;
             std::valarray<double> outout(IN.size()*IN.size()),outin(IN.size()*IN.size());
             for(int i=0;i<IN.size();++i){
                 for(int j=0;j<IN.size();++j){
@@ -73,6 +72,8 @@ public:
             obs << alps::RealVectorObservable("MCRG S_alpha S_beta same iteration" + std::to_string(i));
             obs << alps::RealVectorObservable("MCRG S_alpha S_beta next iteration" + std::to_string(i));
         }
+        obs << alps::RealVectorObservable("MCRG S_alpha" + std::to_string(0));
+        
     }
 
 private:
@@ -156,8 +157,14 @@ const std::vector<std::vector<std::vector<std::pair<int,int>>>> mcrg::interactio
         {{std::make_pair(0,0),std::make_pair(1,0)}},//NNx
         {{std::make_pair(0,0),std::make_pair(0,1)}},//NNy
         {{std::make_pair(0,0),std::make_pair(1,1)},{std::make_pair(0,0),std::make_pair(-1,1)}}, //diagonal
-        {{std::make_pair(0,0),std::make_pair(2,0)}}, //NNNx
-        {{std::make_pair(0,0),std::make_pair(0,2)}}, //NNNy
-        {{std::make_pair(0,0),std::make_pair(0,1),std::make_pair(1,0),std::make_pair(1,1)}} // 4 spin
+        {{std::make_pair(0,0),std::make_pair(2,0)},{std::make_pair(0,0),std::make_pair(0,2)}}, //NNN
+        {{std::make_pair(0,0),std::make_pair(3,0)}}, //NNNNx
+        {{std::make_pair(0,0),std::make_pair(0,3)}}, //NNNNy
+        {{std::make_pair(0,0),std::make_pair(0,1),std::make_pair(1,0),std::make_pair(1,1)}}, // 4 spin
+        {{std::make_pair(0,0),std::make_pair(1,2)}},
+        {{std::make_pair(0,0),std::make_pair(2,1)}},
+        {{std::make_pair(0,0),std::make_pair(-2,1)}},
+        {{std::make_pair(0,0),std::make_pair(-1,2)}},
+        {{std::make_pair(0,0),std::make_pair(-2,2)},{std::make_pair(0,0),std::make_pair(2,2)}}
     }; 
 
