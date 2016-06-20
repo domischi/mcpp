@@ -165,6 +165,12 @@ const std::vector<std::vector<std::vector<std::pair<int,int>>>> mcrg::interactio
         {{std::make_pair(0,0),std::make_pair(2,1)}},
         {{std::make_pair(0,0),std::make_pair(-2,1)}},
         {{std::make_pair(0,0),std::make_pair(-1,2)}},
-        {{std::make_pair(0,0),std::make_pair(-2,2)},{std::make_pair(0,0),std::make_pair(2,2)}}
+        {{std::make_pair(0,0),std::make_pair(-2,2)}},
+        {{std::make_pair(0,0),std::make_pair(4,0)}},
+        {{std::make_pair(0,0),std::make_pair(0,4)}},
+        {{std::make_pair(0,0),std::make_pair(-1,3)}},
+        {{std::make_pair(0,0),std::make_pair(1,3)}},
+        {{std::make_pair(0,0),std::make_pair(3,-1)}},
+        {{std::make_pair(0,0),std::make_pair(3,1)}},
     }; 
 
