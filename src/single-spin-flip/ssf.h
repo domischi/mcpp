@@ -39,11 +39,11 @@ public :
         mx_stag(num_sites()),//stagered in stripes
         my_stag(0.),
         accepted(0),
-        ac_measured(false),
-        safety_factor(params.value_or_default("safety_factor",3)),
-        autocorrelation(0),
-        ac_N(0),
-        ac_obs("autocorr obs"),
+        //ac_measured(false),
+        //safety_factor(params.value_or_default("safety_factor",3)),
+        //autocorrelation(0),
+        //ac_N(0),
+        //ac_obs("autocorr obs"),
         mcrg_it_depth(params.value_or_default("mcrg_iteration_depth",-1))
         {
             measure_mcrg=(mcrg_it_depth>0);
@@ -65,10 +65,10 @@ public :
             Init_Lookup_Tables(); 
 
             En=Energy();
-            if(T<=1e-3){ //at T=0 there is a problem with this, as the system doesn't move at all (0/0 problem) 
-                ac_measured=true;
-                autocorrelation=1;
-            }
+            //if(T<=1e-3){ //at T=0 there is a problem with this, as the system doesn't move at all (0/0 problem) 
+            //    ac_measured=true;
+            //    autocorrelation=1;
+            //}
             if(measure_mcrg){
                 mcrg_=std::make_shared<mcrg>(params,mcrg_it_depth);
             }
@@ -89,16 +89,15 @@ public :
             obs << alps::RealObservable("Mx staggered^2");
             obs << alps::RealObservable("Acceptance Rate"); //Probably very useful for debugging
             if(measure_mcrg){
-                //obs << alps::RealObservable("n_alpha"); //bad thing to use it like this, however I don't find a better way of implementing it...
                 mcrg_->init_observables(obs);
             }
     }
 
-    static void print_copyright(std::ostream & out){
-        out << "You are using mc++"<<std::endl
-            << "copyright (c) by Dominik Schildknecht"<<std::endl
-            << "if you reuse this project, please mention the ALPS project and me as a fair user"<<std::endl;
-    }
+    //static void print_copyright(std::ostream & out){
+    //    out << "You are using mc++"<<std::endl
+    //        << "copyright (c) by Dominik Schildknecht"<<std::endl
+    //        << "if you reuse this project, please mention the ALPS project and me as a fair user"<<std::endl;
+    //}
 
     void save(alps::ODump &dump) const{
         dump << L << N<< T<< Step_Number << spins;
@@ -109,26 +108,28 @@ public :
     void run(alps::ObservableSet& obs){
         using namespace alps::alea;
         ++Step_Number;
-        int MAX_STEPS_AC = 1e6;
-        int n_steps = ac_measured ? autocorrelation*safety_factor+1 : 0;
+        //int MAX_STEPS_AC = 1e6;
+        //int n_steps = ac_measured ? autocorrelation*safety_factor+1 : 0;
+        int n_steps = N;
         for(int i = 0;i<n_steps;++i){
             update();
         } 
-        if(!ac_measured && is_thermalized()) { //the ac_time still needs to be determined
-            for(int i = 0;i<MAX_STEPS_AC;++i){
-                update();
-                ac_obs<<En;
-                if(!(i % 512)) { //only with full bins the ac time can be measured
-                    measure_ac_time();
-                    if(ac_measured) break;
-                }
-                if(i==MAX_STEPS_AC-1) {
-                    std::cerr << "didn't find any meaningful autocorrelation time!!"<<std::endl;
-                    std::exit(13);
-                }
-            }
-        }
-        if(ac_measured && is_thermalized()){
+        //if(!ac_measured && is_thermalized()) { //the ac_time still needs to be determined
+        //    for(int i = 0;i<MAX_STEPS_AC;++i){
+        //        update();
+        //        ac_obs<<En;
+        //        if(!(i % 512)) { //only with full bins the ac time can be measured
+        //            measure_ac_time();
+        //            if(ac_measured) break;
+        //        }
+        //        if(i==MAX_STEPS_AC-1) {
+        //            std::cerr << "didn't find any meaningful autocorrelation time!!"<<std::endl;
+        //            std::exit(13);
+        //        }
+        //    }
+        //}
+        //if(ac_measured && is_thermalized()){
+        if(is_thermalized()){
             measure(obs);
             accepted=0;
         }
@@ -151,12 +152,12 @@ private:
     double D;
     double cutoff_distance;
 
-    //autocorrelation time parameters
-    alps::RealObservable ac_obs;
-    bool ac_measured;
-    int ac_N;
-    double safety_factor;
-    double autocorrelation;
+    ////autocorrelation time parameters
+    //alps::RealObservable ac_obs;
+    //bool ac_measured;
+    //int ac_N;
+    //double safety_factor;
+    //double autocorrelation;
 
     //Lookup tables 
     std::map<std::pair<int,int>,double> dist_3;
@@ -175,22 +176,22 @@ private:
     std::shared_ptr<mcrg> mcrg_;
     int mcrg_it_depth; //to which depth the mcrg is done
 
-    double measure_ac_time(){
-        if(is_thermalized()&&!ac_measured) {
-            if(std::isfinite(N*ac_obs.tau()) && N*ac_obs.tau()>0&&N*ac_obs.tau()>autocorrelation){ 
-                autocorrelation=N*ac_obs.tau();
-                ac_N=0;
-            }
-            else
-                ++ac_N;
+    //double measure_ac_time(){
+    //    if(is_thermalized()&&!ac_measured) {
+    //        if(std::isfinite(N*ac_obs.tau()) && N*ac_obs.tau()>0&&N*ac_obs.tau()>autocorrelation){ 
+    //            autocorrelation=N*ac_obs.tau();
+    //            ac_N=0;
+    //        }
+    //        else
+    //            ++ac_N;
 
-            if(ac_N>=10){//autocorrelation time is stable 
-                ac_measured=true;
-            }
-            ac_obs.reset(true);
-        }
-        return autocorrelation;
-    }
+    //        if(ac_N>=10){//autocorrelation time is stable 
+    //            ac_measured=true;
+    //        }
+    //        ac_obs.reset(true);
+    //    }
+    //    return autocorrelation;
+    //}
     void update(){
         //Choose a site
         int site=random_int(num_sites());
@@ -237,7 +238,7 @@ private:
         Mx=mx_stag/num_sites();
         obs["Mx staggered"]<<Mx; 
         obs["Mx staggered^2"]<<Mx*Mx;
-        obs["Acceptance Rate"] << (1.0*accepted)/(autocorrelation*safety_factor+1);
+        //obs["Acceptance Rate"] << (1.0*accepted)/(autocorrelation*safety_factor+1);
         if(measure_mcrg) 
             mcrg_->measure(spins, obs).size();
     }
@@ -293,24 +294,24 @@ private:
     inline double distance(vector_type& x, vector_type& y, vector_type& periodic){
         return std::sqrt(std::pow(x[0]-y[0]+periodic[0],2)+std::pow(x[1]-y[1]+periodic[1],2));
     }
-    double inv_distance_cubed(int i,int j) {
+    inline double inv_distance_cubed(int i,int j) {
         return inv_distance_cubed(std::make_pair(i,j));
     }
-    double inv_distance_cubed(std::pair<int,int> pair_){
+    inline double inv_distance_cubed(std::pair<int,int> pair_){
         double ret_val=dist_3[pair_];
         assert(ret_val>0.);
         return ret_val;
     }
-    double angle_w_x(int i, int j) { 
+    inline double angle_w_x(int i, int j) { 
         return angle_w_x(std::make_pair(i,j));
     }
-    double angle_w_x(std::pair<int,int> pair_){
+    inline double angle_w_x(std::pair<int,int> pair_){
         return phi[pair_];
     }
-    int random_int(int j){
+    inline int random_int(int j){
         return static_cast<int>(j*uniform_01());
     }
-    double random_real(double a=0,double b=1){
+    inline double random_real(double a=0,double b=1){
         return a+(b-a)*uniform_01();
     }
     double Energy(){
