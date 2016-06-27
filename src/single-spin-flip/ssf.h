@@ -44,7 +44,8 @@ public :
         //autocorrelation(0),
         //ac_N(0),
         //ac_obs("autocorr obs"),
-        mcrg_it_depth(params.value_or_default("mcrg_iteration_depth",-1))
+        mcrg_it_depth(params.value_or_default("mcrg_iteration_depth",-1)),
+        Each_Measurement(params.value_or_default("Each_Measurement",15))
         {
             measure_mcrg=(mcrg_it_depth>0);
             cutoff_distance=params.value_or_default("cutoff_distance",3.);
@@ -129,7 +130,7 @@ public :
         //    }
         //}
         //if(ac_measured && is_thermalized()){
-        if(is_thermalized()){
+        if(is_thermalized()&&(Step_Number%Each_Measurement)){
             measure(obs);
             accepted=0;
         }
@@ -151,7 +152,7 @@ private:
     double T;
     double D;
     double cutoff_distance;
-
+    int Each_Measurement;
     ////autocorrelation time parameters
     //alps::RealObservable ac_obs;
     //bool ac_measured;
@@ -362,7 +363,7 @@ public:
             alps::RealObsevaluator m2 = obs["M staggered^2"];
             alps::RealObsevaluator m4 = obs["M staggered^4"];
             alps::RealObsevaluator binder("BinderCumulant staggered"); 
-            binder = m4/(m2*m2);
+            binder = 1.-m4/(m2*m2*3);
             obs.addObservable(binder); 
         } else std::cerr << "Binder stag cumulant will not be calculated"<<std::endl;
         // c_V  
@@ -386,7 +387,7 @@ public:
             alps::RealObsevaluator M = obs["M staggered"];
             alps::RealObsevaluator M2 = obs["M staggered^2"];
             alps::RealObsevaluator chi("susceptibility staggered");
-            chi = beta() * (M2-M*M) * N; 
+            chi = beta() * (M2-M*M); 
             obs.addObservable(chi); 
         } else std::cerr << "susceptibility staggered will not be calculated"<<std::endl;
         if(measure_mcrg){
