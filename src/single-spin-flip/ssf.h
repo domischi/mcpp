@@ -387,7 +387,7 @@ public:
             alps::RealObsevaluator M = obs["M staggered"];
             alps::RealObsevaluator M2 = obs["M staggered^2"];
             alps::RealObsevaluator chi("susceptibility staggered");
-            chi = beta() * (M2-M*M); 
+            chi = N*beta() * (M2-M*M); 
             obs.addObservable(chi); 
         } else std::cerr << "susceptibility staggered will not be calculated"<<std::endl;
         if(measure_mcrg){
