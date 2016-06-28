@@ -241,7 +241,7 @@ private:
         obs["Mx staggered^2"]<<Mx*Mx;
         //obs["Acceptance Rate"] << (1.0*accepted)/(autocorrelation*safety_factor+1);
         if(measure_mcrg) 
-            mcrg_->measure(spins, obs).size();
+            mcrg_->measure(spins, obs);
     }
     //TODO decide in which units of measurement to measure...(natural, eV and K, SI?)
     inline double beta(){ 
@@ -392,35 +392,63 @@ public:
         } else std::cerr << "susceptibility staggered will not be calculated"<<std::endl;
         if(measure_mcrg){
             for(int it=1;it<=mcrg_it_depth;++it){
-                if (!(obs.has("MCRG S_alpha" + std::to_string(it)) &&
-                      obs.has("MCRG S_alpha"+ std::to_string(it-1)) &&
-                      obs.has("MCRG S_alpha S_beta same iteration"+ std::to_string(it)) &&
-                      obs.has("MCRG S_alpha S_beta next iteration"+ std::to_string(it)))) 
+                if (!(obs.has("MCRG S_alpha even " + std::to_string(it)) &&
+                      obs.has("MCRG S_alpha even "+ std::to_string(it-1)) &&
+                      obs.has("MCRG S_alpha S_beta same iteration even "+ std::to_string(it)) &&
+                      obs.has("MCRG S_alpha S_beta next iteration even "+ std::to_string(it)) &&
+                      obs.has("MCRG S_alpha odd " + std::to_string(it)) &&
+                      obs.has("MCRG S_alpha odd "+ std::to_string(it-1)) &&
+                      obs.has("MCRG S_alpha S_beta same iteration odd "+ std::to_string(it)) &&
+                      obs.has("MCRG S_alpha S_beta next iteration odd "+ std::to_string(it)))) 
                     std::cerr << "NOT ALL INFORMATION FOR A MCRG ANALYSIS WAS GIVEN"<<std::endl;
                 else{ //calculate the dS^(n)/dK^(n-1) and dS^(n)/dK^(n)
-                    alps::RealVectorObsevaluator S_a_n = obs["MCRG S_alpha"+std::to_string(it)];
-                    alps::RealVectorObsevaluator S_a_nm1 = obs["MCRG S_alpha"+std::to_string(it-1)];
-                    alps::RealVectorObsevaluator S_a_n_S_b_n = obs["MCRG S_alpha S_beta same iteration"+std::to_string(it)]; 
-                    alps::RealVectorObsevaluator S_a_n_S_b_nm1 = obs["MCRG S_alpha S_beta next iteration"+std::to_string(it)];
-                    //std::vector<alps::RealObsevaluator> m_S_a_m_S_b; // <S_a><S_b>
-                    std::vector<double> m_S_a_m_S_b_st;
-                    std::vector<double> m_S_a_m_S_b_nt;
-                    int n_alpha=mcrg::n_interactions();
-                    for(int i=0;i<n_alpha;++i)
-                        for(int j=0;j<n_alpha;++j){
-                            m_S_a_m_S_b_st.push_back((S_a_n[i].mean()*S_a_n[j].mean()));
-                            m_S_a_m_S_b_nt.push_back((S_a_nm1[i].mean()*S_a_nm1[j].mean()));
+                    //even
+                    std::valarray<double> S_a_n_e = alps::RealVectorObsevaluator(obs["MCRG S_alpha even "+std::to_string(it)]).mean();
+                    std::valarray<double> S_a_nm1_e = alps::RealVectorObsevaluator(obs["MCRG S_alpha even "+std::to_string(it-1)]).mean();
+                    std::valarray<double> S_a_n_S_b_n_e = alps::RealVectorObsevaluator(obs["MCRG S_alpha S_beta same iteration even "+std::to_string(it)]).mean(); 
+                    std::valarray<double> S_a_n_S_b_nm1_e = alps::RealVectorObsevaluator(obs["MCRG S_alpha S_beta next iteration even "+std::to_string(it)]).mean();
+                    std::vector<double> m_S_a_m_S_b_st_e;
+                    std::vector<double> m_S_a_m_S_b_nt_e;
+                    int n_alpha_e=mcrg::n_interactions_even();
+                    for(int i=0;i<n_alpha_e;++i)
+                        for(int j=0;j<n_alpha_e;++j){
+                            m_S_a_m_S_b_st_e.push_back((S_a_n_e[i]*S_a_n_e[j]));
+                            m_S_a_m_S_b_nt_e.push_back((S_a_nm1_e[i]*S_a_nm1_e[j]));
                         }
-                    std::valarray<double> mSamSb_st(m_S_a_m_S_b_st.data(),m_S_a_m_S_b_st.size());
-                    std::valarray<double> mSamSb_nt(m_S_a_m_S_b_nt.data(),m_S_a_m_S_b_nt.size());
-                    //alps::RealVectorObsevaluator mSamSb1(mSamSb);
-                    if(S_a_n.count()>0 &&S_a_nm1.count()>0 &&S_a_n_S_b_n.count()>0&&S_a_n_S_b_nm1.count()>0){
-                        alps::RealVectorObsevaluator dS_n_dK_n("MCRG dSdK same time"+ std::to_string(it));
-                        alps::RealVectorObsevaluator dS_n_dK_nm1("MCRG dSdK next time"+ std::to_string(it));
-                        dS_n_dK_n = S_a_n_S_b_n - mSamSb_st;
-                        dS_n_dK_nm1 = S_a_n_S_b_nm1 - mSamSb_nt;
-                        obs.addObservable(dS_n_dK_n);
-                        obs.addObservable(dS_n_dK_nm1);
+                    std::valarray<double> mSamSb_st_e(m_S_a_m_S_b_st_e.data(),m_S_a_m_S_b_st_e.size());
+                    std::valarray<double> mSamSb_nt_e(m_S_a_m_S_b_nt_e.data(),m_S_a_m_S_b_nt_e.size());
+                    //odd
+                    std::valarray<double> S_a_n_o = alps::RealVectorObsevaluator(obs["MCRG S_alpha odd "+std::to_string(it)]).mean();
+                    std::valarray<double> S_a_nm1_o = alps::RealVectorObsevaluator(obs["MCRG S_alpha odd "+std::to_string(it-1)]).mean();
+                    std::valarray<double> S_a_n_S_b_n_o = alps::RealVectorObsevaluator(obs["MCRG S_alpha S_beta same iteration odd "+std::to_string(it)]).mean(); 
+                    std::valarray<double> S_a_n_S_b_nm1_o = alps::RealVectorObsevaluator(obs["MCRG S_alpha S_beta next iteration odd "+std::to_string(it)]).mean();
+                    std::vector<double> m_S_a_m_S_b_st_o;
+                    std::vector<double> m_S_a_m_S_b_nt_o;
+                    int n_alpha_o=mcrg::n_interactions_odd();
+                    for(int i=0;i<n_alpha_o;i+=2)
+                        for(int j=0;j<n_alpha_o;j+=2){
+                            m_S_a_m_S_b_st_o.push_back((S_a_n_o[i]*S_a_n_o[j]+S_a_n_o[i+1]*S_a_n_o[j+1]));
+                            m_S_a_m_S_b_nt_o.push_back((S_a_nm1_o[i]*S_a_nm1_o[j]+S_a_nm1_o[i+1]*S_a_nm1_o[j+1]));
+                        }
+                    std::valarray<double> mSamSb_st_o(m_S_a_m_S_b_st_o.data(),m_S_a_m_S_b_st_o.size());
+                    std::valarray<double> mSamSb_nt_o(m_S_a_m_S_b_nt_o.data(),m_S_a_m_S_b_nt_o.size());
+                    if(true){
+                        std::valarray<double> dS_n_dK_n_e = S_a_n_S_b_n_e - mSamSb_st_e;
+                        std::valarray<double> dS_n_dK_nm1_e = S_a_n_S_b_nm1_e - mSamSb_nt_e;
+                        alps::RealVectorObservable dS_n_dK_n_e_obs("MCRG dSdK same time even "+ std::to_string(it));
+                        alps::RealVectorObservable dS_n_dK_nm1_e_obs("MCRG dSdK next time even "+ std::to_string(it));
+                        dS_n_dK_n_e_obs<<dS_n_dK_n_e;
+                        dS_n_dK_nm1_e_obs<<dS_n_dK_nm1_e;
+                        obs.addObservable(dS_n_dK_n_e_obs);
+                        obs.addObservable(dS_n_dK_nm1_e_obs);
+                        std::valarray<double> dS_n_dK_n_o =S_a_n_S_b_n_o - mSamSb_st_o;
+                        std::valarray<double> dS_n_dK_nm1_o=S_a_n_S_b_nm1_o - mSamSb_nt_o;
+                        alps::RealVectorObservable dS_n_dK_n_o_obs("MCRG dSdK same time even "+ std::to_string(it));
+                        alps::RealVectorObservable dS_n_dK_nm1_o_obs("MCRG dSdK next time even "+ std::to_string(it));
+                        dS_n_dK_n_o_obs<<dS_n_dK_n_o;  
+                        //dS_n_dK_nm1_o_obs<< dS_n_dK_nm1_o;
+                        obs.addObservable(dS_n_dK_n_o_obs);
+                        obs.addObservable(dS_n_dK_nm1_o_obs);
                     } else 
                         std::cerr << "NO MEASUREMENTS WERE MADE IN THE OBSERVABLES NEEDED FOR MCRG";
                 }
