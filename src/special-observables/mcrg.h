@@ -68,7 +68,7 @@ public:
         }
         std::valarray<double> OUT_even(OUT_vec_even.data(),OUT_vec_even.size());
         std::valarray<double> OUT_odd(OUT_vec_odd.data(),OUT_vec_odd.size());
-        if(OUT_even.size()*2!=OUT_odd.size()){
+        if(OUT_even.size()/n_interactions_even()*2!=OUT_odd.size()/n_interactions_odd()){
             std::cerr<<"SOMETHING WENT WRONG IN THE MEASUREMENT OF THE MCRG AS THE ODD OUT VECTOR HASN'T TWICE THE SIZE OF THE EVEN ONE, ABORTING...";
             throw 1;
         }
@@ -91,13 +91,13 @@ public:
                 }
             }
             obs["MCRG S_alpha S_beta same iteration even "+ std::to_string(iteration)]<<outout_even;
-            obs["MCRG S_alpha S_beta next iteration odd "+ std::to_string(iteration)]<<outin_even;
+            obs["MCRG S_alpha S_beta next iteration even "+ std::to_string(iteration)]<<outin_even;
             //odd
             std::valarray<double> outout_odd(IN_odd.size()*IN_odd.size()/4),outin_odd(IN_odd.size()*IN_odd.size()/4);
             for(int i=0;i<IN_odd.size();i+=2){
-                for(int j=0;j<IN_odd.size();j+=2){
-                    outout_odd[(i*IN_odd.size()+j)/2]=OUT_odd[i]*OUT_odd[j]+OUT_odd[i+1]*OUT_odd[j+1];
-                    outin_odd[(i*IN_odd.size()+j)/2]=OUT_odd[i]*IN_odd[j]+OUT_odd[i+1]*IN_odd[j+1];
+                for(int j=0;j<IN_odd.size();j+=2){ 
+                    outout_odd[(i*IN_odd.size()/2+j)/2]=OUT_odd[i]*OUT_odd[j]+OUT_odd[i+1]*OUT_odd[j+1];
+                    outin_odd[(i*IN_odd.size()/2+j)/2]=OUT_odd[i]*IN_odd[j]+OUT_odd[i+1]*IN_odd[j+1];
                 }
             }
             obs["MCRG S_alpha S_beta same iteration odd "+ std::to_string(iteration)]<<outout_odd;
@@ -221,22 +221,22 @@ const std::vector<std::vector<std::vector<std::pair<int,int>>>> mcrg::interactio
         {{std::make_pair(0,1),std::make_pair(1,1),std::make_pair(1,0)}},//3 part interaction for simple nn
         {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,2)}},//3 part interaction for simple nn
         {{std::make_pair(0,0),std::make_pair(2,0),std::make_pair(1,0)}},//3 part interaction for simple nn
-        {{std::make_pair(0,0),std::make_pair(0,2),std::make_pair(0,1)}}//3 part interaction for simple nn
-        //{{std::make_pair(0,0),std::make_pair(0,1),std::make_pair(2,1)}},
-        //{{std::make_pair(0,0),std::make_pair(0,1),std::make_pair(2,-1)}},
-        //{{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,1)}},
-        //{{std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(-2,1)}},
-        //{{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(1,2)}},
-        //{{std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(-1,2)}},
-        //{{std::make_pair(0,0),std::make_pair(1,0),std::make_pair(1,2)}},
-        //{{std::make_pair(0,0),std::make_pair(1,0),std::make_pair(-1,2)}},
-        //{{std::make_pair(0,0),std::make_pair(2,1),std::make_pair(1,2)}},
-        //{{std::make_pair(0,0),std::make_pair(-2,1),std::make_pair(-1,2)}},
-        //{{std::make_pair(0,0),std::make_pair(-2,-1),std::make_pair(-1,-2)}},
-        //{{std::make_pair(0,0),std::make_pair(2,-1),std::make_pair(1,-2)}},
-        //{{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(0,2)}},
-        //{{std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(0,2)}},
-        //{{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,0)}}
+        {{std::make_pair(0,0),std::make_pair(0,2),std::make_pair(0,1)}},//3 part interaction for simple nn
+        {{std::make_pair(0,0),std::make_pair(0,1),std::make_pair(2,1)}},
+        {{std::make_pair(0,0),std::make_pair(0,1),std::make_pair(2,-1)}},
+        {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,1)}},
+        {{std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(-2,1)}},
+        {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(1,2)}},
+        {{std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(-1,2)}},
+        {{std::make_pair(0,0),std::make_pair(1,0),std::make_pair(1,2)}},
+        {{std::make_pair(0,0),std::make_pair(1,0),std::make_pair(-1,2)}},
+        {{std::make_pair(0,0),std::make_pair(2,1),std::make_pair(1,2)}},
+        {{std::make_pair(0,0),std::make_pair(-2,1),std::make_pair(-1,2)}},
+        {{std::make_pair(0,0),std::make_pair(-2,-1),std::make_pair(-1,-2)}},
+        {{std::make_pair(0,0),std::make_pair(2,-1),std::make_pair(1,-2)}},
+        {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(0,2)}}, //TODO for whatever reason, this actually crashes the program with a segfault.... check what happens here
+        {{std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(0,2)}},
+        {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,0)}}
     };
 const std::vector<std::vector<std::vector<std::pair<int,int>>>> mcrg::interactions_e = {
         //EVEN
@@ -257,7 +257,7 @@ const std::vector<std::vector<std::vector<std::pair<int,int>>>> mcrg::interactio
         {{std::make_pair(0,0),std::make_pair(-1,3)}},
         {{std::make_pair(0,0),std::make_pair(1,3)}},
         {{std::make_pair(0,0),std::make_pair(3,-1)}},
-        {{std::make_pair(0,0),std::make_pair(3,1)}},
+        {{std::make_pair(0,0),std::make_pair(3,1)}}
     }; 
 
 //const std::vector<std::vector<std::vector<std::pair<int,int>>>> mcrg::interactions=std::copy(interactions_e.begin(),interactions_e.end(),interactions.end()).insert(interactions.end(),interactions_o.begin(),interactions_o.end());

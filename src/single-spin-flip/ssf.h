@@ -435,16 +435,16 @@ public:
                     if(true){
                         std::valarray<double> dS_n_dK_n_e = S_a_n_S_b_n_e - mSamSb_st_e;
                         std::valarray<double> dS_n_dK_nm1_e = S_a_n_S_b_nm1_e - mSamSb_nt_e;
-                        alps::RealVectorObservable dS_n_dK_n_e_obs("MCRG dSdK same time even "+ std::to_string(it));
-                        alps::RealVectorObservable dS_n_dK_nm1_e_obs("MCRG dSdK next time even "+ std::to_string(it));
+                        alps::RealVectorObservable dS_n_dK_n_e_obs("MCRG dSdK same iteration even "+ std::to_string(it));
+                        alps::RealVectorObservable dS_n_dK_nm1_e_obs("MCRG dSdK next iteration even "+ std::to_string(it));
                         dS_n_dK_n_e_obs<<dS_n_dK_n_e;
                         dS_n_dK_nm1_e_obs<<dS_n_dK_nm1_e;
                         obs.addObservable(dS_n_dK_n_e_obs);
                         obs.addObservable(dS_n_dK_nm1_e_obs);
                         std::valarray<double> dS_n_dK_n_o =S_a_n_S_b_n_o - mSamSb_st_o;
                         std::valarray<double> dS_n_dK_nm1_o=S_a_n_S_b_nm1_o - mSamSb_nt_o;
-                        alps::RealVectorObservable dS_n_dK_n_o_obs("MCRG dSdK same time even "+ std::to_string(it));
-                        alps::RealVectorObservable dS_n_dK_nm1_o_obs("MCRG dSdK next time even "+ std::to_string(it));
+                        alps::RealVectorObservable dS_n_dK_n_o_obs("MCRG dSdK same iteration odd "+ std::to_string(it));
+                        alps::RealVectorObservable dS_n_dK_nm1_o_obs("MCRG dSdK next iteration odd "+ std::to_string(it));
                         dS_n_dK_n_o_obs<<dS_n_dK_n_o;  
                         //dS_n_dK_nm1_o_obs<< dS_n_dK_nm1_o;
                         obs.addObservable(dS_n_dK_n_o_obs);
