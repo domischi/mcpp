@@ -215,28 +215,29 @@ const std::vector<std::vector<std::vector<std::pair<int,int>>>> mcrg::interactio
         //ODD
         {{std::make_pair(0,0)}},
         {{std::make_pair(0,0),std::make_pair(1,0),std::make_pair(0,1)}},//3 part interaction for simple nn
+        //up to here everything ok.
         {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(0,1)}},//3 part interaction for simple nn
         {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(1,0)}},//3 part interaction for simple nn
         {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(-1,0)}},//3 part interaction for simple nn
         {{std::make_pair(0,1),std::make_pair(1,1),std::make_pair(1,0)}},//3 part interaction for simple nn
         {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,2)}},//3 part interaction for simple nn
-        {{std::make_pair(0,0),std::make_pair(2,0),std::make_pair(1,0)}},//3 part interaction for simple nn
-        {{std::make_pair(0,0),std::make_pair(0,2),std::make_pair(0,1)}},//3 part interaction for simple nn
-        {{std::make_pair(0,0),std::make_pair(0,1),std::make_pair(2,1)}},
-        {{std::make_pair(0,0),std::make_pair(0,1),std::make_pair(2,-1)}},
-        {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,1)}},
-        {{std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(-2,1)}},
-        {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(1,2)}},
-        {{std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(-1,2)}},
-        {{std::make_pair(0,0),std::make_pair(1,0),std::make_pair(1,2)}},
-        {{std::make_pair(0,0),std::make_pair(1,0),std::make_pair(-1,2)}},
-        {{std::make_pair(0,0),std::make_pair(2,1),std::make_pair(1,2)}},
-        {{std::make_pair(0,0),std::make_pair(-2,1),std::make_pair(-1,2)}},
-        {{std::make_pair(0,0),std::make_pair(-2,-1),std::make_pair(-1,-2)}},
-        {{std::make_pair(0,0),std::make_pair(2,-1),std::make_pair(1,-2)}},
-        {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(0,2)}}, //TODO for whatever reason, this actually crashes the program with a segfault.... check what happens here
-        {{std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(0,2)}},
-        {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,0)}}
+        //{{std::make_pair(0,0),std::make_pair(2,0),std::make_pair(1,0)}},//3 part interaction for simple nn
+        //{{std::make_pair(0,0),std::make_pair(0,2),std::make_pair(0,1)}},//3 part interaction for simple nn
+        //{{std::make_pair(0,0),std::make_pair(0,1),std::make_pair(2,1)}},
+        //{{std::make_pair(0,0),std::make_pair(0,1),std::make_pair(2,-1)}},
+        //{{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,1)}},
+        //{{std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(-2,1)}},
+        //{{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(1,2)}},
+        //{{std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(-1,2)}},
+        //{{std::make_pair(0,0),std::make_pair(1,0),std::make_pair(1,2)}},
+        //{{std::make_pair(0,0),std::make_pair(1,0),std::make_pair(-1,2)}},
+        //{{std::make_pair(0,0),std::make_pair(2,1),std::make_pair(1,2)}},
+        //{{std::make_pair(0,0),std::make_pair(-2,1),std::make_pair(-1,2)}},
+        //{{std::make_pair(0,0),std::make_pair(-2,-1),std::make_pair(-1,-2)}},
+        //{{std::make_pair(0,0),std::make_pair(2,-1),std::make_pair(1,-2)}},
+        //{{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(0,2)}}, 
+        //{{std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(0,2)}},
+        //{{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,0)}}
     };
 const std::vector<std::vector<std::vector<std::pair<int,int>>>> mcrg::interactions_e = {
         //EVEN
