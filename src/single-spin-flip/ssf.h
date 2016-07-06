@@ -55,7 +55,7 @@ public :
             spins.resize(N, 0.);
             if(is_bipartite()&&true)//TODO implement check if ground state is striped as used below
                 for(site_iterator s_iter= sites().first; s_iter!=sites().second; ++s_iter){
-                    if((((*s_iter)/L)%2)){//odd y site
+                    if(((*s_iter)%2)){//odd y site
                         spins[*s_iter]=M_PI;
                     }
                 }
@@ -285,8 +285,8 @@ private:
                     std::pair<int,int> pair_inverse=std::make_pair(pair_.second,pair_.first);
                     dist_3[pair_]=std::pow(dist,-3);
                     dist_3[pair_inverse]=std::pow(dist,-3);
-                    phi[pair_]=std::atan2((c1[1]+p[1]-c2[1]),(c1[0]+p[0]-c2[0]));
-                    phi[pair_inverse]=std::atan2(-(c1[1]+p[1]-c2[1]),-(c1[0]+p[0]-c2[0]));
+                    phi[pair_]=std::atan2(-(c1[1]+p[1]-c2[1]),-(c1[0]+p[0]-c2[0]));
+                    phi[pair_inverse]=std::atan2((c1[1]+p[1]-c2[1]),(c1[0]+p[0]-c2[0]));
                     neighbour_list[*s_iter].push_back(*s_iter2);
                     neighbour_list[*s_iter2].push_back(*s_iter);
                 }
@@ -325,7 +325,7 @@ private:
     double single_site_Energy(int i){
         double e=0.;
         for(int j : neighbour_list[i]){
-            e+=D*inv_distance_cubed(i,j)*(1.5*std::cos(spins[i]+spins[j]-2*angle_w_x(i,j))+0.5*std::cos(spins[i]-spins[j]));
+            e-=D*inv_distance_cubed(i,j)*(1.5*std::cos(spins[i]+spins[j]-2*angle_w_x(i,j))+0.5*std::cos(spins[i]-spins[j]));
         }
         return e;
     }
