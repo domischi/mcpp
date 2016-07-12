@@ -147,9 +147,9 @@ private:
         double S_a=0;
         for(int i =0;i<N;++i){
             double tmp=1;
-            for(int i = 0; i <shifts.size();i+=2){
-                auto& s = shifts[i];
-                auto& t = shifts[i+1];
+            for(int j = 0; j <shifts.size();j+=2){
+                auto& s = shifts[j];
+                auto& t = shifts[j+1];
                 tmp*=std::cos(spins[index_o_neighbour(i,s.first,s.second)])*std::cos(spins[index_o_neighbour(i,t.first,t.second)])+std::sin(spins[index_o_neighbour(i,s.first,s.second)])*std::sin(spins[index_o_neighbour(i,t.first,t.second)]);
             }
             S_a+=tmp;
