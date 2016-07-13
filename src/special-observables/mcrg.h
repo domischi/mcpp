@@ -10,9 +10,10 @@ class mcrg;
 class mcrg /*: public alps::graph_helper<G>*/{
 public:
     typedef double spin_type;
-    mcrg(const alps::Parameters& p, int Iteration_) :
+    mcrg(const alps::Parameters& p, int Iteration_, int MCRG_It_) :
     //graph_helper<G>(p),
     iteration(Iteration_),
+    max_iterations(MCRG_It_),
     L(p["L"]),
     N(L*L)
     {
@@ -23,8 +24,8 @@ public:
         alps::Parameters p_descendant=p;
         p_descendant["L"]=L/2;
         init_blocks();
-        if(iteration>0) {
-            descendant=std::make_shared<mcrg>(p_descendant,Iteration_-1);
+        if(!is_last_iteration()) {
+            descendant=std::make_shared<mcrg>(p_descendant,iteration+1,MCRG_It_);
         }
     }
                 
@@ -74,7 +75,7 @@ public:
         }
         obs["MCRG S_alpha even " + std::to_string(iteration)]<<OUT_even;
         obs["MCRG S_alpha odd " + std::to_string(iteration)]<<OUT_odd;
-        if(iteration>0){//This is not the last instantation of the mcrg
+        if(!is_last_iteration()){//This is not the last instantation of the mcrg
             //reduce the lattice and call the descendant on the renormalized system
             std::vector<spin_type> reduced_spins = reduce(spins);
             std::valarray<double> IN_even(OUT_even.size());
@@ -91,7 +92,7 @@ public:
                 }
             }
             obs["MCRG S_alpha S_beta same iteration even "+ std::to_string(iteration)]<<outout_even;
-            obs["MCRG S_alpha S_beta next iteration even "+ std::to_string(iteration)]<<outin_even;
+            obs["MCRG S_alpha S_beta befo iteration even "+ std::to_string(iteration-1)]<<outin_even;
             //odd
             std::valarray<double> outout_odd(IN_odd.size()*IN_odd.size()/4),outin_odd(IN_odd.size()*IN_odd.size()/4);
             for(int i=0;i<IN_odd.size();i+=2){
@@ -101,19 +102,19 @@ public:
                 }
             }
             obs["MCRG S_alpha S_beta same iteration odd "+ std::to_string(iteration)]<<outout_odd;
-            obs["MCRG S_alpha S_beta next iteration odd "+ std::to_string(iteration)]<<outin_odd;
+            obs["MCRG S_alpha S_beta befo iteration odd "+ std::to_string(iteration-1)]<<outin_odd;
         }
         return std::make_pair(OUT_even,OUT_odd); 
     }
 
     void init_observables(alps::ObservableSet& obs){
-        for(int i =1; i<=iteration;++i){
+        for(int i =1; i<=max_iterations;++i){
             obs << alps::RealVectorObservable("MCRG S_alpha even " + std::to_string(i));
             obs << alps::RealVectorObservable("MCRG S_alpha odd " + std::to_string(i));
             obs << alps::RealVectorObservable("MCRG S_alpha S_beta same iteration even " + std::to_string(i));
             obs << alps::RealVectorObservable("MCRG S_alpha S_beta same iteration odd " + std::to_string(i));
-            obs << alps::RealVectorObservable("MCRG S_alpha S_beta next iteration even " + std::to_string(i));
-            obs << alps::RealVectorObservable("MCRG S_alpha S_beta next iteration odd " + std::to_string(i));
+            obs << alps::RealVectorObservable("MCRG S_alpha S_beta befo iteration even " + std::to_string(i-1));
+            obs << alps::RealVectorObservable("MCRG S_alpha S_beta befo iteration odd " + std::to_string(i-1));
         }
         obs << alps::RealVectorObservable("MCRG S_alpha even " + std::to_string(0));
         obs << alps::RealVectorObservable("MCRG S_alpha odd " + std::to_string(0));
@@ -123,10 +124,14 @@ public:
 private:
     std::shared_ptr<mcrg> descendant;
     int iteration;
-     
+    int max_iterations; 
     int L,N;
 
     std::vector<std::vector<int>> blocks;
+
+    bool inline is_last_iteration(){
+        return max_iterations<=iteration;
+    }
 
     //return the index of a site j which is i+dx+dy in the periodic lattice
     inline int index_o_neighbour (int i, int dx,int dy){

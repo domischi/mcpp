@@ -71,7 +71,8 @@ public :
             //    autocorrelation=1;
             //}
             if(measure_mcrg){
-                mcrg_=std::make_shared<mcrg>(params,mcrg_it_depth);
+                std::cout << "\tInitialize MCRG with iteration depth "<<mcrg_it_depth<<std::endl;
+                mcrg_=std::make_shared<mcrg>(params,1,mcrg_it_depth);
             }
         }
     
