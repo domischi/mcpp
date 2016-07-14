@@ -212,8 +212,8 @@ private:
             //update with the corresponding prefactor
             int prefactor_x=1;
             int prefactor_y=1;
-            if(((site/L)%2)) prefactor_x=-1; //for even y sites -1
-            if(((site%L)%2)) prefactor_y=-1; //for even x sites -1
+            if(((site%L)%2)) prefactor_x=-1; //for even y sites -1
+            if(((site/L)%2)) prefactor_y=-1; //for even x sites -1
             mx_stag+=prefactor_x*(std::cos(new_state)-std::cos(old_state));
             my_stag+=prefactor_y*(std::sin(new_state)-std::sin(old_state));
             En+=(new_energy-old_energy)/2;
