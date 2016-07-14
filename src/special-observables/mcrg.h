@@ -73,8 +73,8 @@ public:
             std::cerr<<"SOMETHING WENT WRONG IN THE MEASUREMENT OF THE MCRG AS THE ODD OUT VECTOR HASN'T TWICE THE SIZE OF THE EVEN ONE, ABORTING...";
             throw 1;
         }
-        obs["MCRG S_alpha even " + std::to_string(iteration)]<<OUT_even;
-        obs["MCRG S_alpha odd " + std::to_string(iteration)]<<OUT_odd;
+        obs["MCRG S_alpha"+ std::to_string(iteration-1)+" even"]<<OUT_even;
+        obs["MCRG S_alpha"+ std::to_string(iteration-1)+" odd"]<<OUT_even;
         if(!is_last_iteration()){//This is not the last instantation of the mcrg
             //reduce the lattice and call the descendant on the renormalized system
             std::vector<spin_type> reduced_spins = reduce(spins);
@@ -91,8 +91,8 @@ public:
                     outin_even[i*IN_even.size()+j]=OUT_even[i]*IN_even[j];
                 }
             }
-            obs["MCRG S_alpha S_beta same iteration even "+ std::to_string(iteration)]<<outout_even;
-            obs["MCRG S_alpha S_beta befo iteration even "+ std::to_string(iteration-1)]<<outin_even;
+            obs["MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration-1)+" even"]<<outout_even;
+            obs["MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration)+" even"  ]<<outout_even;
             //odd
             std::valarray<double> outout_odd(IN_odd.size()*IN_odd.size()/4),outin_odd(IN_odd.size()*IN_odd.size()/4);
             for(int i=0;i<IN_odd.size();i+=2){
@@ -101,24 +101,23 @@ public:
                     outin_odd[(i*IN_odd.size()/2+j)/2]=OUT_odd[i]*IN_odd[j]+OUT_odd[i+1]*IN_odd[j+1];
                 }
             }
-            obs["MCRG S_alpha S_beta same iteration odd "+ std::to_string(iteration)]<<outout_odd;
-            obs["MCRG S_alpha S_beta befo iteration odd "+ std::to_string(iteration-1)]<<outin_odd;
+            obs["MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration-1)+" odd"]<<outout_odd;
+            obs["MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration)+" odd"]<<outin_odd;
         }
         return std::make_pair(OUT_even,OUT_odd); 
     }
 
     void init_observables(alps::ObservableSet& obs){
-        for(int i =1; i<=max_iterations;++i){
-            obs << alps::RealVectorObservable("MCRG S_alpha even " + std::to_string(i));
-            obs << alps::RealVectorObservable("MCRG S_alpha odd " + std::to_string(i));
-            obs << alps::RealVectorObservable("MCRG S_alpha S_beta same iteration even " + std::to_string(i));
-            obs << alps::RealVectorObservable("MCRG S_alpha S_beta same iteration odd " + std::to_string(i));
-            obs << alps::RealVectorObservable("MCRG S_alpha S_beta befo iteration even " + std::to_string(i-1));
-            obs << alps::RealVectorObservable("MCRG S_alpha S_beta befo iteration odd " + std::to_string(i-1));
+        obs << alps::RealVectorObservable("MCRG S_alpha"+ std::to_string(iteration-1)+" even");
+        obs << alps::RealVectorObservable("MCRG S_alpha"+ std::to_string(iteration-1)+" odd");
+        if(!is_last_iteration()){
+            obs << alps::RealVectorObservable("MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration-1)+" even");
+            obs << alps::RealVectorObservable("MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration)+" even");
+            obs << alps::RealVectorObservable("MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration-1)+" odd");
+            obs << alps::RealVectorObservable("MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration)+" odd");
+
+            descendant->init_observables(obs);
         }
-        obs << alps::RealVectorObservable("MCRG S_alpha even " + std::to_string(0));
-        obs << alps::RealVectorObservable("MCRG S_alpha odd " + std::to_string(0));
-        
     }
 
 private:
