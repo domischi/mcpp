@@ -75,6 +75,22 @@ public:
         }
         obs["MCRG S_alpha"+ std::to_string(iteration-1)+" even"]<<OUT_even;
         obs["MCRG S_alpha"+ std::to_string(iteration-1)+" odd"]<<OUT_even;
+        std::valarray<double> outout_even(OUT_even.size()*OUT_even.size());
+        
+        for(int i=0;i<OUT_even.size();++i){
+            for(int j=0;j<OUT_even.size();++j){
+                outout_even[i*OUT_even.size()+j]=OUT_even[i]*OUT_even[j];
+            }
+        }
+        obs["MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration-1)+" even"]<<outout_even;
+        std::valarray<double> outout_odd(OUT_odd.size()*OUT_odd.size()/4);
+        for(int i=0;i<OUT_odd.size();i+=2){
+            for(int j=0;j<OUT_odd.size();j+=2){ 
+                outout_odd[(i*OUT_odd.size()/2+j)/2]=OUT_odd[i]*OUT_odd[j]+OUT_odd[i+1]*OUT_odd[j+1];
+            }
+        }
+        obs["MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration-1)+" odd"]<<outout_odd;
+        
         if(!is_last_iteration()){//This is not the last instantation of the mcrg
             //reduce the lattice and call the descendant on the renormalized system
             std::vector<spin_type> reduced_spins = reduce(spins);
@@ -84,14 +100,12 @@ public:
             //calculate <S_alpha S_beta> - <S_alpha> <S_beta>
             //and save it into obs
             //even
-            std::valarray<double> outout_even(IN_even.size()*IN_even.size()),outin_even(IN_even.size()*IN_even.size());
+            std::valarray<double> outin_even(IN_even.size()*IN_even.size());
             for(int i=0;i<IN_even.size();++i){
                 for(int j=0;j<IN_even.size();++j){
-                    outout_even[i*IN_even.size()+j]=OUT_even[i]*OUT_even[j];
                     outin_even[i*IN_even.size()+j]=OUT_even[i]*IN_even[j];
                 }
             }
-            obs["MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration-1)+" even"]<<outout_even;
             obs["MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration)+" even"  ]<<outout_even;
             //odd
             std::valarray<double> outout_odd(IN_odd.size()*IN_odd.size()/4),outin_odd(IN_odd.size()*IN_odd.size()/4);
@@ -110,12 +124,11 @@ public:
     void init_observables(alps::ObservableSet& obs){
         obs << alps::RealVectorObservable("MCRG S_alpha"+ std::to_string(iteration-1)+" even");
         obs << alps::RealVectorObservable("MCRG S_alpha"+ std::to_string(iteration-1)+" odd");
+        obs << alps::RealVectorObservable("MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration-1)+" even");
+        obs << alps::RealVectorObservable("MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration)+" even");
+        obs << alps::RealVectorObservable("MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration-1)+" odd");
+        obs << alps::RealVectorObservable("MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration)+" odd");
         if(!is_last_iteration()){
-            obs << alps::RealVectorObservable("MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration-1)+" even");
-            obs << alps::RealVectorObservable("MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration)+" even");
-            obs << alps::RealVectorObservable("MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration-1)+" odd");
-            obs << alps::RealVectorObservable("MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration)+" odd");
-
             descendant->init_observables(obs);
         }
     }
