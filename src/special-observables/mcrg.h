@@ -74,7 +74,7 @@ public:
             throw 1;
         }
         obs["MCRG S_alpha"+ std::to_string(iteration-1)+" even"]<<OUT_even;
-        obs["MCRG S_alpha"+ std::to_string(iteration-1)+" odd"]<<OUT_even;
+        //obs["MCRG S_alpha"+ std::to_string(iteration-1)+" odd"]<<OUT_even; //TODO this is definitly wrong for odd, however ok for even
         std::valarray<double> outout_even(OUT_even.size()*OUT_even.size());
         
         for(int i=0;i<OUT_even.size();++i){
@@ -106,7 +106,7 @@ public:
                     outin_even[i*IN_even.size()+j]=OUT_even[i]*IN_even[j];
                 }
             }
-            obs["MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration)+" even"  ]<<outout_even;
+            obs["MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration)+" even"  ]<<outin_even; //TODO this should be outin_even and not that...
             //odd
             std::valarray<double> outout_odd(IN_odd.size()*IN_odd.size()/4),outin_odd(IN_odd.size()*IN_odd.size()/4);
             for(int i=0;i<IN_odd.size();i+=2){
@@ -115,7 +115,7 @@ public:
                     outin_odd[(i*IN_odd.size()/2+j)/2]=OUT_odd[i]*IN_odd[j]+OUT_odd[i+1]*IN_odd[j+1];
                 }
             }
-            obs["MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration-1)+" odd"]<<outout_odd;
+            //obs["MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration-1)+" odd"]<<outout_odd; //TODO this line should not be here
             obs["MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration)+" odd"]<<outin_odd;
         }
         return std::make_pair(OUT_even,OUT_odd); 
