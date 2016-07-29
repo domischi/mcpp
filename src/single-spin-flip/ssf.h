@@ -140,7 +140,7 @@ public :
         return Step_Number >= Thermalization_Sweeps;   
     }
     double progress() const {
-        return Step_Number/(static_cast<double>(Measure_Sweeps+Thermalization_Sweeps));
+        return Step_Number/(static_cast<double>(Measure_Sweeps*Each_Measurement+Thermalization_Sweeps));
     }
 private:
     //System parameters
