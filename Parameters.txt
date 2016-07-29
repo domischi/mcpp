@@ -1,0 +1,45 @@
+This file explains you what the parameters are, the default values and sometimes what is useful. I however do not guarantee that this list is complete and/or correct. Where no default value is given, the parameter needs to be given explicitly or the code just doesn't start.
+
+LATTICE
+Describes the lattice, it uses the functions of the ALPS library to choose from. At the moment everything is only tested (and partially also only implemented) for the square lattice. The parameter therefore is "square lattice".
+
+L
+this tells you how many lattice sites there are in each direction. The total number of sites is L^D
+
+
+a
+default value: 1.0
+this describes the lattice spacing. It is possible to tune this, to achieve bigger spacing, the algorithm looks at this distance
+
+
+T
+defines the temperature in natural units. (e.g. Tc for 2D XY is around 1.4)
+
+
+THERMALIZATION
+default value: 100
+this tells you how many lattice flips you attempt before you start measuring something
+
+
+SWEEPS
+default value: 5000
+this tells you how many independent samples you measure (the code estimates an autocorrelation time, this feature however isn't totally debugged and potentially is still wrong, use with care)
+
+
+UPDATE
+at the moment only one update type is allowed, namely 'ssf', which stands for single spin flip. 
+
+
+NUM_CLONES
+default value: 1
+Tells you how many copies of the same parameter set are started in parallel to get higher data usage. This mainly is good for really really high statistics at specific points. E.g. around Tc for Binder cumulant or a MCRG measurement
+
+
+cutoff_distance
+defaul value: 3.0
+this tells you how many multiplies of a you want to consider for the interaction. Every two sites further appart than cutoff_distance * a are not considered to interact.
+
+
+mcrg_iteration_depth
+default value: -1 (no MCRG approach is done)
+this means how often in a MCRG approach the lattice is reduced. Please note that the lattice number needs to be even dividable wrt 2^mcrg_iteration_depth (L==i*2^mcrg_iteration_depth)

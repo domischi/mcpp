@@ -456,6 +456,6 @@ public:
         //    }
         //}
     }
-};
 
+};
 #endif //MCPP_SSF_H
