@@ -5,13 +5,12 @@
 #include <utility> //pair
 
 class mcrg;
-
 /*template<class G = alps::graph_helper<>::graph_type>*/
 class mcrg /*: public alps::graph_helper<G>*/{
 public:
-    typedef double spin_type;
+    typedef double spin_t;
+    typedef std::pair<int,int> shift_t;
     mcrg(const alps::Parameters& p, int Iteration_, int MCRG_It_) :
-    //graph_helper<G>(p),
     iteration(Iteration_),
     max_iterations(MCRG_It_),
     L(p["L"]),
@@ -32,9 +31,9 @@ public:
     //first index: which interaction
     //second index: symmetric parts (for example two diag terms, here)
     //third index: all pairs which are in a specific S_alpha (for example in a four spin interaction)
-    /*static const*/ std::vector<std::vector<std::vector<std::pair<int,int>>>> interactions;
-    static const std::vector<std::vector<std::vector<std::pair<int,int>>>> interactions_e;
-    static const std::vector<std::vector<std::vector<std::pair<int,int>>>> interactions_o;
+    /*static const*/ std::vector<std::vector<std::vector<shift_t>>> interactions;
+    static const std::vector<std::vector<std::vector<shift_t>>> interactions_e;
+    static const std::vector<std::vector<std::vector<shift_t>>> interactions_o;
     static inline int n_interactions_odd(){ 
         return interactions_o.size();
     }
@@ -42,43 +41,51 @@ public:
         return interactions_e.size();
     }
 
-    std::pair<std::valarray<double>,std::valarray<double>> measure(const std::vector<spin_type>& spins, alps::ObservableSet& obs){
-        std::vector<double> OUT_vec_even;
-        std::vector<double> OUT_vec_odd;
+    std::pair<std::valarray<double>,std::valarray<double>> measure(const std::vector<spin_t>& spins, alps::ObservableSet& obs){
+        std::valarray<double> OUT_even(n_interactions_even());
+        std::valarray<double> OUT_odd(2*n_interactions_odd());
+        int count_o=0;
+        int count_e=0;
+        //std::vector<double> OUT_vec_even;
+        //std::vector<double> OUT_vec_odd;
         //measure the S_alpha in the not reduced lattice
         for(int i=0;i<interactions.size();++i) {
             if(interactions[i][0].size()%2){//odd
-                std::vector<double> tmp = {0.,0.};
+                double tmp0=0.;
+                double tmp1=0.;
                 for(int j=0;j<interactions[i].size();++j){
                     auto tmp2=S_alpha_odd(spins,interactions[i][j]);
-                    tmp[0]+=tmp2[0];
-                    tmp[1]+=tmp2[1];
+                    tmp0+=tmp2[0];
+                    tmp1+=tmp2[1];
                 }
-                tmp[0]/=interactions[i].size();
-                tmp[1]/=interactions[i].size();
-                OUT_vec_odd.push_back(tmp[0]);
-                OUT_vec_odd.push_back(tmp[1]);
+                tmp0/=interactions[i].size();
+                tmp1/=interactions[i].size();
+                OUT_odd[count_o]  =(tmp0);
+                OUT_odd[count_o+1]=(tmp1);
+                count_o+=2;
             }
             else{
                 double tmp=0; //add S_alpha, consists of more than one term in case of diag (as there 2 are the same and both should be counted)
                 for(int j=0;j<interactions[i].size();++j){
                     tmp+=S_alpha_even(spins,interactions[i][j]);   
                 }
-                OUT_vec_even.push_back(tmp/interactions[i].size());
+                OUT_even[count_e]=tmp/interactions[i].size();
             }
         }
-        std::valarray<double> OUT_even(OUT_vec_even.data(),OUT_vec_even.size());
-        std::valarray<double> OUT_odd(OUT_vec_odd.data(),OUT_vec_odd.size());
-        if(OUT_even.size()/n_interactions_even()*2!=OUT_odd.size()/n_interactions_odd()){
-            std::cerr<<"SOMETHING WENT WRONG IN THE MEASUREMENT OF THE MCRG AS THE ODD OUT VECTOR HASN'T TWICE THE SIZE OF THE EVEN ONE, ABORTING...";
-            throw 1;
-        }
+        //std::valarray<double> OUT_even(OUT_vec_even.data(),OUT_vec_even.size());
+        //std::valarray<double> OUT_odd(OUT_vec_odd.data(),OUT_vec_odd.size());
+        //if(OUT_even.size()/n_interactions_even()*2!=OUT_odd.size()/n_interactions_odd()){
+        //    std::cerr<<"SOMETHING WENT WRONG IN THE MEASUREMENT OF THE MCRG AS THE ODD OUT VECTOR HASN'T TWICE THE SIZE OF THE EVEN ONE, ABORTING...";
+        //    throw 1;
+        //}
         obs["MCRG S_alpha"+ std::to_string(iteration-1)+" even"]<<OUT_even;
-        //obs["MCRG S_alpha"+ std::to_string(iteration-1)+" odd"]<<OUT_even; //TODO this is definitly wrong for odd, however ok for even
+        obs["MCRG S_alpha"+ std::to_string(iteration-1)+" odd"]<<OUT_odd;
+
+        //measure <S_alpha n S_beta n>
         std::valarray<double> outout_even(OUT_even.size()*OUT_even.size());
         
-        for(int i=0;i<OUT_even.size();++i){
-            for(int j=0;j<OUT_even.size();++j){
+        for(int i=0;i<n_interactions_even();++i){
+            for(int j=0;j<n_interactions_even();++j){
                 outout_even[i*OUT_even.size()+j]=OUT_even[i]*OUT_even[j];
             }
         }
@@ -93,11 +100,11 @@ public:
         
         if(!is_last_iteration()){//This is not the last instantation of the mcrg
             //reduce the lattice and call the descendant on the renormalized system
-            std::vector<spin_type> reduced_spins = reduce(spins);
+            std::vector<spin_t> reduced_spins = reduce(spins);
             std::valarray<double> IN_even(OUT_even.size());
             std::valarray<double> IN_odd(OUT_odd.size());
             std::tie(IN_even, IN_odd) =  descendant->measure(reduced_spins,obs);
-            //calculate <S_alpha S_beta> - <S_alpha> <S_beta>
+            //calculate <S_alpha n-1 S_beta n>
             //and save it into obs
             //even
             std::valarray<double> outin_even(IN_even.size()*IN_even.size());
@@ -106,15 +113,15 @@ public:
                     outin_even[i*IN_even.size()+j]=OUT_even[i]*IN_even[j];
                 }
             }
-            obs["MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration)+" even"  ]<<outin_even; //TODO this should be outin_even and not that...
+            obs["MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration)+" even"]<<outin_even;
             //odd
-            std::valarray<double> outout_odd(IN_odd.size()*IN_odd.size()/4),outin_odd(IN_odd.size()*IN_odd.size()/4);
+            std::valarray<double> /*outout_odd(IN_odd.size()*IN_odd.size()/4),*/outin_odd(IN_odd.size()*IN_odd.size()/4);
             for(int i=0;i<IN_odd.size();i+=2){
                 for(int j=0;j<IN_odd.size();j+=2){ 
-                    outout_odd[(i*IN_odd.size()/2+j)/2]=OUT_odd[i]*OUT_odd[j]+OUT_odd[i+1]*OUT_odd[j+1];
+                    //outout_odd[(i*IN_odd.size()/2+j)/2]=OUT_odd[i]*OUT_odd[j]+OUT_odd[i+1]*OUT_odd[j+1];
                     outin_odd[(i*IN_odd.size()/2+j)/2]=OUT_odd[i]*IN_odd[j]+OUT_odd[i+1]*IN_odd[j+1];
                 }
-            }
+            } 
             //obs["MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration-1)+" odd"]<<outout_odd; //TODO this line should not be here
             obs["MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration)+" odd"]<<outin_odd;
         }
@@ -142,15 +149,15 @@ private:
     std::vector<std::vector<int>> blocks;
 
     bool inline is_last_iteration(){
-        return max_iterations<=iteration;
+        return max_iterations<iteration;
     }
 
     //return the index of a site j which is i+dx+dy in the periodic lattice
     inline int index_o_neighbour (int i, int dx,int dy){
          int x,y;
          i+=N; dx+=N; dy+=N;
-         x=(i%L+dx)%L;
-         y=(i/L+dy)%L;
+         x=(i/L+dx)%L;
+         y=(i%L+dy)%L;
          assert(x<L&&y<L);
          return x+L*y;
     }
@@ -160,12 +167,12 @@ private:
     //For example, just field term (one spin correlator) shifts.size()==0
     //For example, NN along x: shifts.size()==1, shifts[0]=(1,0)
     //For example, 4 spin interaction in a vortex type : shifts.size()==3 shifts[0]==(1,0), shifts[1]==(1,1), shifts[2]==(0,1), 
-    double S_alpha_even (const std::vector<spin_type>& spins, std::vector<std::pair<int,int>> shifts) {
+    double S_alpha_even (const std::vector<spin_t>& spins, std::vector<shift_t> shifts) {
         double S_a=0;
         for(int i =0;i<N;++i){
-            double tmp=1;
-            for(int j = 0; j <shifts.size();j+=2){
-                auto& s = shifts[j];
+            double tmp=1.;
+            for(int j = 0; j <shifts.size();j+=2){ //Pairwise build up the scalar products
+                auto& s = shifts[j]; 
                 auto& t = shifts[j+1];
                 tmp*=std::cos(spins[index_o_neighbour(i,s.first,s.second)])*std::cos(spins[index_o_neighbour(i,t.first,t.second)])+std::sin(spins[index_o_neighbour(i,s.first,s.second)])*std::sin(spins[index_o_neighbour(i,t.first,t.second)]);
             }
@@ -173,13 +180,13 @@ private:
         }
         return S_a/N;
     }
-    std::vector<double> S_alpha_odd (const std::vector<spin_type>& spins, std::vector<std::pair<int,int>> shifts) {//TODO this might be wrong
-        std::vector<double> S_a={0.,0.};
+    std::valarray<double> S_alpha_odd (const std::vector<spin_t>& spins, std::vector<shift_t> shifts) {//TODO this might be wrong
+        std::valarray<double> S_a={0.,0.};
         for(int i =0;i<N;++i){
-            double tmp=1; 
-            for(int i=1;i<shifts.size();i+=2){
-                auto& s = shifts[i];
-                auto& t = shifts[i+1];
+            double tmp=1.; 
+            for(int j=1;j<shifts.size();j+=2){
+                auto& s = shifts[j];
+                auto& t = shifts[j+1];
                 tmp*=std::cos(spins[index_o_neighbour(i,s.first,s.second)])*std::cos(spins[index_o_neighbour(i,t.first,t.second)])+std::sin(spins[index_o_neighbour(i,s.first,s.second)])*std::sin(spins[index_o_neighbour(i,t.first,t.second)]);
             }
             S_a[0]+=tmp*std::cos(spins[i]);
@@ -192,7 +199,7 @@ private:
 
     void init_blocks() {
         std::vector<int> in1,in2,in3,in4;
-        for(int i=0;i<N;i+=2) { //should definitly check this....
+        for(int i=0;i<N;i+=2) {
             if((i/L)%2){//odd (L+1,L+3,L+5,...)
                 in3.push_back(i);
                 in4.push_back(i+1);
@@ -203,22 +210,23 @@ private:
             }
         }
         for(int i=0;i<N/4;++i){
-            std::vector<int> tmp;
-            tmp.push_back(in1[i]);
-            tmp.push_back(in2[i]);
-            tmp.push_back(in3[i]);
-            tmp.push_back(in4[i]);
+            std::vector<int> tmp(4);
+            tmp[0]=in1[i];
+            tmp[1]=in2[i];
+            tmp[2]=in3[i];
+            tmp[3]=in4[i];
             blocks.push_back(tmp);
         }
+        blocks.shrink_to_fit();
     }
 
     //this function reduces the spin lattice to a quarter of the size by adding the vectors of 4 neighbouring sites together to one and then calculates the angle back and saves it in OUT
-    std::vector<spin_type> reduce(const std::vector<spin_type>& spins){
-        std::vector<spin_type> OUT;
-        for(int i=0;i<blocks.size();++i) {
-            double c=0;
-            double s=0;
-            for(int j : blocks[i]) {
+    std::vector<spin_t> reduce(const std::vector<spin_t>& spins){
+        std::vector<spin_t> OUT(blocks.size());
+        for(int b=0;b<blocks.size();++b) {
+            double c=0.;
+            double s=0.;
+            for(int j : blocks[b]) {
                 c+=std::cos(spins[j]); 
                 s+=std::sin(spins[j]); 
             }
@@ -228,7 +236,7 @@ private:
     }
 };
 
-const std::vector<std::vector<std::vector<std::pair<int,int>>>> mcrg::interactions_o = {
+const std::vector<std::vector<std::vector<mcrg::shift_t>>> mcrg::interactions_o = {
         //ODD
         {{std::make_pair(0,0)}},
         {{std::make_pair(0,0),std::make_pair(1,0),std::make_pair(0,1)}},//3 part interaction for simple nn
@@ -255,7 +263,7 @@ const std::vector<std::vector<std::vector<std::pair<int,int>>>> mcrg::interactio
         {{std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(0,2)}},
         {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,0)}}
     };
-const std::vector<std::vector<std::vector<std::pair<int,int>>>> mcrg::interactions_e = {
+const std::vector<std::vector<std::vector<mcrg::shift_t>>> mcrg::interactions_e = {
         //EVEN
         {{std::make_pair(0,0),std::make_pair(1,0)}},//NNx
         {{std::make_pair(0,0),std::make_pair(0,1)}},//NNy
@@ -276,7 +284,3 @@ const std::vector<std::vector<std::vector<std::pair<int,int>>>> mcrg::interactio
         {{std::make_pair(0,0),std::make_pair(3,-1)}},
         {{std::make_pair(0,0),std::make_pair(3,1)}}
     }; 
-
-//const std::vector<std::vector<std::vector<std::pair<int,int>>>> mcrg::interactions=std::copy(interactions_e.begin(),interactions_e.end(),interactions.end()).insert(interactions.end(),interactions_o.begin(),interactions_o.end());
-
-
