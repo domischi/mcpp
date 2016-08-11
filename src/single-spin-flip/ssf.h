@@ -114,9 +114,14 @@ public :
         //int MAX_STEPS_AC = 1e6;
         //int n_steps = ac_measured ? autocorrelation*safety_factor+1 : 0;
         int n_steps = N;
-        for(int i = 0;i<n_steps;++i){
-            update();
-        } 
+        for(int i = 0;i<n_steps;++i){// Do a typewriter sweep (possibly avoiding cache reload every step)
+            update(i);
+        }
+        if(Step_Number&(1<<10)){ //Every 1024 steps do a random site lattice sweep to avoid ergodicity problems at 0K
+            for(int i = 0;i<n_steps;++i){
+                update();
+            }
+        }
         //if(!ac_measured && is_thermalized()) { //the ac_time still needs to be determined
         //    for(int i = 0;i<MAX_STEPS_AC;++i){
         //        update();
@@ -195,9 +200,9 @@ private:
     //    }
     //    return autocorrelation;
     //}
-    void update(){
-        //Choose a site
-        int site=random_int(num_sites());
+
+    void update(){update(random_int(num_sites()));}
+    void update(int site){
         //propose a new state
         double new_state=random_real(0.,2*M_PI);
         double old_energy=single_site_Energy(site);
@@ -245,7 +250,6 @@ private:
         if(measure_mcrg) 
             mcrg_->measure(spins, obs);
     }
-    //TODO decide in which units of measurement to measure...(natural, eV and K, SI?)
     inline double beta(){ 
         return 1./T;
     }
@@ -293,6 +297,9 @@ private:
                     neighbour_list[*s_iter2].push_back(*s_iter);
                 }
             }
+        //Shrink the neighbour_list
+        for(auto& nl : neighbour_list) nl.shrink_to_fit();
+        neighbour_list.shrink_to_fit();
     }
     inline double distance(vector_type& x, vector_type& y, vector_type& periodic){
         return std::sqrt(std::pow(x[0]-y[0]+periodic[0],2)+std::pow(x[1]-y[1]+periodic[1],2));
