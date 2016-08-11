@@ -18,6 +18,8 @@ public:
     {
         interactions=interactions_e;
         interactions.insert(interactions.end(),interactions_o.begin(),interactions_o.end());
+        for(auto& i : interactions) i.shrink_to_fit();
+        interactions.shrink_to_fit();
         assert(lattice_name_=="square lattice"); //not sure if this works
         assert(!(L%2));
         alps::Parameters p_descendant=p;
@@ -29,11 +31,11 @@ public:
     }
                 
     //first index: which interaction
-    //second index: symmetric parts (for example two diag terms, here)
-    //third index: all pairs which are in a specific S_alpha (for example in a four spin interaction)
-    /*static const*/ std::vector<std::vector<std::vector<shift_t>>> interactions;
-    static const std::vector<std::vector<std::vector<shift_t>>> interactions_e;
-    static const std::vector<std::vector<std::vector<shift_t>>> interactions_o;
+    //second index: listing the vectors of the shift
+    //third index (shift_t): a pair of ints denoting the shift wrt to the first one (always (0,0))
+    /*static const*/ std::vector<std::vector<shift_t>> interactions;
+    static const std::vector<std::vector<shift_t>> interactions_e;
+    static const std::vector<std::vector<shift_t>> interactions_o;
     static inline int n_interactions_odd(){ 
         return interactions_o.size();
     }
@@ -50,26 +52,14 @@ public:
         //std::vector<double> OUT_vec_odd;
         //measure the S_alpha in the not reduced lattice
         for(int i=0;i<interactions.size();++i) {
-            if(interactions[i][0].size()%2){//odd
-                double tmp0=0.;
-                double tmp1=0.;
-                for(int j=0;j<interactions[i].size();++j){
-                    auto tmp2=S_alpha_odd(spins,interactions[i][j]);
-                    tmp0+=tmp2[0];
-                    tmp1+=tmp2[1];
-                }
-                tmp0/=interactions[i].size();
-                tmp1/=interactions[i].size();
-                OUT_odd[count_o]  =(tmp0);
-                OUT_odd[count_o+1]=(tmp1);
+            if(interactions[i].size()%2){//odd
+                auto tmp=S_alpha_odd(spins,interactions[i]);
+                OUT_odd[count_o]  =tmp[0];
+                OUT_odd[count_o+1]=tmp[1];
                 count_o+=2;
             }
             else{
-                double tmp=0; //add S_alpha, consists of more than one term in case of diag (as there 2 are the same and both should be counted)
-                for(int j=0;j<interactions[i].size();++j){
-                    tmp+=S_alpha_even(spins,interactions[i][j]);   
-                }
-                OUT_even[count_e]=tmp/interactions[i].size();
+                OUT_even[count_e]=S_alpha_even(spins,interactions[i]);
             }
         }
         //std::valarray<double> OUT_even(OUT_vec_even.data(),OUT_vec_even.size());
@@ -118,11 +108,9 @@ public:
             std::valarray<double> /*outout_odd(IN_odd.size()*IN_odd.size()/4),*/outin_odd(IN_odd.size()*IN_odd.size()/4);
             for(int i=0;i<IN_odd.size();i+=2){
                 for(int j=0;j<IN_odd.size();j+=2){ 
-                    //outout_odd[(i*IN_odd.size()/2+j)/2]=OUT_odd[i]*OUT_odd[j]+OUT_odd[i+1]*OUT_odd[j+1];
                     outin_odd[(i*IN_odd.size()/2+j)/2]=OUT_odd[i]*IN_odd[j]+OUT_odd[i+1]*IN_odd[j+1];
                 }
             } 
-            //obs["MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration-1)+" odd"]<<outout_odd; //TODO this line should not be here
             obs["MCRG S_alpha"+std::to_string(iteration-1) +" S_beta"+std::to_string(iteration)+" odd"]<<outin_odd;
         }
         return std::make_pair(OUT_even,OUT_odd); 
@@ -236,51 +224,53 @@ private:
     }
 };
 
-const std::vector<std::vector<std::vector<mcrg::shift_t>>> mcrg::interactions_o = {
+const std::vector<std::vector<mcrg::shift_t>> mcrg::interactions_o = {
         //ODD
-        {{std::make_pair(0,0)}},
-        {{std::make_pair(0,0),std::make_pair(1,0),std::make_pair(0,1)}},//3 part interaction for simple nn
-        {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(0,1)}},//3 part interaction for simple nn
-        {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(1,0)}},//3 part interaction for simple nn
-        {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(-1,0)}},//3 part interaction for simple nn
-        //{{std::make_pair(0,1),std::make_pair(1,0),std::make_pair(1,1)}},//3 part interaction for simple nn//this makes problems
-        {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,2)}},//3 part interaction for simple nn 
-        {{std::make_pair(0,0),std::make_pair(2,0),std::make_pair(1,0)}},//3 part interaction for simple nn
-        {{std::make_pair(0,0),std::make_pair(0,2),std::make_pair(0,1)}},//3 part interaction for simple nn
-        {{std::make_pair(0,0),std::make_pair(0,1),std::make_pair(2,1)}}, 
-        {{std::make_pair(0,0),std::make_pair(0,1),std::make_pair(2,-1)}},
-        {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,1)}},
-        {{std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(-2,1)}},
-        {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(1,2)}},
-        {{std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(-1,2)}},
-        {{std::make_pair(0,0),std::make_pair(1,0),std::make_pair(1,2)}},
-        {{std::make_pair(0,0),std::make_pair(1,0),std::make_pair(-1,2)}},
-        {{std::make_pair(0,0),std::make_pair(2,1),std::make_pair(1,2)}},
-        {{std::make_pair(0,0),std::make_pair(-2,1),std::make_pair(-1,2)}},
-        {{std::make_pair(0,0),std::make_pair(-2,-1),std::make_pair(-1,-2)}},
-        {{std::make_pair(0,0),std::make_pair(2,-1),std::make_pair(1,-2)}},
-        {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(0,2)}}, 
-        {{std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(0,2)}},
-        {{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,0)}}
+        {std::make_pair(0,0)},
+        {std::make_pair(0,0),std::make_pair(1,0),std::make_pair(0,1)},//3 part interaction for simple nn
+        {std::make_pair(0,0),std::make_pair(1,1),std::make_pair(0,1)},//3 part interaction for simple nn
+        {std::make_pair(0,0),std::make_pair(1,1),std::make_pair(1,0)},//3 part interaction for simple nn
+        {std::make_pair(0,0),std::make_pair(1,1),std::make_pair(-1,0)},//3 part interaction for simple nn
+        //{{std::make_pair(0,1),s>td::make_pair(1,0),std::make_pair(1,1)}},//3 part interaction for simple nn//this makes problems
+        {std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,2)},//3 part interaction for simple nn 
+        {std::make_pair(0,0),std::make_pair(2,0),std::make_pair(1,0)},//3 part interaction for simple nn
+        {std::make_pair(0,0),std::make_pair(0,2),std::make_pair(0,1)},//3 part interaction for simple nn
+        {std::make_pair(0,0),std::make_pair(0,1),std::make_pair(2,1)}, 
+        {std::make_pair(0,0),std::make_pair(0,1),std::make_pair(2,-1)},
+        {std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,1)},
+        {std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(-2,1)},
+        {std::make_pair(0,0),std::make_pair(1,1),std::make_pair(1,2)},
+        {std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(-1,2)},
+        {std::make_pair(0,0),std::make_pair(1,0),std::make_pair(1,2)},
+        {std::make_pair(0,0),std::make_pair(1,0),std::make_pair(-1,2)},
+        {std::make_pair(0,0),std::make_pair(2,1),std::make_pair(1,2)},
+        {std::make_pair(0,0),std::make_pair(-2,1),std::make_pair(-1,2)},
+        {std::make_pair(0,0),std::make_pair(-2,-1),std::make_pair(-1,-2)},
+        {std::make_pair(0,0),std::make_pair(2,-1),std::make_pair(1,-2)},
+        {std::make_pair(0,0),std::make_pair(1,1),std::make_pair(0,2)}, 
+        {std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(0,2)},
+        {std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,0)}
     };
-const std::vector<std::vector<std::vector<mcrg::shift_t>>> mcrg::interactions_e = {
+const std::vector<std::vector<mcrg::shift_t>> mcrg::interactions_e = {
         //EVEN
-        {{std::make_pair(0,0),std::make_pair(1,0)}},//NNx
-        {{std::make_pair(0,0),std::make_pair(0,1)}},//NNy
-        {{std::make_pair(0,0),std::make_pair(1,1)},{std::make_pair(0,0),std::make_pair(-1,1)}}, //diagonal
-        {{std::make_pair(0,0),std::make_pair(2,0)},{std::make_pair(0,0),std::make_pair(0,2)}}, //NNN
-        {{std::make_pair(0,0),std::make_pair(3,0)}}, //NNNNx
-        {{std::make_pair(0,0),std::make_pair(0,3)}}, //NNNNy
-        {{std::make_pair(0,0),std::make_pair(0,1),std::make_pair(1,0),std::make_pair(1,1)}}, // 4 spin
-        {{std::make_pair(0,0),std::make_pair(1,2)}},
-        {{std::make_pair(0,0),std::make_pair(2,1)}},
-        {{std::make_pair(0,0),std::make_pair(-2,1)}},
-        {{std::make_pair(0,0),std::make_pair(-1,2)}},
-        {{std::make_pair(0,0),std::make_pair(-2,2)}},
-        {{std::make_pair(0,0),std::make_pair(4,0)}},
-        {{std::make_pair(0,0),std::make_pair(0,4)}},
-        {{std::make_pair(0,0),std::make_pair(-1,3)}},
-        {{std::make_pair(0,0),std::make_pair(1,3)}},
-        {{std::make_pair(0,0),std::make_pair(3,-1)}},
-        {{std::make_pair(0,0),std::make_pair(3,1)}}
+        {std::make_pair(0,0),std::make_pair(1,0)},//NNx
+        {std::make_pair(0,0),std::make_pair(0,1)},//NNy
+        {std::make_pair(0,0),std::make_pair(1,1)},
+        {std::make_pair(0,0),std::make_pair(-1,1)}, //diagonal
+        {std::make_pair(0,0),std::make_pair(2,0)},
+        {std::make_pair(0,0),std::make_pair(0,2)}, //NNN
+        {std::make_pair(0,0),std::make_pair(3,0)}, //NNNNx
+        {std::make_pair(0,0),std::make_pair(0,3)}, //NNNNy
+        {std::make_pair(0,0),std::make_pair(0,1),std::make_pair(1,0),std::make_pair(1,1)}, // 4 spin
+        {std::make_pair(0,0),std::make_pair(1,2)},
+        {std::make_pair(0,0),std::make_pair(2,1)},
+        {std::make_pair(0,0),std::make_pair(-2,1)},
+        {std::make_pair(0,0),std::make_pair(-1,2)},
+        {std::make_pair(0,0),std::make_pair(-2,2)},
+        {std::make_pair(0,0),std::make_pair(4,0)},
+        {std::make_pair(0,0),std::make_pair(0,4)},
+        {std::make_pair(0,0),std::make_pair(-1,3)},
+        {std::make_pair(0,0),std::make_pair(1,3)},
+        {std::make_pair(0,0),std::make_pair(3,-1)},
+        {std::make_pair(0,0),std::make_pair(3,1)}
     }; 
