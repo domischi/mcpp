@@ -60,6 +60,7 @@ public:
             }
             else{
                 OUT_even[count_e]=S_alpha_even(spins,interactions[i]);
+                ++count_e;
             }
         }
         //std::valarray<double> OUT_even(OUT_vec_even.data(),OUT_vec_even.size());
@@ -218,7 +219,7 @@ private:
                 c+=std::cos(spins[j]); 
                 s+=std::sin(spins[j]); 
             }
-            OUT.push_back(std::atan2(s,c));
+            OUT[b]=std::atan2(s,c);
         }
         return OUT;
     }
@@ -226,51 +227,51 @@ private:
 
 const std::vector<std::vector<mcrg::shift_t>> mcrg::interactions_o = {
         //ODD
-        {std::make_pair(0,0)},
-        {std::make_pair(0,0),std::make_pair(1,0),std::make_pair(0,1)},//3 part interaction for simple nn
-        {std::make_pair(0,0),std::make_pair(1,1),std::make_pair(0,1)},//3 part interaction for simple nn
-        {std::make_pair(0,0),std::make_pair(1,1),std::make_pair(1,0)},//3 part interaction for simple nn
-        {std::make_pair(0,0),std::make_pair(1,1),std::make_pair(-1,0)},//3 part interaction for simple nn
-        //{{std::make_pair(0,1),s>td::make_pair(1,0),std::make_pair(1,1)}},//3 part interaction for simple nn//this makes problems
-        {std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,2)},//3 part interaction for simple nn 
-        {std::make_pair(0,0),std::make_pair(2,0),std::make_pair(1,0)},//3 part interaction for simple nn
-        {std::make_pair(0,0),std::make_pair(0,2),std::make_pair(0,1)},//3 part interaction for simple nn
-        {std::make_pair(0,0),std::make_pair(0,1),std::make_pair(2,1)}, 
-        {std::make_pair(0,0),std::make_pair(0,1),std::make_pair(2,-1)},
-        {std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,1)},
-        {std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(-2,1)},
-        {std::make_pair(0,0),std::make_pair(1,1),std::make_pair(1,2)},
-        {std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(-1,2)},
-        {std::make_pair(0,0),std::make_pair(1,0),std::make_pair(1,2)},
-        {std::make_pair(0,0),std::make_pair(1,0),std::make_pair(-1,2)},
-        {std::make_pair(0,0),std::make_pair(2,1),std::make_pair(1,2)},
-        {std::make_pair(0,0),std::make_pair(-2,1),std::make_pair(-1,2)},
-        {std::make_pair(0,0),std::make_pair(-2,-1),std::make_pair(-1,-2)},
-        {std::make_pair(0,0),std::make_pair(2,-1),std::make_pair(1,-2)},
-        {std::make_pair(0,0),std::make_pair(1,1),std::make_pair(0,2)}, 
-        {std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(0,2)},
-        {std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,0)}
+        {std::make_pair(0,0)}//,
+        //{std::make_pair(0,0),std::make_pair(1,0),std::make_pair(0,1)},//3 part interaction for simple nn
+        //{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(0,1)},//3 part interaction for simple nn
+        //{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(1,0)},//3 part interaction for simple nn
+        //{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(-1,0)},//3 part interaction for simple nn
+        ////{{std::make_pair(0,1),s>td::make_pair(1,0),std::make_pair(1,1)}},//3 part interaction for simple nn//this makes problems
+        //{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,2)},//3 part interaction for simple nn 
+        //{std::make_pair(0,0),std::make_pair(2,0),std::make_pair(1,0)},//3 part interaction for simple nn
+        //{std::make_pair(0,0),std::make_pair(0,2),std::make_pair(0,1)},//3 part interaction for simple nn
+        //{std::make_pair(0,0),std::make_pair(0,1),std::make_pair(2,1)}, 
+        //{std::make_pair(0,0),std::make_pair(0,1),std::make_pair(2,-1)},
+        //{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,1)},
+        //{std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(-2,1)},
+        //{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(1,2)},
+        //{std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(-1,2)},
+        //{std::make_pair(0,0),std::make_pair(1,0),std::make_pair(1,2)},
+        //{std::make_pair(0,0),std::make_pair(1,0),std::make_pair(-1,2)},
+        //{std::make_pair(0,0),std::make_pair(2,1),std::make_pair(1,2)},
+        //{std::make_pair(0,0),std::make_pair(-2,1),std::make_pair(-1,2)},
+        //{std::make_pair(0,0),std::make_pair(-2,-1),std::make_pair(-1,-2)},
+        //{std::make_pair(0,0),std::make_pair(2,-1),std::make_pair(1,-2)},
+        //{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(0,2)}, 
+        //{std::make_pair(0,0),std::make_pair(-1,1),std::make_pair(0,2)},
+        //{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(2,0)}
     };
 const std::vector<std::vector<mcrg::shift_t>> mcrg::interactions_e = {
         //EVEN
         {std::make_pair(0,0),std::make_pair(1,0)},//NNx
         {std::make_pair(0,0),std::make_pair(0,1)},//NNy
         {std::make_pair(0,0),std::make_pair(1,1)},
-        {std::make_pair(0,0),std::make_pair(-1,1)}, //diagonal
-        {std::make_pair(0,0),std::make_pair(2,0)},
-        {std::make_pair(0,0),std::make_pair(0,2)}, //NNN
-        {std::make_pair(0,0),std::make_pair(3,0)}, //NNNNx
-        {std::make_pair(0,0),std::make_pair(0,3)}, //NNNNy
-        {std::make_pair(0,0),std::make_pair(0,1),std::make_pair(1,0),std::make_pair(1,1)}, // 4 spin
-        {std::make_pair(0,0),std::make_pair(1,2)},
-        {std::make_pair(0,0),std::make_pair(2,1)},
-        {std::make_pair(0,0),std::make_pair(-2,1)},
-        {std::make_pair(0,0),std::make_pair(-1,2)},
-        {std::make_pair(0,0),std::make_pair(-2,2)},
-        {std::make_pair(0,0),std::make_pair(4,0)},
-        {std::make_pair(0,0),std::make_pair(0,4)},
-        {std::make_pair(0,0),std::make_pair(-1,3)},
-        {std::make_pair(0,0),std::make_pair(1,3)},
-        {std::make_pair(0,0),std::make_pair(3,-1)},
-        {std::make_pair(0,0),std::make_pair(3,1)}
+        {std::make_pair(0,0),std::make_pair(-1,1)}//, //diagonal
+        //{std::make_pair(0,0),std::make_pair(2,0)},
+        //{std::make_pair(0,0),std::make_pair(0,2)}, //NNN
+        //{std::make_pair(0,0),std::make_pair(3,0)}, //NNNNx
+        //{std::make_pair(0,0),std::make_pair(0,3)}, //NNNNy
+        //{std::make_pair(0,0),std::make_pair(0,1),std::make_pair(1,0),std::make_pair(1,1)}, // 4 spin
+        //{std::make_pair(0,0),std::make_pair(1,2)},
+        //{std::make_pair(0,0),std::make_pair(2,1)},
+        //{std::make_pair(0,0),std::make_pair(-2,1)},
+        //{std::make_pair(0,0),std::make_pair(-1,2)},
+        //{std::make_pair(0,0),std::make_pair(-2,2)},
+        //{std::make_pair(0,0),std::make_pair(4,0)},
+        //{std::make_pair(0,0),std::make_pair(0,4)},
+        //{std::make_pair(0,0),std::make_pair(-1,3)},
+        //{std::make_pair(0,0),std::make_pair(1,3)},
+        //{std::make_pair(0,0),std::make_pair(3,-1)},
+        //{std::make_pair(0,0),std::make_pair(3,1)}
     }; 
