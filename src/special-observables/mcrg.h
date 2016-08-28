@@ -71,7 +71,6 @@ public:
         }
         obs["MCRG S_alpha"+ std::to_string(iteration)+" even"]<<OUT_even;
         obs["MCRG S_alpha"+ std::to_string(iteration)+" odd"]<<OUT_odd;
-
         //measure <S_alpha n S_beta n>
         std::valarray<double> outout_even(OUT_even.size()*OUT_even.size());
         
@@ -194,9 +193,11 @@ private:
         for(int i =0;i<N;++i){
             double tmp=1.;
             for(int j = 0; j <shifts.size();j+=2){ //Pairwise build up the scalar products
-                auto& s = shifts[j]; 
-                auto& t = shifts[j+1];
-                tmp*=std::cos(spins[index_o_neighbour(i,s.first,s.second)])*std::cos(spins[index_o_neighbour(i,t.first,t.second)])+std::sin(spins[index_o_neighbour(i,s.first,s.second)])*std::sin(spins[index_o_neighbour(i,t.first,t.second)]);
+                shift_t s = shifts[j];
+                shift_t t = shifts[j+1];
+                double angle1=spins[index_o_neighbour(i,s.first,s.second)];
+                double angle2=spins[index_o_neighbour(i,t.first,t.second)];
+                tmp*=std::cos(angle1)*std::cos(angle2)+std::sin(angle1)*std::sin(angle2);
             }
             S_a+=tmp;
         }
