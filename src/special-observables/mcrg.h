@@ -60,20 +60,23 @@ public:
             }
             else{
                 OUT_even[count_e]=S_alpha_even(spins,interactions[i]);
+                //OUT_even[count_e]=S_alpha_even(spins,interactions[i]);
                 ++count_e;
             }
         }
         obs["MCRG S_alpha"+ std::to_string(iteration)+" even"]<<OUT_even;
+        //obs["MCRG S_alpha"+ std::to_string(iteration)+" even"]<<(OUT_even/(1.*N));
         obs["MCRG S_alpha"+ std::to_string(iteration)+" odd"]<<OUT_odd;
         //measure <S_alpha n S_beta n>
         std::valarray<double> outout_even(OUT_even.size()*OUT_even.size());
         
         for(int i=0;i<n_interactions_even();++i){
             for(int j=0;j<n_interactions_even();++j){
-                outout_even[i*OUT_even.size()+j]=OUT_even[i]*OUT_even[j];
+                outout_even[i*OUT_even.size()+j]=(OUT_even[i]*OUT_even[j]);
             }
         }
         obs["MCRG S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration)+" even"]<<outout_even;
+        //obs["MCRG S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration)+" even"]<<outout_even;
         std::valarray<double> outout_odd(OUT_odd.size()*OUT_odd.size()/4);
         for(int i=0;i<OUT_odd.size();i+=2){
             for(int j=0;j<OUT_odd.size();j+=2){ 
@@ -94,9 +97,10 @@ public:
             std::valarray<double> outin_even(IN_even.size()*IN_even.size());
             for(int i=0;i<IN_even.size();++i){
                 for(int j=0;j<IN_even.size();++j){
-                    outin_even[i*IN_even.size()+j]=OUT_even[i]*IN_even[j];
+                    outin_even[i*IN_even.size()+j]=(OUT_even[i]*IN_even[j]);
                 }
             }
+            //obs["MCRG S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1)+" even"]<<outin_even/(1.*N);
             obs["MCRG S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1)+" even"]<<outin_even;
             //odd
             std::valarray<double> /*outout_odd(IN_odd.size()*IN_odd.size()/4),*/outin_odd(IN_odd.size()*IN_odd.size()/4);
@@ -162,7 +166,8 @@ private:
             }
             S_a+=tmp;
         }
-        return S_a/N;
+        return S_a;
+        //return S_a/N;
     }
     std::valarray<double> S_alpha_odd (const std::vector<spin_t>& spins, std::vector<shift_t> shifts) {//TODO this might be wrong
         std::valarray<double> S_a={0.,0.};
@@ -269,4 +274,4 @@ const std::vector<std::vector<mcrg::shift_t>> mcrg::interactions_e = {
         //{std::make_pair(0,0),std::make_pair(1,3)},
         //{std::make_pair(0,0),std::make_pair(3,-1)},
         //{std::make_pair(0,0),std::make_pair(3,1)}
-    }; 
+    };
