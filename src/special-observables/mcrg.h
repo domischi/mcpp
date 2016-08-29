@@ -46,6 +46,12 @@ public:
     std::pair<std::valarray<double>,std::valarray<double>> measure(const std::vector<spin_t>& spins, alps::ObservableSet& obs){
         std::valarray<double> OUT_even(n_interactions_even());
         std::valarray<double> OUT_odd(2*n_interactions_odd());
+        std::vector<spin_t> working_data;
+        if(is_first_iteration()){
+            working_data=ferromagnetic_transformation(spins);
+        }
+        else
+            working_data=spins;
         int count_o=0;
         int count_e=0;
         //std::vector<double> OUT_vec_even;
@@ -53,14 +59,13 @@ public:
         //measure the S_alpha in the not reduced lattice
         for(int i=0;i<interactions.size();++i) {
             if(interactions[i].size()%2){//odd
-                auto tmp=S_alpha_odd(spins,interactions[i]);
+                auto tmp=S_alpha_odd(working_data,interactions[i]);
                 OUT_odd[count_o]  =tmp[0];
                 OUT_odd[count_o+1]=tmp[1];
                 count_o+=2;
             }
             else{
-                OUT_even[count_e]=S_alpha_even(spins,interactions[i]);
-                //OUT_even[count_e]=S_alpha_even(spins,interactions[i]);
+                OUT_even[count_e]=S_alpha_even(working_data,interactions[i]);
                 ++count_e;
             }
         }
@@ -87,7 +92,7 @@ public:
         
         if(!is_last_iteration()){//This is not the last instantation of the mcrg
             //reduce the lattice and call the descendant on the renormalized system
-            std::vector<spin_t> reduced_spins = reduce(spins);
+            std::vector<spin_t> reduced_spins = reduce(working_data);
             std::valarray<double> IN_even(OUT_even.size());
             std::valarray<double> IN_odd(OUT_odd.size());
             std::tie(IN_even, IN_odd) =  descendant->measure(reduced_spins,obs);
@@ -136,6 +141,39 @@ private:
 
     bool inline is_last_iteration(){
         return max_iterations<iteration;
+    }
+    bool inline is_first_iteration(){
+        return !iteration; //if iteration==0 this is true
+    }
+
+    std::vector<spin_t> ferromagnetic_transformation(const std::vector<spin_t>& spins){
+        std::vector<spin_t> ret=spins;//check if this function exists
+        for(auto& b: blocks){
+            for(int i=0;i<b.size();++i){
+                int site=b[i];
+                switch(i){
+                    case 0: //left lower 
+                        break;
+                    case 1: //left upper
+                        ret[i]=mod2Pi(M_PI-spins[i]); // mirror at y axis (x -> -x)
+                        break;
+                    case 2: //right lower
+                        ret[i]=mod2Pi(-spins[i]); // mirror at x axis (y -> -y) 
+                        break;
+                    case 3: //right upper
+                        ret[i]=mod2Pi(spins[i]+M_PI); // mirror at origin (x -> -x, y->-y)
+                        break;
+                    default:
+                        std::cout<<"Something went wrong in the ferromagn. transfo in MCRG, index encountered was "<<i<<"... Aborting..."<<std::endl;
+                        std::exit(8);
+                }
+            }
+        }
+        return ret;
+    }
+
+    spin_t inline mod2Pi(double s){
+        return s-std::floor(s/(2*M_PI))*2*M_PI;
     }
 
     //return the index of a site j which is i+dx+dy in the periodic lattice
@@ -186,6 +224,9 @@ private:
         return S_a;
     }
 
+    //Initialize the block list, such that I know which blocks to be reduced.
+    //This generates the vectors of blocks
+    //each block contains 4 spins, being in the order of left lower, left upper, right lower, right upper
     void init_blocks() {
         std::vector<int> in1,in2,in3,in4;
         for(int i=0;i<N;i+=2) {
