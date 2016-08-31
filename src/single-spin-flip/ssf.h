@@ -45,7 +45,9 @@ public :
         //ac_N(0),
         //ac_obs("autocorr obs"),
         mcrg_it_depth(params.value_or_default("mcrg_iteration_depth",-1)),
-        Each_Measurement(params.value_or_default("Each_Measurement",15))
+        Each_Measurement(params.value_or_default("Each_Measurement",15)),
+        targeted_acc_ratio(params.value_or_default("targeted_acceptance_ratio",0.5)),
+        angle_dev(0.1*M_PI)
         {
             measure_mcrg=(mcrg_it_depth>0);
             cutoff_distance=params.value_or_default("cutoff_distance",3.);
@@ -114,9 +116,17 @@ public :
         //int MAX_STEPS_AC = 1e6;
         //int n_steps = ac_measured ? autocorrelation*safety_factor+1 : 0;
         int n_steps = N;
+        accepted=0;
         for(int i = 0;i<n_steps;++i){// Do a typewriter sweep (possibly avoiding cache reload every step)
             update(i);
         }
+        //this updates the range for the update
+        double acc_ratio=accepted*1./n_steps;
+        if(targeted_acc_ratio>acc_ratio && angle_dev>1e-3*M_PI)
+            angle_dev/=1.2;
+        if(targeted_acc_ratio<acc_ratio && angle_dev<2*M_PI)
+            angle_dev*=1.2;
+
         if(Step_Number&(1<<10)){ //Every 1024 steps do a random site lattice sweep to avoid ergodicity problems at 0K
             for(int i = 0;i<n_steps;++i){
                 update();
@@ -139,7 +149,6 @@ public :
         //if(ac_measured && is_thermalized()){
         if(is_thermalized()&&(Step_Number%Each_Measurement)){
             measure(obs);
-            accepted=0;
         }
     }
     bool is_thermalized() const {
@@ -166,6 +175,9 @@ private:
     //int ac_N;
     //double safety_factor;
     //double autocorrelation;
+    
+    double targeted_acc_ratio;
+    double angle_dev;
 
     //Lookup tables 
     std::map<std::pair<int,int>,double> dist_3;
@@ -204,10 +216,10 @@ private:
     void update(){update(random_int(num_sites()));}
     void update(int site){
         //propose a new state
-        double new_state=random_real(0.,2*M_PI);
-        double old_energy=single_site_Energy(site);
         double old_state=spins[site];
+        double old_energy=single_site_Energy(site);
         
+        double new_state=old_state+random_real_shifted(angle_dev);
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);
         if(random_real()<=std::exp(-(new_energy-old_energy)/T)){
@@ -323,6 +335,9 @@ private:
     }
     inline double random_real(double a=0,double b=1){
         return a+(b-a)*uniform_01();
+    }
+    inline double random_real_shifted(double s){
+        return -s/2+s*uniform_01();
     }
     double Energy(){
         double e=0.;
