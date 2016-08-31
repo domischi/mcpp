@@ -47,11 +47,11 @@ public:
         std::valarray<double> OUT_even(n_interactions_even());
         std::valarray<double> OUT_odd(2*n_interactions_odd());
         std::vector<spin_t> working_data;
-        if(is_first_iteration()){
-            working_data=ferromagnetic_transformation(spins);
-        }
-        else
-            working_data=spins;
+        //if(is_first_iteration()){
+        //    working_data=ferromagnetic_transformation(spins);
+        //}
+        //else
+        working_data=spins;
         int count_o=0;
         int count_e=0;
         //std::vector<double> OUT_vec_even;
@@ -143,31 +143,31 @@ private:
         return !iteration; //if iteration==0 this is true
     }
 
-    std::vector<spin_t> ferromagnetic_transformation(const std::vector<spin_t>& spins){
-        std::vector<spin_t> ret=spins;//check if this function exists
-        for(auto& b: blocks){
-            for(int i=0;i<b.size();++i){
-                int site=b[i];
-                switch(i){
-                    case 0: //left lower 
-                        break;
-                    case 1: //left upper
-                        ret[i]=mod2Pi(M_PI-spins[i]); // mirror at y axis (x -> -x)
-                        break;
-                    case 2: //right lower
-                        ret[i]=mod2Pi(-spins[i]); // mirror at x axis (y -> -y) 
-                        break;
-                    case 3: //right upper
-                        ret[i]=mod2Pi(spins[i]+M_PI); // mirror at origin (x -> -x, y->-y)
-                        break;
-                    default:
-                        std::cout<<"Something went wrong in the ferromagn. transfo in MCRG, index encountered was "<<i<<"... Aborting..."<<std::endl;
-                        std::exit(8);
-                }
-            }
-        }
-        return ret;
-    }
+    //std::vector<spin_t> ferromagnetic_transformation(const std::vector<spin_t>& spins){
+    //    std::vector<spin_t> ret=spins;//check if this function exists
+    //    for(auto& b: blocks){
+    //        for(int i=0;i<b.size();++i){
+    //            int site=b[i];
+    //            switch(i){
+    //                case 0: //left lower 
+    //                    break;
+    //                case 1: //left upper
+    //                    ret[i]=mod2Pi(M_PI-spins[i]); // mirror at y axis (x -> -x)
+    //                    break;
+    //                case 2: //right lower
+    //                    ret[i]=mod2Pi(-spins[i]); // mirror at x axis (y -> -y) 
+    //                    break;
+    //                case 3: //right upper
+    //                    ret[i]=mod2Pi(spins[i]+M_PI); // mirror at origin (x -> -x, y->-y)
+    //                    break;
+    //                default:
+    //                    std::cout<<"Something went wrong in the ferromagn. transfo in MCRG, index encountered was "<<i<<"... Aborting..."<<std::endl;
+    //                    std::exit(8);
+    //            }
+    //        }
+    //    }
+    //    return ret;
+    //}
 
     spin_t inline mod2Pi(double s){
         return s-std::floor(s/(2*M_PI))*2*M_PI;
@@ -250,13 +250,14 @@ private:
     std::vector<spin_t> reduce(const std::vector<spin_t>& spins){
         std::vector<spin_t> OUT(blocks.size());
         for(int b=0;b<blocks.size();++b) {
-            double c=0.;
-            double s=0.;
-            for(int j : blocks[b]) {
-                c+=std::cos(spins[j]); 
-                s+=std::sin(spins[j]); 
-            }
-            OUT[b]=std::atan2(s,c);
+            OUT[b]=spins[(blocks[b])[0]]; // decimation
+            //double c=0.;
+            //double s=0.;
+            //for(int j : blocks[b]) {
+            //    c+=std::cos(spins[j]); 
+            //    s+=std::sin(spins[j]); 
+            //}
+            //OUT[b]=std::atan2(s,c);
         }
         return OUT;
     }
