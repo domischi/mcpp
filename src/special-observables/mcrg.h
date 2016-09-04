@@ -3,13 +3,14 @@
 #include <valarray>
 #include <alps/parameter.h>
 #include <utility> //pair
+#include <tuple>
 
 class mcrg;
 /*template<class G = alps::graph_helper<>::graph_type>*/
 class mcrg /*: public alps::graph_helper<G>*/{
 public:
     typedef double spin_t;
-    typedef std::pair<int,int> shift_t;
+    typedef std::tuple<int,int,int> shift_t; //(dx,dy, component)
     mcrg(const alps::Parameters& p, int Iteration_, int MCRG_It_) :
     iteration(Iteration_),
     max_iterations(MCRG_It_),
@@ -42,10 +43,13 @@ public:
     static inline int n_interactions_even(){ 
         return interactions_e.size();
     }
+    static inline int n_interactions(){
+        return n_interactions_odd()+n_interactions_even();
+    }
 
-    std::pair<std::valarray<double>,std::valarray<double>> measure(const std::vector<spin_t>& spins, alps::ObservableSet& obs){
-        std::valarray<double> OUT_even(n_interactions_even());
-        std::valarray<double> OUT_odd(2*n_interactions_odd());
+
+    std::valarray<double> measure(const std::vector<spin_t>& spins, alps::ObservableSet& obs){
+        std::valarray<double> OUT(n_interactions());
         std::vector<spin_t> working_data;
         //if(is_first_iteration()){
         //    working_data=ferromagnetic_transformation(spins);
@@ -58,74 +62,43 @@ public:
         //std::vector<double> OUT_vec_odd;
         //measure the S_alpha in the not reduced lattice
         for(int i=0;i<interactions.size();++i) {
-            if(interactions[i].size()%2){//odd
-                auto tmp=S_alpha_odd(working_data,interactions[i]);
-                OUT_odd[count_o]  =tmp[0];
-                OUT_odd[count_o+1]=tmp[1];
-                count_o+=2;
-            }
-            else{
-                OUT_even[count_e]=S_alpha_even(working_data,interactions[i]);
-                ++count_e;
-            }
+            //tmp=S_alpha(working_data,interactions[i]);
+            OUT[i]=S_alpha(working_data,interactions[i]);
         }
-        obs["MCRG S_alpha"+ std::to_string(iteration)+" even"]<<OUT_even;
-        //obs["MCRG S_alpha"+ std::to_string(iteration)+" even"]<<(OUT_even/(1.*N));
-        obs["MCRG S_alpha"+ std::to_string(iteration)+" odd"]<<OUT_odd;
+        obs["MCRG S_alpha"+ std::to_string(iteration)]<<OUT;
         //measure <S_alpha n S_beta n>
-        std::valarray<double> outout_even(OUT_even.size()*OUT_even.size());
+        std::valarray<double> outout(OUT.size()*OUT.size());
         
-        for(int i=0;i<n_interactions_even();++i){
-            for(int j=0;j<n_interactions_even();++j){
-                outout_even[i*OUT_even.size()+j]=(OUT_even[i]*OUT_even[j]);
+        for(int i=0;i<n_interactions();++i){
+            for(int j=0;j<n_interactions();++j){
+                outout[i*OUT.size()+j]=OUT[i]*OUT[j];
             }
         }
-        obs["MCRG S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration)+" even"]<<outout_even;
-        //obs["MCRG S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration)+" even"]<<outout_even;
-        std::valarray<double> outout_odd(OUT_odd.size()*OUT_odd.size()/4);
-        for(int i=0;i<OUT_odd.size();i+=2){
-            for(int j=0;j<OUT_odd.size();j+=2){ 
-                outout_odd[(i*OUT_odd.size()/2+j)/2]=OUT_odd[i]*OUT_odd[j]+OUT_odd[i+1]*OUT_odd[j+1];
-            }
-        }
-        obs["MCRG S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration)+" odd"]<<outout_odd;
+        obs["MCRG S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration)]<<outout;
         
         if(!is_last_iteration()){//This is not the last instantation of the mcrg
             //reduce the lattice and call the descendant on the renormalized system
             std::vector<spin_t> reduced_spins = reduce(working_data);
-            std::valarray<double> IN_even(OUT_even.size());
-            std::valarray<double> IN_odd(OUT_odd.size());
-            std::tie(IN_even, IN_odd) =  descendant->measure(reduced_spins,obs);
+            std::valarray<double> IN(OUT.size());
+            IN =  descendant->measure(reduced_spins,obs);
             //calculate <S_alpha n-1 S_beta n>
             //and save it into obs
             //even
-            std::valarray<double> outin_even(IN_even.size()*IN_even.size());
-            for(int i=0;i<IN_even.size();++i){
-                for(int j=0;j<IN_even.size();++j){
-                    outin_even[i*IN_even.size()+j]=(OUT_even[i]*IN_even[j]);
+            std::valarray<double> outin(IN.size()*IN.size());
+            for(int i=0;i<IN.size();++i){
+                for(int j=0;j<IN.size();++j){
+                    outin[i*IN.size()+j]=(OUT[i]*IN[j]);
                 }
             }
-            //obs["MCRG S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1)+" even"]<<outin_even/(1.*N);
-            obs["MCRG S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1)+" even"]<<outin_even;
-            //odd
-            std::valarray<double> /*outout_odd(IN_odd.size()*IN_odd.size()/4),*/outin_odd(IN_odd.size()*IN_odd.size()/4);
-            for(int i=0;i<IN_odd.size();i+=2){
-                for(int j=0;j<IN_odd.size();j+=2){ 
-                    outin_odd[(i*IN_odd.size()/2+j)/2]=OUT_odd[i]*IN_odd[j]+OUT_odd[i+1]*IN_odd[j+1];
-                }
-            } 
-            obs["MCRG S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1)+" odd"]<<outin_odd;
+            obs["MCRG S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1)]<<outin;
         }
-        return std::make_pair(OUT_even,OUT_odd); 
+        return OUT;
     }
 
     void init_observables(alps::ObservableSet& obs){
-        obs << alps::RealVectorObservable("MCRG S_alpha"+ std::to_string(iteration)+" even");
-        obs << alps::RealVectorObservable("MCRG S_alpha"+ std::to_string(iteration)+" odd");
-        obs << alps::RealVectorObservable("MCRG S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration)+" even");
-        obs << alps::RealVectorObservable("MCRG S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1)+" even");
-        obs << alps::RealVectorObservable("MCRG S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration)+" odd");
-        obs << alps::RealVectorObservable("MCRG S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1)+" odd");
+        obs << alps::RealVectorObservable("MCRG S_alpha"+ std::to_string(iteration));
+        obs << alps::RealVectorObservable("MCRG S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration));
+        obs << alps::RealVectorObservable("MCRG S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1));
         if(!is_last_iteration()){
             descendant->init_observables(obs);
         }
@@ -191,37 +164,27 @@ private:
     //For example, just field term (one spin correlator) shifts.size()==0
     //For example, NN along x: shifts.size()==1, shifts[0]=(1,0)
     //For example, 4 spin interaction in a vortex type : shifts.size()==3 shifts[0]==(1,0), shifts[1]==(1,1), shifts[2]==(0,1), 
-    double S_alpha_even (const std::vector<spin_t>& spins, std::vector<shift_t> shifts) {
+    double S_alpha (const std::vector<spin_t>& spins, std::vector<shift_t> shifts) {
         double S_a=0;
         for(int i =0;i<N;++i){
             double tmp=1.;
-            for(int j = 0; j <shifts.size();j+=2){ //Pairwise build up the scalar products
+            for(int j = 0; j <shifts.size();++j){ //Pairwise build up the scalar products
                 shift_t s = shifts[j];
-                shift_t t = shifts[j+1];
-                double angle1=spins[index_o_neighbour(i,s.first,s.second)];
-                double angle2=spins[index_o_neighbour(i,t.first,t.second)];
-                tmp*=std::cos(angle1)*std::cos(angle2)+std::sin(angle1)*std::sin(angle2);
+                double angle=spins[index_o_neighbour(i,std::get<0>(s),std::get<1>(s))];
+                int component=std::get<2>(s);
+                if(component==0){
+                    tmp*=std::cos(angle);
+                } else if(component==1){
+                    tmp*=std::sin(angle);
+                } else {
+                    std::cout << "In S_alpha with a not recognised component, The values is "<< component<<"... Aborting..."<< std::endl;
+                    std::exit(19);
+                }
             }
             S_a+=tmp;
         }
         return S_a;
         //return S_a/N;
-    }
-    std::valarray<double> S_alpha_odd (const std::vector<spin_t>& spins, std::vector<shift_t> shifts) {//TODO this might be wrong
-        std::valarray<double> S_a={0.,0.};
-        for(int i =0;i<N;++i){
-            double tmp=1.; 
-            for(int j=1;j<shifts.size();j+=2){
-                auto& s = shifts[j];
-                auto& t = shifts[j+1];
-                tmp*=std::cos(spins[index_o_neighbour(i,s.first,s.second)])*std::cos(spins[index_o_neighbour(i,t.first,t.second)])+std::sin(spins[index_o_neighbour(i,s.first,s.second)])*std::sin(spins[index_o_neighbour(i,t.first,t.second)]);
-            }
-            S_a[0]+=tmp*std::cos(spins[i]);
-            S_a[1]+=tmp*std::sin(spins[i]);
-        }
-        S_a[0]/=N;
-        S_a[1]/=N;
-        return S_a;
     }
 
     //Initialize the block list, such that I know which blocks to be reduced.
@@ -269,7 +232,8 @@ private:
 
 const std::vector<std::vector<mcrg::shift_t>> mcrg::interactions_o = {
         //ODD
-        {std::make_pair(0,0)}//,
+        {std::make_tuple(0,0,0)},// field term along x
+        {std::make_tuple(0,0,1)} // field term along y
         //{std::make_pair(0,0),std::make_pair(1,0),std::make_pair(0,1)},//3 part interaction for simple nn
         //{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(0,1)},//3 part interaction for simple nn
         //{std::make_pair(0,0),std::make_pair(1,1),std::make_pair(1,0)},//3 part interaction for simple nn
@@ -296,10 +260,22 @@ const std::vector<std::vector<mcrg::shift_t>> mcrg::interactions_o = {
     };
 const std::vector<std::vector<mcrg::shift_t>> mcrg::interactions_e = {
         //EVEN
-        {std::make_pair(0,0),std::make_pair(1,0)},//NNx
-        {std::make_pair(0,0),std::make_pair(0,1)},//NNy
-        {std::make_pair(0,0),std::make_pair(1,1)},
-        {std::make_pair(0,0),std::make_pair(-1,1)}//, //diagonal
+        {std::make_tuple(0,0,0),std::make_tuple(1,0,0)}, //NNx x comp
+        {std::make_tuple(0,0,1),std::make_tuple(1,0,1)}, //NNx y comp
+        {std::make_tuple(0,0,0),std::make_tuple(1,0,1)}, //NNx xy comp
+        {std::make_tuple(0,0,1),std::make_tuple(1,0,0)}, //NNx yx comp
+        {std::make_tuple(0,0,0),std::make_tuple(0,1,0)}, //NNy x comp
+        {std::make_tuple(0,0,1),std::make_tuple(0,1,1)}, //NNy y comp
+        {std::make_tuple(0,0,0),std::make_tuple(0,1,1)}, //NNy xy comp
+        {std::make_tuple(0,0,1),std::make_tuple(0,1,0)}, //NNy yx comp
+        {std::make_tuple(0,0,0),std::make_tuple(1,1,0)}, //d11 x comp
+        {std::make_tuple(0,0,1),std::make_tuple(1,1,1)}, //d11 y comp
+        {std::make_tuple(0,0,0),std::make_tuple(1,1,1)}, //d11 xy comp
+        {std::make_tuple(0,0,1),std::make_tuple(1,1,0)}, //d11 yx comp
+        {std::make_tuple(0,0,0),std::make_tuple(-1,1,0)},//d-11 x comp
+        {std::make_tuple(0,0,1),std::make_tuple(-1,1,1)},//,//d-11 y comp
+        {std::make_tuple(0,0,0),std::make_tuple(-1,1,1)},//,//d-11 xy comp
+        {std::make_tuple(0,0,1),std::make_tuple(-1,1,0)}//,//d-11 yx comp
         //{std::make_pair(0,0),std::make_pair(2,0)},
         //{std::make_pair(0,0),std::make_pair(0,2)}, //NNN
         //{std::make_pair(0,0),std::make_pair(3,0)}, //NNNNx
