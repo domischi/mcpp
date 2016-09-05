@@ -25,6 +25,9 @@
 
 class ssf_worker : public alps::parapack::lattice_mc_worker<>{
 public :
+    enum spin_type {ising, xy};
+    enum interaction_type {dipol,exchange};
+    
     ssf_worker(const alps::Parameters& params) :
         alps::parapack::lattice_mc_worker<>(params), 
         Thermalization_Sweeps(params.value_or_default("THERMALIZATION",100)),
@@ -47,6 +50,16 @@ public :
         mcrg_it_depth(params.value_or_default("mcrg_iteration_depth",-1)),
         Each_Measurement(params.value_or_default("Each_Measurement",15))
         {
+            if(params.value_or_default("interaction type","dipol")=="exchange")
+                interaction_t=interaction_type::exchange;
+            else
+                interaction_t=interaction_type::dipol;
+           
+            if(params.value_or_default("spin type","xy")=="ising")
+                spin_t=spin_type::ising;
+            else
+                spin_t=spin_type::xy;
+            
             measure_mcrg=(mcrg_it_depth>0);
             cutoff_distance=params.value_or_default("cutoff_distance",3.);
             double a=params.value_or_default("a",1.);
@@ -156,6 +169,8 @@ private:
     int L;
     int N; //L^2
     std::vector<double> spins; //saves the spins
+    spin_type spin_t;
+    interaction_type interaction_t;
     double T;
     double D;
     double cutoff_distance;
@@ -204,9 +219,13 @@ private:
     void update(){update(random_int(num_sites()));}
     void update(int site){
         //propose a new state
-        double new_state=random_real(0.,2*M_PI);
-        double old_energy=single_site_Energy(site);
         double old_state=spins[site];
+        double new_state;
+        if(spin_t==spin_type::xy)
+            new_state=random_real(0.,2*M_PI);
+        else if (spin_t==spin_type::ising)
+            old_state==0. ? new_state=M_PI : new_state=0.;
+        double old_energy=single_site_Energy(site);
         
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);
@@ -253,54 +272,56 @@ private:
     inline double beta(){ 
         return 1./T;
     }
-    void Init_Lookup_Tables(){ 
-        std::vector<vector_type> basis;
-        basis_vector_iterator v, v_end;
-        for(std::tie(v,v_end)=basis_vectors();v!= v_end;++v){
-            basis.push_back(*v);
-        }
-        std::vector<vector_type> periodic_translations;
-        int dim = dimension();
-        assert(dim==basis[0].size());
-        periodic_translations.push_back(vector_type(dim,0.));
-        vector_type pmb(dimension()),ppb(dimension()); //periodic_translation+-L*basis
-        for(auto& actual_basis_vector : basis){
-            int size_periodic_translations=periodic_translations.size();
-            for(int i=0;i<size_periodic_translations;++i){//to avoid double counting a specific vector, and to not have a segfault
-                vector_type p = periodic_translations[i];
-                for(int d =0;d<dimension();++d){
-                    pmb[d]=(p[d]-L*(actual_basis_vector[d]));
-                    ppb[d]=(p[d]+L*(actual_basis_vector[d]));
-                }
-                periodic_translations.push_back(pmb);
-                periodic_translations.push_back(ppb);
-            }
-        }
-        for(int i=0;i<num_sites();++i) neighbour_list.push_back(std::vector<int>());
-        std::map<std::pair<int,int>,double> dist_map;
-        for(site_iterator s_iter= sites().first; s_iter!=sites().second; ++s_iter)
-        for(site_iterator s_iter2= s_iter; s_iter2!=sites().second; ++s_iter2)
-        for(auto& p : periodic_translations)
-            if(*s_iter!=*s_iter2){
-                vector_type c1(coordinate(*s_iter));
-                vector_type c2(coordinate(*s_iter2));
-                double dist=distance(c1,c2,p);
-                std::pair<int,int> pair_ = std::make_pair(*s_iter,*s_iter2);
-                if(dist<=cutoff_distance && (dist_map[pair_]==0. || dist<dist_map[pair_])){ //new value is smaller than the previous calculated for this pair
-                    dist_map[pair_]=dist;
-                    std::pair<int,int> pair_inverse=std::make_pair(pair_.second,pair_.first);
-                    dist_3[pair_]=std::pow(dist,-3);
-                    dist_3[pair_inverse]=std::pow(dist,-3);
-                    phi[pair_]=std::atan2(-(c1[1]+p[1]-c2[1]),-(c1[0]+p[0]-c2[0]));
-                    phi[pair_inverse]=std::atan2((c1[1]+p[1]-c2[1]),(c1[0]+p[0]-c2[0]));
-                    neighbour_list[*s_iter].push_back(*s_iter2);
-                    neighbour_list[*s_iter2].push_back(*s_iter);
-                }
-            }
-        //Shrink the neighbour_list
-        for(auto& nl : neighbour_list) nl.shrink_to_fit();
-        neighbour_list.shrink_to_fit();
-    }
+    void Init_Lookup_Tables(){
+		if(interaction_t==interaction_type::dipol) {
+			std::vector<vector_type> basis;
+			basis_vector_iterator v, v_end;
+			for(std::tie(v,v_end)=basis_vectors();v!= v_end;++v){
+				basis.push_back(*v);
+			}
+			std::vector<vector_type> periodic_translations;
+			int dim = dimension();
+			assert(dim==basis[0].size());
+			periodic_translations.push_back(vector_type(dim,0.));
+			vector_type pmb(dimension()),ppb(dimension()); //periodic_translation+-L*basis
+			for(auto& actual_basis_vector : basis){
+				int size_periodic_translations=periodic_translations.size();
+				for(int i=0;i<size_periodic_translations;++i){//to avoid double counting a specific vector, and to not have a segfault
+					vector_type p = periodic_translations[i];
+					for(int d =0;d<dimension();++d){
+						pmb[d]=(p[d]-L*(actual_basis_vector[d]));
+						ppb[d]=(p[d]+L*(actual_basis_vector[d]));
+					}
+					periodic_translations.push_back(pmb);
+					periodic_translations.push_back(ppb);
+				}
+			}
+			for(int i=0;i<num_sites();++i) neighbour_list.push_back(std::vector<int>());
+			std::map<std::pair<int,int>,double> dist_map;
+			for(site_iterator s_iter= sites().first; s_iter!=sites().second; ++s_iter)
+			for(site_iterator s_iter2= s_iter; s_iter2!=sites().second; ++s_iter2)
+			for(auto& p : periodic_translations)
+				if(*s_iter!=*s_iter2){
+					vector_type c1(coordinate(*s_iter));
+					vector_type c2(coordinate(*s_iter2));
+					double dist=distance(c1,c2,p);
+					std::pair<int,int> pair_ = std::make_pair(*s_iter,*s_iter2);
+					if(dist<=cutoff_distance && (dist_map[pair_]==0. || dist<dist_map[pair_])){ //new value is smaller than the previous calculated for this pair
+						dist_map[pair_]=dist;
+						std::pair<int,int> pair_inverse=std::make_pair(pair_.second,pair_.first);
+						dist_3[pair_]=std::pow(dist,-3);
+						dist_3[pair_inverse]=std::pow(dist,-3);
+						phi[pair_]=std::atan2(-(c1[1]+p[1]-c2[1]),-(c1[0]+p[0]-c2[0]));
+						phi[pair_inverse]=std::atan2((c1[1]+p[1]-c2[1]),(c1[0]+p[0]-c2[0]));
+						neighbour_list[*s_iter].push_back(*s_iter2);
+						neighbour_list[*s_iter2].push_back(*s_iter);
+					}
+				}
+			//Shrink the neighbour_list
+			for(auto& nl : neighbour_list) nl.shrink_to_fit();
+			neighbour_list.shrink_to_fit();
+		}
+	}
     inline double distance(vector_type& x, vector_type& y, vector_type& periodic){
         return std::sqrt(std::pow(x[0]-y[0]+periodic[0],2)+std::pow(x[1]-y[1]+periodic[1],2));
     }
@@ -333,8 +354,16 @@ private:
     }
     double single_site_Energy(int i){
         double e=0.;
-        for(int j : neighbour_list[i]){
-            e-=D*inv_distance_cubed(i,j)*(1.5*std::cos(spins[i]+spins[j]-2*angle_w_x(i,j))+0.5*std::cos(spins[i]-spins[j]));
+        if (interaction_t==interaction_type::dipol){
+            for(int j : neighbour_list[i]){
+                e-=D*inv_distance_cubed(i,j)*(1.5*std::cos(spins[i]+spins[j]-2*angle_w_x(i,j))+0.5*std::cos(spins[i]-spins[j]));
+            }
+        }
+        else if (interaction_t==interaction_type::exchange){
+			neighbor_iterator n_iter;
+			for (n_iter=neighbors(i).first; n_iter!=neighbors(i).second; ++n_iter) {
+		  		e -= (spins[i]==spins[*n_iter])? 0.5*D : -0.5*D ;
+            }
         }
         return e;
     }
