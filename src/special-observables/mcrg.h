@@ -304,7 +304,10 @@ const std::vector<std::vector<mcrg::shift_t>> mcrg::interactions_e = {
         //{std::make_pair(0,0),std::make_pair(0,2)}, //NNN
         //{std::make_pair(0,0),std::make_pair(3,0)}, //NNNNx
         //{std::make_pair(0,0),std::make_pair(0,3)}, //NNNNy
-        //{std::make_pair(0,0),std::make_pair(0,1),std::make_pair(1,0),std::make_pair(1,1)}, // 4 spin
+        //{std::make_pair(0,0),std::make_pair(0,1),std::make_pair(0,0),std::make_pair(0,1)}, // 4 spin
+        //{std::make_pair(0,0),std::make_pair(0,0),std::make_pair(1,0),std::make_pair(1,0)}, // 4 spin
+        //{std::make_pair(0,0),std::make_pair(0,0),std::make_pair(0,1),std::make_pair(0,1)}, // 4 spin
+        //{std::make_pair(0,0),std::make_pair(0,0),std::make_pair(1,1),std::make_pair(1,1)}, // 4 spin
         //{std::make_pair(0,0),std::make_pair(1,2)},
         //{std::make_pair(0,0),std::make_pair(2,1)},
         //{std::make_pair(0,0),std::make_pair(-2,1)},
