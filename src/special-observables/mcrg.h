@@ -273,9 +273,17 @@ const std::vector<std::vector<mcrg::shift_t>> mcrg::interactions_e = {
         {std::make_tuple(0,0,0),std::make_tuple(1,1,1)}, //d11 xy comp
         {std::make_tuple(0,0,1),std::make_tuple(1,1,0)}, //d11 yx comp
         {std::make_tuple(0,0,0),std::make_tuple(-1,1,0)},//d-11 x comp
-        {std::make_tuple(0,0,1),std::make_tuple(-1,1,1)},//,//d-11 y comp
-        {std::make_tuple(0,0,0),std::make_tuple(-1,1,1)},//,//d-11 xy comp
-        {std::make_tuple(0,0,1),std::make_tuple(-1,1,0)}//,//d-11 yx comp
+        {std::make_tuple(0,0,1),std::make_tuple(-1,1,1)},//d-11 y comp
+        {std::make_tuple(0,0,0),std::make_tuple(-1,1,1)},//d-11 xy comp
+        {std::make_tuple(0,0,1),std::make_tuple(-1,1,0)},//d-11 yx comp
+        {std::make_tuple(0,0,0),std::make_tuple(2,0,0)}, //NNNx x comp
+        {std::make_tuple(0,0,1),std::make_tuple(2,0,1)}, //NNNx y comp
+        {std::make_tuple(0,0,0),std::make_tuple(2,0,1)}, //NNNx xy comp
+        {std::make_tuple(0,0,1),std::make_tuple(2,0,0)}, //NNNx yx comp
+        {std::make_tuple(0,0,0),std::make_tuple(0,2,0)}, //NNNy x comp
+        {std::make_tuple(0,0,1),std::make_tuple(0,2,1)}, //NNNy y comp
+        {std::make_tuple(0,0,0),std::make_tuple(0,2,1)}, //NNNy xy comp
+        {std::make_tuple(0,0,1),std::make_tuple(0,2,0)}//, //NNNy yx comp
         //{std::make_pair(0,0),std::make_pair(2,0)},
         //{std::make_pair(0,0),std::make_pair(0,2)}, //NNN
         //{std::make_pair(0,0),std::make_pair(3,0)}, //NNNNx
