@@ -40,7 +40,9 @@ public :
         my_stag(0.),
         accepted(0),
         mcrg_it_depth(params.value_or_default("mcrg_iteration_depth",-1)),
-        Each_Measurement(params.value_or_default("Each_Measurement",15))
+        Each_Measurement(params.value_or_default("Each_Measurement",15)),
+        targeted_acc_ratio(params.value_or_default("targeted_acceptance_ratio",0.5)),
+        angle_dev(0.1*M_PI)
         {
             measure_mcrg=(mcrg_it_depth>0);
             cutoff_distance=params.value_or_default("cutoff_distance",3.);
@@ -97,9 +99,17 @@ public :
         using namespace alps::alea;
         ++Step_Number;
         int n_steps = N;
+        accepted=0;
         for(int i = 0;i<n_steps;++i){// Do a typewriter sweep (possibly avoiding cache reload every step)
             update(i);
         }
+        //this updates the range for the update
+        double acc_ratio=accepted*1./n_steps;
+        if(targeted_acc_ratio>acc_ratio && angle_dev>1e-3*M_PI)
+            angle_dev/=1.2;
+        if(targeted_acc_ratio<acc_ratio && angle_dev<2*M_PI)
+            angle_dev*=1.2;
+
         if(Step_Number&(1<<10)){ //Every 1024 steps do a random site lattice sweep to avoid ergodicity problems at 0K
             for(int i = 0;i<n_steps;++i){
                 update();
@@ -128,6 +138,9 @@ private:
     double D;
     double cutoff_distance;
     int Each_Measurement;
+    
+    double targeted_acc_ratio;
+    double angle_dev;
 
     //Lookup tables 
     std::map<std::pair<int,int>,double> dist_3;
@@ -150,10 +163,9 @@ private:
     void update(int site){
         //propose a new state
         double old_state=spins[site];
-        double new_state;
-        new_state=random_real(0.,2*M_PI);
         double old_energy=single_site_Energy(site);
         
+        double new_state=old_state+random_real_shifted(angle_dev);
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);
         if(random_real()<=std::exp(-(new_energy-old_energy)/T)){
@@ -245,7 +257,7 @@ private:
         //Shrink the neighbour_list
         for(auto& nl : neighbour_list) nl.shrink_to_fit();
         neighbour_list.shrink_to_fit();
-	}
+    }
     inline double distance(vector_type& x, vector_type& y, vector_type& periodic){
         return std::sqrt(std::pow(x[0]-y[0]+periodic[0],2)+std::pow(x[1]-y[1]+periodic[1],2));
     }
@@ -268,6 +280,9 @@ private:
     }
     inline double random_real(double a=0,double b=1){
         return a+(b-a)*uniform_01();
+    }
+    inline double random_real_shifted(double s){
+        return -s/2+s*uniform_01();
     }
     double Energy(){
         double e=0.;
