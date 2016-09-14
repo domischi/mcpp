@@ -59,6 +59,24 @@ SET(PROJECT_CMAKE "${CMAKE_SOURCE_DIR}/CMake")
 SET(BUILD_DIR "${CMAKE_SOURCE_DIR}/build")
 
 #-------------------------------------------------------------------
+# GIT VERSION (from pmirshad, github: https://github.com/pmirshad/cmake-with-git-metadata/)
+#-------------------------------------------------------------------
+if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
+  execute_process(
+    COMMAND git log -1 --format=%h
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_COMMIT_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+else(EXISTS "${CMAKE_SOURCE_DIR}/.git")
+  set(GIT_COMMIT_HASH "")
+endif(EXISTS "${CMAKE_SOURCE_DIR}/.git")
+message(STATUS "Git commit hash: ${GIT_COMMIT_HASH}")
+configure_file(
+  ${CMAKE_SOURCE_DIR}/src/version/version.h.in
+  ${CMAKE_SOURCE_DIR}/src/version/version.h
+)
+#-------------------------------------------------------------------
 # mc++
 #-------------------------------------------------------------------
 SET(SRCS ${SRCS} src/main.cpp src/parapack_register.cpp)
