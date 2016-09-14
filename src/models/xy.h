@@ -41,7 +41,7 @@ public :
         accepted(0),
         mcrg_it_depth(params.value_or_default("mcrg_iteration_depth",-1)),
         Each_Measurement(params.value_or_default("Each_Measurement",15)),
-        targeted_acc_ratio(params.value_or_default("targeted_acceptance_ratio",0.5)),
+        targeted_acc_ratio(params.value_or_default("Targeted Acceptance Ratio",0.5)),
         angle_dev(0.1*M_PI)
         {
             measure_mcrg=(mcrg_it_depth>0);
@@ -90,10 +90,58 @@ public :
     }
 
     void save(alps::ODump &dump) const{
-        dump << L << N<< T<< Step_Number << spins;
+        dump 
+        << L 
+        << N
+        << T
+        << Step_Number 
+        << spins 
+        //<< Thermalization_Sweeps
+        //<< Measure_Sweeps
+        //<< D
+        << cutoff_distance
+        //<< Each_Measurement
+        //<< targeted_acc_ratio
+        << angle_dev
+        //<< dist3_
+        //<< phi
+        //<< neighbour_list
+        << En
+        << mx
+        << my
+        << mx_stag
+        << my_stag
+        << accepted
+        //<< measure_mcrg
+        //<< mcrg_it_depth
+        ;
     }
     void load(alps::IDump &dump){
-        dump >> L >> N>> T>> Step_Number >> spins;
+        dump 
+        >> L 
+        >> N
+        >> T
+        >> Step_Number 
+        >> spins 
+        //>> Thermalization_Sweeps
+        //>> Measure_Sweeps
+        //>> D
+        >> cutoff_distance
+        //>> Each_Measurement
+        //>> targeted_acc_ratio
+        >> angle_dev
+        //>> dist3_
+        //>> phi
+        //>> neighbour_list
+        >> En
+        >> mx
+        >> my
+        >> mx_stag
+        >> my_stag
+        >> accepted
+        //>> measure_mcrg
+        //>> mcrg_it_depth
+        ;
     }
     void run(alps::ObservableSet& obs){
         using namespace alps::alea;
