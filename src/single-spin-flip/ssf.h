@@ -21,7 +21,7 @@
 #include <algorithm> //sort
 #include <utility> //pair
 
-#include "../special-observables/mcrg.h"
+#include "../special-observables/mcrg/mcrg.h"
 
 class ssf_worker : public alps::parapack::lattice_mc_worker<>{
 public :
