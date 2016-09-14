@@ -83,7 +83,7 @@ public :
             obs << alps::RealObservable("M staggered^4");
             obs << alps::RealObservable("Mx staggered");
             obs << alps::RealObservable("Mx staggered^2");
-            obs << alps::RealObservable("Acceptance Rate"); //Probably very useful for debugging
+            obs << alps::RealObservable("Acceptance Ratio"); //Probably very useful for debugging
             if(measure_mcrg){
                 mcrg_->init_observables(obs);
             }
@@ -103,23 +103,30 @@ public :
         for(int i = 0;i<n_steps;++i){// Do a typewriter sweep (possibly avoiding cache reload every step)
             update(i);
         }
-        //this updates the range for the update
-        double acc_ratio=accepted*1./n_steps;
-        if(targeted_acc_ratio>acc_ratio && angle_dev>1e-3*M_PI)
-            angle_dev/=1.2;
-        if(targeted_acc_ratio<acc_ratio && angle_dev<2*M_PI)
-            angle_dev*=1.2;
 
         if(Step_Number&(1<<10)){ //Every 1024 steps do a random site lattice sweep to avoid ergodicity problems at 0K
             for(int i = 0;i<n_steps;++i){
                 update();
             }
         }
+        obs["Acceptance Ratio"]<<update_angle_deviation(accepted,n_steps);// This is also of interest before thermalization
         if(is_thermalized()&&(Step_Number%Each_Measurement)){
             measure(obs);
             accepted=0;
         }
     }
+    
+    //this updates the range for the update
+    double update_angle_deviation(int accepted, int n_steps){
+        double acc_ratio=accepted*1./n_steps;
+        if(targeted_acc_ratio>acc_ratio && angle_dev>1e-3*M_PI)
+            angle_dev/=1.2;
+        if(targeted_acc_ratio<acc_ratio && angle_dev<2*M_PI)
+            angle_dev*=1.2;
+        accepted=0;
+        return acc_ratio; 
+    }
+    
     bool is_thermalized() const {
         return Step_Number >= Thermalization_Sweeps;   
     }
