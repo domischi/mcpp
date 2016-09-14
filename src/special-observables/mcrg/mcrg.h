@@ -1,8 +1,10 @@
+#ifndef MCPP_MCRG_H_
+#define MCPP_MCRG_H_
+
 #include <alps/lattice.h>
 #include <cassert>
 #include <valarray>
 #include <alps/parameter.h>
-#include <utility> //pair
 #include <tuple>
 #include "interactions.h"
 #include "reductions.h"
@@ -38,21 +40,18 @@ public:
         //Choose reduction technique
         if(p["MCRG Reduction Technique"]=="Decimation"){
             reduction_type=ReductionTechnique::Decimation;
-        }
-        else if(p["MCRG Reduction Technique"]=="Blockspin"){
+        } else if(p["MCRG Reduction Technique"]=="Blockspin"){
             reduction_type=ReductionTechnique::Blockspin;
-        }
-        else if(p["MCRG Reduction Technique"]=="FerroBlockspin"){
+        } else if(p["MCRG Reduction Technique"]=="FerroBlockspin"){
             reduction_type=ReductionTechnique::FerroBlockspin;
-        }
-        else {
+        } else {
             std::cerr << "Did not recognise the reduction process to use for MCRG, aborting..."<<std::endl;
             std::exit(21); 
         }
         assert(lattice_name_=="square lattice"); //not sure if this works
         assert(!(L%2));
        
-        //If this is not hte last iteration, construct the MCRG class for the next smaller lattice 
+        //If this is not the last iteration, construct the MCRG class for the next smaller lattice 
         if(!is_last_iteration()) {
             alps::Parameters p_descendant=p;
             p_descendant["L"]=L/2;
@@ -71,17 +70,11 @@ public:
 
     std::valarray<double> measure(const std::vector<spin_t>& spins, alps::ObservableSet& obs){
         std::valarray<double> OUT(n_interactions());
-        std::vector<spin_t> working_data;
-        //if(is_first_iteration()){//TODO check if this needs to be done before measuring in the first lattice or before the first reduction
-        //    working_data=ferromagnetic_transformation(spins);
-        //}
-        //else
-        working_data=spins;
         int count_o=0;
         int count_e=0;
         //measure the S_alpha in the not reduced lattice
         for(int i=0;i<interactions.size();++i) {
-            OUT[i]=S_alpha(working_data,interactions[i]);
+            OUT[i]=S_alpha(spins, interactions[i]);
         }
         obs["MCRG S_alpha"+ std::to_string(iteration)]<<OUT;
         //measure <S_alpha n S_beta n>
@@ -96,12 +89,11 @@ public:
         
         if(!is_last_iteration()){//This is not the last instantation of the mcrg
             //reduce the lattice and call the descendant on the renormalized system
-            std::vector<spin_t> reduced_spins = reduce(working_data);
+            std::vector<spin_t> reduced_spins = reduce(spins);
             std::valarray<double> IN(OUT.size());
             IN =  descendant->measure(reduced_spins,obs);
             //calculate <S_alpha n-1 S_beta n>
             //and save it into obs
-            //even
             std::valarray<double> outin(IN.size()*IN.size());
             for(int i=0;i<IN.size();++i){
                 for(int j=0;j<IN.size();++j){
@@ -145,9 +137,9 @@ private:
 
     //This generally calculates all the S_alpha
     //for this it iterates over all the lattice sites i. For each of them all the shifts are calculated and taken into consideration with the correlation
-    //For example, just field term (one spin correlator) shifts.size()==0
-    //For example, NN along x: shifts.size()==1, shifts[0]=(1,0)
-    //For example, 4 spin interaction in a vortex type : shifts.size()==3 shifts[0]==(1,0), shifts[1]==(1,1), shifts[2]==(0,1), 
+    //Example: field term along x: shift[j].size()==1, {{0,0,0}}
+    //Example: NNx along xy: shift[j].size()==2, { {0,0,0} , {1,0,1} }
+    //For more examples have a look at the interactions.h file
     double S_alpha (const std::vector<spin_t>& spins, std::vector<shift_t> shifts) {
         double S_a=0;
         for(int i =0;i<N;++i){
@@ -188,4 +180,4 @@ private:
         }
     }
 };
-
+#endif //MCPP_MCRG_H_

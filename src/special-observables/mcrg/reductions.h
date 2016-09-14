@@ -1,3 +1,6 @@
+#ifndef MCPP_MCRG_REDUCTIONS_H_
+#define MCPP_MCRG_REDUCTIONS_H_
+
 #include <vector>
 #include <cmath>
 namespace mcrg_utilities{
@@ -13,7 +16,7 @@ namespace mcrg_utilities{
         return x+L*y;
     }
 
-	inline std::vector<spin_t> decimate(const std::vector<spin_t> spins, const int& L, const int& EntryPoint){
+	std::vector<spin_t> decimate(const std::vector<spin_t> spins, const int& L, const int& EntryPoint){
         std::vector<spin_t> ret; //TODO do a bit of index magic, to not need to use the vector capabilities, such that it get's fastened up a bit
         for(int dx=0; dx<L;dx+=2)
             for(int dy=0; dy<L;dy+=2)
@@ -21,7 +24,8 @@ namespace mcrg_utilities{
         ret.shrink_to_fit();
         return ret; 
 	}
-	inline std::vector<spin_t> blockspin(const std::vector<spin_t> spins, const int& L, const int& EntryPoint){
+
+	std::vector<spin_t> blockspin(const std::vector<spin_t> spins, const int& L, const int& EntryPoint){
         std::vector<spin_t> ret; //TODO do a bit of index magic, to not need to use the vector capabilities, such that it get's fastened up a bit
         for(int dx=0; dx<L;dx+=2)
             for(int dy=0; dy<L;dy+=2){
@@ -37,32 +41,6 @@ namespace mcrg_utilities{
         return ret; 
 	}
  
-	//std::vector<spin_t> ferrmoagnetic_transformation(const std::vector<spint_t>& spins){
-	//    std::vector<spin_t> ret=spins;//check if this function exists
-    //    for(auto& b: blocks){
-    //        for(int i=0;i<b.size();++i){
-    //            int site=b[i];
-    //            switch(i){
-    //                case 0: //left lower 
-    //                    break;
-    //                case 1: //left upper
-    //                    ret[i]=mod2Pi(M_PI-spins[i]); // mirror at y axis (x -> -x)
-    //                    break;
-    //                case 2: //right lower
-    //                    ret[i]=mod2Pi(-spins[i]); // mirror at x axis (y -> -y) 
-    //                    break;
-    //                case 3: //right upper
-    //                    ret[i]=mod2Pi(spins[i]+M_PI); // mirror at origin (x -> -x, y->-y)
-    //                    break;
-    //                default:
-    //                    std::cout<<"Something went wrong in the ferromagn. transfo in MCRG, index encountered was "<<i<<"... Aborting..."<<std::endl;
-    //                    std::exit(8);
-    //            }
-    //        }
-    //    }
-    //    return ret;
-    //}
-
     spin_t inline mod2Pi(double s){
         return s-std::floor(s/(2*M_PI))*2*M_PI;
     }
@@ -89,3 +67,4 @@ namespace mcrg_utilities{
         return ret;
     }
 }
+#endif //MCPP_MCRG_REDUCTIONS_H_

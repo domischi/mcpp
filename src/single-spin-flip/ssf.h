@@ -21,7 +21,7 @@
 #include <algorithm> //sort
 #include <utility> //pair
 
-#include "../special-observables/mcrg/mcrg.h"
+#include "../special-observables/special-observables.h"
 
 class ssf_worker : public alps::parapack::lattice_mc_worker<>{
 public :
@@ -39,11 +39,6 @@ public :
         mx_stag(num_sites()),//stagered in stripes
         my_stag(0.),
         accepted(0),
-        //ac_measured(false),
-        //safety_factor(params.value_or_default("safety_factor",3)),
-        //autocorrelation(0),
-        //ac_N(0),
-        //ac_obs("autocorr obs"),
         mcrg_it_depth(params.value_or_default("mcrg_iteration_depth",-1)),
         Each_Measurement(params.value_or_default("Each_Measurement",15))
         {
@@ -66,10 +61,6 @@ public :
             Init_Lookup_Tables(); 
 
             En=Energy();
-            //if(T<=1e-3){ //at T=0 there is a problem with this, as the system doesn't move at all (0/0 problem) 
-            //    ac_measured=true;
-            //    autocorrelation=1;
-            //}
             if(measure_mcrg){
                 std::cout << "\tInitialize MCRG with iteration depth "<<mcrg_it_depth<<"..."<<std::flush;
                 mcrg_=std::make_shared<mcrg>(params,0,mcrg_it_depth);
@@ -96,12 +87,6 @@ public :
             }
     }
 
-    //static void print_copyright(std::ostream & out){
-    //    out << "You are using mc++"<<std::endl
-    //        << "copyright (c) by Dominik Schildknecht"<<std::endl
-    //        << "if you reuse this project, please mention the ALPS project and me as a fair user"<<std::endl;
-    //}
-
     void save(alps::ODump &dump) const{
         dump << L << N<< T<< Step_Number << spins;
     }
@@ -111,8 +96,6 @@ public :
     void run(alps::ObservableSet& obs){
         using namespace alps::alea;
         ++Step_Number;
-        //int MAX_STEPS_AC = 1e6;
-        //int n_steps = ac_measured ? autocorrelation*safety_factor+1 : 0;
         int n_steps = N;
         for(int i = 0;i<n_steps;++i){// Do a typewriter sweep (possibly avoiding cache reload every step)
             update(i);
@@ -122,21 +105,6 @@ public :
                 update();
             }
         }
-        //if(!ac_measured && is_thermalized()) { //the ac_time still needs to be determined
-        //    for(int i = 0;i<MAX_STEPS_AC;++i){
-        //        update();
-        //        ac_obs<<En;
-        //        if(!(i % 512)) { //only with full bins the ac time can be measured
-        //            measure_ac_time();
-        //            if(ac_measured) break;
-        //        }
-        //        if(i==MAX_STEPS_AC-1) {
-        //            std::cerr << "didn't find any meaningful autocorrelation time!!"<<std::endl;
-        //            std::exit(13);
-        //        }
-        //    }
-        //}
-        //if(ac_measured && is_thermalized()){
         if(is_thermalized()&&(Step_Number%Each_Measurement)){
             measure(obs);
             accepted=0;
@@ -160,12 +128,6 @@ private:
     double D;
     double cutoff_distance;
     int Each_Measurement;
-    ////autocorrelation time parameters
-    //alps::RealObservable ac_obs;
-    //bool ac_measured;
-    //int ac_N;
-    //double safety_factor;
-    //double autocorrelation;
 
     //Lookup tables 
     std::map<std::pair<int,int>,double> dist_3;
@@ -183,23 +145,6 @@ private:
     bool measure_mcrg;
     std::shared_ptr<mcrg> mcrg_;
     int mcrg_it_depth; //to which depth the mcrg is done
-
-    //double measure_ac_time(){
-    //    if(is_thermalized()&&!ac_measured) {
-    //        if(std::isfinite(N*ac_obs.tau()) && N*ac_obs.tau()>0&&N*ac_obs.tau()>autocorrelation){ 
-    //            autocorrelation=N*ac_obs.tau();
-    //            ac_N=0;
-    //        }
-    //        else
-    //            ++ac_N;
-
-    //        if(ac_N>=10){//autocorrelation time is stable 
-    //            ac_measured=true;
-    //        }
-    //        ac_obs.reset(true);
-    //    }
-    //    return autocorrelation;
-    //}
 
     void update(){update(random_int(num_sites()));}
     void update(int site){
@@ -246,7 +191,6 @@ private:
         Mx=mx_stag/num_sites();
         obs["Mx staggered"]<<Mx; 
         obs["Mx staggered^2"]<<Mx*Mx;
-        //obs["Acceptance Rate"] << (1.0*accepted)/(autocorrelation*safety_factor+1);
         if(measure_mcrg) 
             mcrg_->measure(spins, obs);
     }
@@ -400,68 +344,7 @@ public:
             obs.addObservable(chi); 
         } else std::cerr << "susceptibility staggered will not be calculated"<<std::endl;
         //if(measure_mcrg){
-        //    for(int it=1;it<=mcrg_it_depth;++it){
-        //        if (!(obs.has("MCRG S_alpha even " + std::to_string(it)) &&
-        //              obs.has("MCRG S_alpha even "+ std::to_string(it-1)) &&
-        //              obs.has("MCRG S_alpha S_beta same iteration even "+ std::to_string(it)) &&
-        //              obs.has("MCRG S_alpha S_beta next iteration even "+ std::to_string(it)) &&
-        //              obs.has("MCRG S_alpha odd " + std::to_string(it)) &&
-        //              obs.has("MCRG S_alpha odd "+ std::to_string(it-1)) &&
-        //              obs.has("MCRG S_alpha S_beta same iteration odd "+ std::to_string(it)) &&
-        //              obs.has("MCRG S_alpha S_beta next iteration odd "+ std::to_string(it)))) 
-        //            std::cerr << "NOT ALL INFORMATION FOR A MCRG ANALYSIS WAS GIVEN"<<std::endl;
-        //        else{ //calculate the dS^(n)/dK^(n-1) and dS^(n)/dK^(n)
-        //            //even
-        //            std::valarray<double> S_a_n_e = alps::RealVectorObsevaluator(obs["MCRG S_alpha even "+std::to_string(it)]).mean();
-        //            std::valarray<double> S_a_nm1_e = alps::RealVectorObsevaluator(obs["MCRG S_alpha even "+std::to_string(it-1)]).mean();
-        //            std::valarray<double> S_a_n_S_b_n_e = alps::RealVectorObsevaluator(obs["MCRG S_alpha S_beta same iteration even "+std::to_string(it)]).mean(); 
-        //            std::valarray<double> S_a_n_S_b_nm1_e = alps::RealVectorObsevaluator(obs["MCRG S_alpha S_beta next iteration even "+std::to_string(it)]).mean();
-        //            std::vector<double> m_S_a_m_S_b_st_e;
-        //            std::vector<double> m_S_a_m_S_b_nt_e;
-        //            int n_alpha_e=mcrg::n_interactions_even();
-        //            for(int i=0;i<n_alpha_e;++i)
-        //                for(int j=0;j<n_alpha_e;++j){
-        //                    m_S_a_m_S_b_st_e.push_back((S_a_n_e[i]*S_a_n_e[j]));
-        //                    m_S_a_m_S_b_nt_e.push_back((S_a_nm1_e[i]*S_a_nm1_e[j]));
-        //                }
-        //            std::valarray<double> mSamSb_st_e(m_S_a_m_S_b_st_e.data(),m_S_a_m_S_b_st_e.size());
-        //            std::valarray<double> mSamSb_nt_e(m_S_a_m_S_b_nt_e.data(),m_S_a_m_S_b_nt_e.size());
-        //            //odd
-        //            std::valarray<double> S_a_n_o = alps::RealVectorObsevaluator(obs["MCRG S_alpha odd "+std::to_string(it)]).mean();
-        //            std::valarray<double> S_a_nm1_o = alps::RealVectorObsevaluator(obs["MCRG S_alpha odd "+std::to_string(it-1)]).mean();
-        //            std::valarray<double> S_a_n_S_b_n_o = alps::RealVectorObsevaluator(obs["MCRG S_alpha S_beta same iteration odd "+std::to_string(it)]).mean(); 
-        //            std::valarray<double> S_a_n_S_b_nm1_o = alps::RealVectorObsevaluator(obs["MCRG S_alpha S_beta next iteration odd "+std::to_string(it)]).mean();
-        //            std::vector<double> m_S_a_m_S_b_st_o;
-        //            std::vector<double> m_S_a_m_S_b_nt_o;
-        //            int n_alpha_o=mcrg::n_interactions_odd();
-        //            for(int i=0;i<n_alpha_o;i+=2)
-        //                for(int j=0;j<n_alpha_o;j+=2){
-        //                    m_S_a_m_S_b_st_o.push_back((S_a_n_o[i]*S_a_n_o[j]+S_a_n_o[i+1]*S_a_n_o[j+1]));
-        //                    m_S_a_m_S_b_nt_o.push_back((S_a_nm1_o[i]*S_a_nm1_o[j]+S_a_nm1_o[i+1]*S_a_nm1_o[j+1]));
-        //                }
-        //            std::valarray<double> mSamSb_st_o(m_S_a_m_S_b_st_o.data(),m_S_a_m_S_b_st_o.size());
-        //            std::valarray<double> mSamSb_nt_o(m_S_a_m_S_b_nt_o.data(),m_S_a_m_S_b_nt_o.size());
-        //            if(true){
-        //                std::valarray<double> dS_n_dK_n_e = S_a_n_S_b_n_e - mSamSb_st_e;
-        //                std::valarray<double> dS_n_dK_nm1_e = S_a_n_S_b_nm1_e - mSamSb_nt_e;
-        //                alps::RealVectorObservable dS_n_dK_n_e_obs("MCRG dSdK same iteration even "+ std::to_string(it));
-        //                alps::RealVectorObservable dS_n_dK_nm1_e_obs("MCRG dSdK next iteration even "+ std::to_string(it));
-        //                dS_n_dK_n_e_obs<<dS_n_dK_n_e;
-        //                dS_n_dK_nm1_e_obs<<dS_n_dK_nm1_e;
-        //                obs.addObservable(dS_n_dK_n_e_obs);
-        //                obs.addObservable(dS_n_dK_nm1_e_obs);
-        //                std::valarray<double> dS_n_dK_n_o =S_a_n_S_b_n_o - mSamSb_st_o;
-        //                std::valarray<double> dS_n_dK_nm1_o=S_a_n_S_b_nm1_o - mSamSb_nt_o;
-        //                alps::RealVectorObservable dS_n_dK_n_o_obs("MCRG dSdK same iteration odd "+ std::to_string(it));
-        //                alps::RealVectorObservable dS_n_dK_nm1_o_obs("MCRG dSdK next iteration odd "+ std::to_string(it));
-        //                dS_n_dK_n_o_obs<<dS_n_dK_n_o;  
-        //                //dS_n_dK_nm1_o_obs<< dS_n_dK_nm1_o;
-        //                obs.addObservable(dS_n_dK_n_o_obs);
-        //                obs.addObservable(dS_n_dK_nm1_o_obs);
-        //            } else 
-        //                std::cerr << "NO MEASUREMENTS WERE MADE IN THE OBSERVABLES NEEDED FOR MCRG";
-        //        }
-        //    }
+        //    
         //}
     }
 

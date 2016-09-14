@@ -1,3 +1,6 @@
+#ifndef MCPP_MCRG_INTERACTIONS_H_
+#define MCPP_MCRG_INTERACTIONS_H_
+
 #include <vector>
 #include <tuple>
 
@@ -234,3 +237,4 @@ std::vector<std::vector<shift_t>> massive = {
         {std::make_tuple(0,0,1),std::make_tuple(-1,2,0)} //d-12 yx comp
     };
 }
+#endif //MCPP_MCRG_INTERACTIONS_H_
