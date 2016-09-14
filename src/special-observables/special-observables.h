@@ -1,0 +1,6 @@
+#ifndef MCPP_SPECIAL_OBSERVABLES_H_
+#define MCPP_SPECIAL_OBSERVABLES_H_
+
+#include "mcrg/mcrg.h"
+
+#endif //MCPP_SPECIAL_OBSERVABLES_H_
