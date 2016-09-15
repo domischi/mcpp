@@ -9,3 +9,6 @@
 
 #ignore my Ideas.txt file
 Ideas.txt
+
+#ignore the generated versions file
+src/version/version.h
