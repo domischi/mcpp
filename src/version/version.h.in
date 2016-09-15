@@ -1,0 +1,11 @@
+#ifndef MCPP_VERSION_H
+#define MCPP_VERSION_H
+
+// This uses the short git hash (7 alphanum chars), with a relatively high probability of a collision compared to the full (40 alphanum chars)
+// However the number of commits, such that the probability of a collision is 1% is nearly 40k, for a 50% chance it is around 320k
+// Compare also with birthday paradox, as the number of possible small hashes is (36^7 >> 320k)
+// However not at all a problem, but rather useful to just use the small one and thinking of a very small chance of a collision
+
+#cmakedefine GIT_COMMIT_HASH "@GIT_COMMIT_HASH@"
+
+#endif //MCPP_VERSION_H
