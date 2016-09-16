@@ -21,7 +21,9 @@
 #include <algorithm> //sort
 #include <utility> //pair
 
-#include "../special-observables/special-observables.h"
+#include "../hamiltonians/hamiltonian_factory.h"
+
+#include "../special-observables/special_observables.h"
 
 class xy_worker : public alps::parapack::lattice_mc_worker<>{
 public :
@@ -30,8 +32,9 @@ public :
         Thermalization_Sweeps(params.value_or_default("THERMALIZATION",100)),
         Measure_Sweeps(params.value_or_default("SWEEPS",5000)),
         L(params["L"]),
-        N(L*L),
+        N(num_sites()),//TODO get this out of the graph function...
         T(params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"])),
+        HamiltonianList(HamiltonianFactory(params)),
         D(params.value_or_default("D",1.)),
         Step_Number(0),
         mx(0.),
@@ -59,9 +62,6 @@ public :
             else {
                 std::cerr <<"Ground state not explicitly defined, for this lattice, implement this or assume all spins to point in the x direction"<<std::endl;
             }
-            //Init the lookup tables
-            Init_Lookup_Tables(); 
-
             En=Energy();
             if(measure_mcrg){
                 std::cout << "\tInitialize MCRG with iteration depth "<<mcrg_it_depth<<"..."<<std::flush;
@@ -197,10 +197,8 @@ private:
     double targeted_acc_ratio;
     double angle_dev;
 
-    //Lookup tables 
-    std::map<std::pair<int,int>,double> dist_3;
-    std::map<std::pair<int,int>,double> phi;
-    std::vector<std::vector<int>> neighbour_list; //saves which neighbours are relevant (as not only nearest neighbours count in dipole )
+    //List of pointers to the Hamiltonians, implemented in ../hamiltonians/xy_*.h
+    std::vector<std::shared_ptr<XY_Hamiltonian>> HamiltonianList;
 
     //Easy observables
     double En;
@@ -218,8 +216,7 @@ private:
     void update(int site){
         //propose a new state
         double old_state=spins[site];
-        double old_energy=single_site_Energy(site);
-        
+        double old_energy=single_site_Energy(site); 
         double new_state=old_state+random_real_shifted(angle_dev);
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);
@@ -265,71 +262,6 @@ private:
     inline double beta(){ 
         return 1./T;
     }
-    void Init_Lookup_Tables(){
-        std::vector<vector_type> basis;
-        basis_vector_iterator v, v_end;
-        for(std::tie(v,v_end)=basis_vectors();v!= v_end;++v){
-            basis.push_back(*v);
-        }
-        std::vector<vector_type> periodic_translations;
-        int dim = dimension();
-        assert(dim==basis[0].size());
-        periodic_translations.push_back(vector_type(dim,0.));
-        vector_type pmb(dimension()),ppb(dimension()); //periodic_translation+-L*basis
-        for(auto& actual_basis_vector : basis){
-            int size_periodic_translations=periodic_translations.size();
-            for(int i=0;i<size_periodic_translations;++i){//to avoid double counting a specific vector, and to not have a segfault
-                vector_type p = periodic_translations[i];
-                for(int d =0;d<dimension();++d){
-                    pmb[d]=(p[d]-L*(actual_basis_vector[d]));
-                    ppb[d]=(p[d]+L*(actual_basis_vector[d]));
-                }
-                periodic_translations.push_back(pmb);
-                periodic_translations.push_back(ppb);
-            }
-        }
-        for(int i=0;i<num_sites();++i) neighbour_list.push_back(std::vector<int>());
-        std::map<std::pair<int,int>,double> dist_map;
-        for(site_iterator s_iter= sites().first; s_iter!=sites().second; ++s_iter)
-        for(site_iterator s_iter2= s_iter; s_iter2!=sites().second; ++s_iter2)
-        for(auto& p : periodic_translations)
-            if(*s_iter!=*s_iter2){
-                vector_type c1(coordinate(*s_iter));
-                vector_type c2(coordinate(*s_iter2));
-                double dist=distance(c1,c2,p);
-                std::pair<int,int> pair_ = std::make_pair(*s_iter,*s_iter2);
-                if(dist<=cutoff_distance && (dist_map[pair_]==0. || dist<dist_map[pair_])){ //new value is smaller than the previous calculated for this pair
-                    dist_map[pair_]=dist;
-                    std::pair<int,int> pair_inverse=std::make_pair(pair_.second,pair_.first);
-                    dist_3[pair_]=std::pow(dist,-3);
-                    dist_3[pair_inverse]=std::pow(dist,-3);
-                    phi[pair_]=std::atan2(-(c1[1]+p[1]-c2[1]),-(c1[0]+p[0]-c2[0]));
-                    phi[pair_inverse]=std::atan2((c1[1]+p[1]-c2[1]),(c1[0]+p[0]-c2[0]));
-                    neighbour_list[*s_iter].push_back(*s_iter2);
-                    neighbour_list[*s_iter2].push_back(*s_iter);
-                }
-            }
-        //Shrink the neighbour_list
-        for(auto& nl : neighbour_list) nl.shrink_to_fit();
-        neighbour_list.shrink_to_fit();
-    }
-    inline double distance(vector_type& x, vector_type& y, vector_type& periodic){
-        return std::sqrt(std::pow(x[0]-y[0]+periodic[0],2)+std::pow(x[1]-y[1]+periodic[1],2));
-    }
-    inline double inv_distance_cubed(int i,int j) {
-        return inv_distance_cubed(std::make_pair(i,j));
-    }
-    inline double inv_distance_cubed(std::pair<int,int> pair_){
-        double ret_val=dist_3[pair_];
-        assert(ret_val>0.);
-        return ret_val;
-    }
-    inline double angle_w_x(int i, int j) { 
-        return angle_w_x(std::make_pair(i,j));
-    }
-    inline double angle_w_x(std::pair<int,int> pair_){
-        return phi[pair_];
-    }
     inline int random_int(int j){
         return static_cast<int>(j*uniform_01());
     }
@@ -339,18 +271,14 @@ private:
     inline double random_real_shifted(double s){
         return -s/2+s*uniform_01();
     }
-    double Energy(){
-        double e=0.;
-        for(int i =0;i<N;++i){
-            e+=single_site_Energy(i);
-        }
-        return e/2;
+    double Energy() {
+        double E=0.;
+        for (auto& h : HamiltonianList) E+=h->Energy(spins);
+        return E;
     }
     double single_site_Energy(int i){
         double e=0.;
-        for(int j : neighbour_list[i]){
-            e-=D*inv_distance_cubed(i,j)*(1.5*std::cos(spins[i]+spins[j]-2*angle_w_x(i,j))+0.5*std::cos(spins[i]-spins[j]));
-        }
+        for (auto& h : HamiltonianList) e+=h->SingleSiteEnergy(spins, i);
         return e;
     }
 };
