@@ -126,7 +126,7 @@ private:
         assert(ret_val>0.);
         return ret_val;
     }
-    inline double angle_w_x(int i, int j) { 
+    inline double angle_w_x(int i, int j) {//it might be useful to check what it is for site 0 and then do the transformation for the second site if one assumes a shift first. This would allow only to save the interactions for the 0th site, and therefore reduce the map by a Factor of N which will probably be easier to save & load 
         return angle_w_x(std::make_pair(i,j));
     }
     inline double angle_w_x(std::pair<int,int> pair_){
