@@ -1,6 +1,12 @@
 #ifndef MCPP_XY_HAMILTONIAN_DIPOLE_H
 #define MCPP_XY_HAMILTONIAN_DIPOLE_H
 
+#include <vector>
+#include <numeric>
+#include <random>
+#include <cmath>
+#include <iomanip>
+
 #include "xy_hamiltonian.h"
 
 class XY_Dipole : public XY_Hamiltonian{
@@ -11,10 +17,11 @@ public:
     D(params.value_or_default("D",1)),
     L(params["L"]),
     N(L*L),
+    dilution_rate(params.value_or_default("Dilution Rate", 0.)),
     gh(params){ 
         cutoff_distance=static_cast<double>(params.value_or_default("cutoff_distance",3))*static_cast<double>(params.value_or_default("a",1.));
-        Init_Lookup_Tables();
-    }
+        Init_Lookup_Tables(params["DISORDER_SEED"]);
+    } 
     virtual double SingleSiteEnergy(std::vector<double> const& spins, int i){
         double e=0.;
         for(int j : neighbour_list[i]){
@@ -24,8 +31,9 @@ public:
     }
 
 private:
-    int L,N;
+    int L,N, DISORDER_SEED;
     double D;
+    double dilution_rate;
     double cutoff_distance;
     alps::graph_helper<> gh;
     //Lookup tables 
@@ -37,7 +45,7 @@ private:
     typedef typename alps::graph_helper<>::basis_vector_iterator basis_vector_iterator;
     typedef typename alps::graph_helper<>::site_iterator site_iterator;
      
-    void Init_Lookup_Tables(){
+    void Init_Lookup_Tables(int DISORDER_SEED){
         std::vector<vector_type> basis;
         basis_vector_iterator v, v_end;
         for(std::tie(v,v_end)=gh.basis_vectors();v!= v_end;++v){
@@ -81,6 +89,24 @@ private:
                     neighbour_list[*s_iter2].push_back(*s_iter);
                 }
             }
+        //Dilution Disorder
+        if(dilution_rate > 0.){
+            std::cout << "WARNING: dilution is only implemented for the dipolar interaction!"<<std::endl;
+            std::mt19937 rng(DISORDER_SEED);
+            std::vector<int> site_list(N);
+            iota(site_list.begin(),site_list.end(),0);// List of the sites
+            std::shuffle(site_list.begin(),site_list.end(),rng);
+            int Num_Diluted_Sites=static_cast<int>(std::round(dilution_rate*N));
+            std::cout << "Remove "<<Num_Diluted_Sites<<"/"<<N<<" resulting in an effective dilution rate of "<<std::setprecision(3)<<Num_Diluted_Sites*1.0/N<< " ~ "<<dilution_rate<<std::endl;
+            site_list.resize(Num_Diluted_Sites);
+            for (auto& l : site_list) {
+                neighbour_list[l]=std::vector<int>(); //make sure these sites have no neighbours 
+            }
+            for(auto& nl : neighbour_list){ //make sure that they are not neighbours of others
+                for(auto& s : site_list)
+                    nl.erase(std::remove(nl.begin(),nl.end(),s),nl.end());
+            }
+        }
         //Shrink the neighbour_list
         for(auto& nl : neighbour_list) nl.shrink_to_fit();
         neighbour_list.shrink_to_fit();
