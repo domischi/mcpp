@@ -5,6 +5,7 @@
 #include <numeric>
 #include <random>
 #include <cmath>
+#include <algorithm>
 #include <iomanip>
 
 #include "xy_hamiltonian.h"
@@ -107,8 +108,11 @@ private:
                     nl.erase(std::remove(nl.begin(),nl.end(),s),nl.end());
             }
         }
-        //Shrink the neighbour_list
-        for(auto& nl : neighbour_list) nl.shrink_to_fit();
+        //Sort & Shrink the neighbour_list
+        for(auto& nl : neighbour_list) {
+            std::sort(nl.begin(),nl.end());
+            nl.shrink_to_fit();
+        }
         neighbour_list.shrink_to_fit();
     }
     inline double distance(vector_type& x, vector_type& y, vector_type& periodic){
