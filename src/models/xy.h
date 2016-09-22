@@ -212,7 +212,7 @@ private:
     std::shared_ptr<mcrg> mcrg_;
     int mcrg_it_depth; //to which depth the mcrg is done
 
-    void update(){update(random_int(num_sites()));}
+    inline void update(){update(random_int(num_sites()));}
     void update(int site){
         //propose a new state
         double old_state=spins[site];
@@ -221,6 +221,7 @@ private:
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);
         if(random_real()<=std::exp(-(new_energy-old_energy)/T)){
+            //if(site==0)std::cout << std::setw(15)<<new_state/M_PI<<std::setw(15)<<old_state/M_PI<<std::endl;
             //update variables due to local change
             mx+=std::cos(new_state)-std::cos(old_state);
             my+=std::sin(new_state)-std::sin(old_state);

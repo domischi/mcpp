@@ -22,6 +22,13 @@ public:
     gh(params){ 
         cutoff_distance=static_cast<double>(params.value_or_default("cutoff_distance",3))*static_cast<double>(params.value_or_default("a",1.));
         Init_Lookup_Tables(params["DISORDER_SEED"]);
+        //for (int i = 0; i < N;++i)
+        //for (int j = 0; j < N;++j)
+        //    std::cout<< std::setw(3)<<i<<std::setw(3)<<j<<std::setw(3)<<reduced_index(i,j).first<<std::setw(3)<<reduced_index(i,j).second<<std::endl;
+        //for(int i=0;i<N;++i)
+        //    for(int j=0;j<N;++j)
+        //        std::cout <<std::setw(4)<<i<<std::setw(4)<<j<<"\t("<<reduced_index(i,j).first<<", "<<reduced_index(i,j).second<<")\t("<<reduced_index(j,i).first<<","<<reduced_index(j,i).second<<")"<<std::endl;
+    
     } 
     virtual double SingleSiteEnergy(std::vector<double> const& spins, int i){
         double e=0.;
@@ -38,14 +45,27 @@ private:
     double cutoff_distance;
     alps::graph_helper<> gh;
     //Lookup tables 
-    std::map<std::pair<int,int>,double> dist_3;
+    std::map<std::pair<int,int>,double> dist_3; //TODO check if an unordered map is faster...
     std::map<std::pair<int,int>,double> phi;
     std::vector<std::vector<int>> neighbour_list; //saves which neighbours are relevant (as not only nearest neighbours count in dipole )
                         
     typedef typename alps::graph_helper<>::vector_type vector_type;
     typedef typename alps::graph_helper<>::basis_vector_iterator basis_vector_iterator;
     typedef typename alps::graph_helper<>::site_iterator site_iterator;
-     
+    
+    inline std::pair<int,int> reduced_index(int i, int j){
+        int xi,yi,xj,yj,x,y;
+        xi=i/L;
+        yi=i%L;
+        xj=j/L;
+        yj=j%L;
+        x=(xi-xj+L)%L;
+        y=(yi-yj+L)%L;
+        return std::make_pair(x,y); //TODO as now 0<=x,y<L => x*L+y is unique for the shift vectors => simple int as key...
+    }
+    inline std::pair<int,int> reduced_index(std::pair<int,int> p) {
+        return reduced_index(p.first,p.second);
+    }
     void Init_Lookup_Tables(int DISORDER_SEED){
         std::vector<vector_type> basis;
         basis_vector_iterator v, v_end;
@@ -71,26 +91,23 @@ private:
         }
         for(int i=0;i<gh.num_sites();++i) neighbour_list.push_back(std::vector<int>());
         std::map<std::pair<int,int>,double> dist_map;
-        for(site_iterator s_iter= gh.sites().first; s_iter!=gh.sites().second; ++s_iter)
-        for(site_iterator s_iter2= s_iter; s_iter2!=gh.sites().second; ++s_iter2)
+        for(site_iterator s_iter = gh.sites().first; s_iter !=gh.sites().second; ++s_iter )
+        for(site_iterator s_iter2= gh.sites().first; s_iter2!=gh.sites().second; ++s_iter2)
         for(auto& p : periodic_translations)
             if(*s_iter!=*s_iter2){
                 vector_type c1(gh.coordinate(*s_iter));
                 vector_type c2(gh.coordinate(*s_iter2));
                 double dist=distance(c1,c2,p);
-                std::pair<int,int> pair_ = std::make_pair(*s_iter,*s_iter2);
-                if(dist<=cutoff_distance && (dist_map[pair_]==0. || dist<dist_map[pair_])){ //new value is smaller than the previous calculated for this pair
-                    dist_map[pair_]=dist;
-                    std::pair<int,int> pair_inverse=std::make_pair(pair_.second,pair_.first);
-                    dist_3[pair_]=std::pow(dist,-3);
-                    dist_3[pair_inverse]=std::pow(dist,-3);
-                    phi[pair_]=std::atan2(-(c1[1]+p[1]-c2[1]),-(c1[0]+p[0]-c2[0]));
-                    phi[pair_inverse]=std::atan2((c1[1]+p[1]-c2[1]),(c1[0]+p[0]-c2[0]));
+                std::pair<int,int> ri = reduced_index(*s_iter, *s_iter2);
+                //if(*s_iter==8 && *s_iter2==5) std::cout << dist<<std::setw(15)<<reduced_index(8,5).first<<" "<<reduced_index(8,5).second<<std::endl;
+                if(dist<=cutoff_distance && (dist_map[ri]==0. || dist<=dist_map[ri])){ //new value is smaller than the previous calculated for this pair
+                    dist_map[ri]=dist;
+                    dist_3[ri]=std::pow(dist,-3);
+                    phi[ri]=std::atan2(-(c1[1]+p[1]-c2[1]),-(c1[0]+p[0]-c2[0]));
                     neighbour_list[*s_iter].push_back(*s_iter2);
-                    neighbour_list[*s_iter2].push_back(*s_iter);
                 }
             }
-        //Dilution Disorder
+        //Dilution Disorder //TODO this is broken as with the reduced_index business...
         if(dilution_rate > 0.){
             std::cout << "WARNING: dilution is only implemented for the dipolar interaction!"<<std::endl;
             std::mt19937 rng(DISORDER_SEED);
@@ -114,6 +131,11 @@ private:
             nl.shrink_to_fit();
         }
         neighbour_list.shrink_to_fit();
+        //for(auto& nl:neighbour_list) std::cout << nl.size()<<std::endl;// not all of them have the same number of neighbours...
+        //int test=8;
+        //for (auto& s : neighbour_list[test]){
+        //    std::cout << test<< std::setw(4)<<s <<std::setw(15)<<std::pow(inv_distance_cubed(test,s),(-2./3))<<std::setw(15)<<angle_w_x(test,s)/M_PI<<std::endl;
+        //}
     }
     inline double distance(vector_type& x, vector_type& y, vector_type& periodic){
         return std::sqrt(std::pow(x[0]-y[0]+periodic[0],2)+std::pow(x[1]-y[1]+periodic[1],2));
@@ -121,8 +143,8 @@ private:
     inline double inv_distance_cubed(int i,int j) {
         return inv_distance_cubed(std::make_pair(i,j));
     }
-    inline double inv_distance_cubed(std::pair<int,int> pair_){
-        double ret_val=dist_3[pair_];
+    inline double inv_distance_cubed(std::pair<int,int> pair_){// TODO make the packing and packing of a pair consistent
+        double ret_val=dist_3[reduced_index(pair_)];
         assert(ret_val>0.);
         return ret_val;
     }
@@ -130,7 +152,7 @@ private:
         return angle_w_x(std::make_pair(i,j));
     }
     inline double angle_w_x(std::pair<int,int> pair_){
-        return phi[pair_];
+        return phi[reduced_index(pair_)];
     }
 
 };
