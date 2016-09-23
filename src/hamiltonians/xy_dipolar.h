@@ -45,15 +45,15 @@ private:
     double cutoff_distance;
     alps::graph_helper<> gh;
     //Lookup tables 
-    std::map<std::pair<int,int>,double> dist_3; //TODO check if an unordered map is faster...
-    std::map<std::pair<int,int>,double> phi;
+    std::map<int,double> dist_3; //TODO check if an unordered map is faster...
+    std::map<int,double> phi;
     std::vector<std::vector<int>> neighbour_list; //saves which neighbours are relevant (as not only nearest neighbours count in dipole )
                         
     typedef typename alps::graph_helper<>::vector_type vector_type;
     typedef typename alps::graph_helper<>::basis_vector_iterator basis_vector_iterator;
     typedef typename alps::graph_helper<>::site_iterator site_iterator;
     
-    inline std::pair<int,int> reduced_index(int i, int j){
+    inline int reduced_index(int i, int j){
         int xi,yi,xj,yj,x,y;
         xi=i/L;
         yi=i%L;
@@ -61,9 +61,9 @@ private:
         yj=j%L;
         x=(xi-xj+L)%L;
         y=(yi-yj+L)%L;
-        return std::make_pair(x,y); //TODO as now 0<=x,y<L => x*L+y is unique for the shift vectors => simple int as key...
+        return L*x+y;
     }
-    inline std::pair<int,int> reduced_index(std::pair<int,int> p) {
+    inline int reduced_index(std::pair<int,int> p) {
         return reduced_index(p.first,p.second);
     }
     void Init_Lookup_Tables(int DISORDER_SEED){
@@ -90,7 +90,7 @@ private:
             }
         }
         for(int i=0;i<gh.num_sites();++i) neighbour_list.push_back(std::vector<int>());
-        std::map<std::pair<int,int>,double> dist_map;
+        std::map<int,double> dist_map;
         for(site_iterator s_iter = gh.sites().first; s_iter !=gh.sites().second; ++s_iter )
         for(site_iterator s_iter2= gh.sites().first; s_iter2!=gh.sites().second; ++s_iter2)
         for(auto& p : periodic_translations)
@@ -98,7 +98,7 @@ private:
                 vector_type c1(gh.coordinate(*s_iter));
                 vector_type c2(gh.coordinate(*s_iter2));
                 double dist=distance(c1,c2,p);
-                std::pair<int,int> ri = reduced_index(*s_iter, *s_iter2);
+                int ri = reduced_index(*s_iter, *s_iter2);
                 //if(*s_iter==8 && *s_iter2==5) std::cout << dist<<std::setw(15)<<reduced_index(8,5).first<<" "<<reduced_index(8,5).second<<std::endl;
                 if(dist<=cutoff_distance && (dist_map[ri]==0. || dist<=dist_map[ri])){ //new value is smaller than the previous calculated for this pair
                     dist_map[ri]=dist;
