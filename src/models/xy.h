@@ -53,7 +53,7 @@ public :
             cutoff_distance*=a;
             //Initialize Spins and the local observables
             spins.resize(N, 0.);
-            if(is_bipartite()&&true)//TODO implement check if ground state is striped as used below
+            if(params["LATTICE"]=="square lattice")//TODO implement check if ground state is striped as used below
                 for(site_iterator s_iter= sites().first; s_iter!=sites().second; ++s_iter){
                     if(((*s_iter)%2)){//odd y site
                         spins[*s_iter]=M_PI;
@@ -333,7 +333,7 @@ public:
             alps::RealObsevaluator Mx = obs["Mx"];
             alps::RealObsevaluator Mx2 = obs["Mx^2"];
             alps::RealObsevaluator chi("susceptibility");
-            chi = beta() * (Mx2-Mx*Mx); //TODO divide by num_sites()?
+            chi = beta() * (Mx2-Mx*Mx);
             obs.addObservable(chi); 
         } else std::cerr << "susceptibility will not be calculated"<<std::endl;
         if(obs.has("M staggered")&&obs.has("M staggered^2")){
