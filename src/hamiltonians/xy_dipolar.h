@@ -45,8 +45,10 @@ private:
     double cutoff_distance;
     alps::graph_helper<> gh;
     //Lookup tables 
-    std::map<int,double> dist_3; //TODO check if an unordered map is faster...
-    std::map<int,double> phi;
+    //std::unordered_map<int,double> dist_3; //TODO check if an unordered map is faster...
+    //std::unordered_map<int,double> phi;
+    std::vector<double> dist_3; //TODO check if an unordered map is faster...
+    std::vector<double> phi;
     std::vector<std::vector<int>> neighbour_list; //saves which neighbours are relevant (as not only nearest neighbours count in dipole )
                         
     typedef typename alps::graph_helper<>::vector_type vector_type;
@@ -67,6 +69,8 @@ private:
         return reduced_index(p.first,p.second);
     }
     void Init_Lookup_Tables(int DISORDER_SEED){
+        dist_3=std::vector<double>(N);
+        phi=std::vector<double>(N);
         std::vector<vector_type> basis;
         basis_vector_iterator v, v_end;
         for(std::tie(v,v_end)=gh.basis_vectors();v!= v_end;++v){
