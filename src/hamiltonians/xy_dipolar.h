@@ -45,9 +45,7 @@ private:
     double cutoff_distance;
     alps::graph_helper<> gh;
     //Lookup tables 
-    //std::unordered_map<int,double> dist_3; //TODO check if an unordered map is faster...
-    //std::unordered_map<int,double> phi;
-    std::vector<double> dist_3; //TODO check if an unordered map is faster...
+    std::vector<double> dist_3;
     std::vector<double> phi;
     std::vector<std::vector<int>> neighbour_list; //saves which neighbours are relevant (as not only nearest neighbours count in dipole )
                         
@@ -145,18 +143,16 @@ private:
         return std::sqrt(std::pow(x[0]-y[0]+periodic[0],2)+std::pow(x[1]-y[1]+periodic[1],2));
     }
     inline double inv_distance_cubed(int i,int j) {
-        return inv_distance_cubed(std::make_pair(i,j));
+        return dist_3[reduced_index(i,j)];
     }
-    inline double inv_distance_cubed(std::pair<int,int> pair_){// TODO make the packing and packing of a pair consistent
-        double ret_val=dist_3[reduced_index(pair_)];
-        assert(ret_val>0.);
-        return ret_val;
+    inline double inv_distance_cubed(std::pair<int,int> pair_){
+        return inv_distance_cubed(pair_.first, pair_.second);
     }
-    inline double angle_w_x(int i, int j) {//it might be useful to check what it is for site 0 and then do the transformation for the second site if one assumes a shift first. This would allow only to save the interactions for the 0th site, and therefore reduce the map by a Factor of N which will probably be easier to save & load 
-        return angle_w_x(std::make_pair(i,j));
+    inline double angle_w_x(int i, int j) {
+        return phi[reduced_index(i,j)];
     }
     inline double angle_w_x(std::pair<int,int> pair_){
-        return phi[reduced_index(pair_)];
+        return angle_w_x(pair_.first, pair_.second);
     }
 
 };

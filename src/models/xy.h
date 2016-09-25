@@ -32,7 +32,7 @@ public :
         Thermalization_Sweeps(params.value_or_default("THERMALIZATION",100)),
         Measure_Sweeps(params.value_or_default("SWEEPS",5000)),
         L(params["L"]),
-        N(num_sites()),//TODO get this out of the graph function...
+        N(num_sites()),
         T(params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"])),
         HamiltonianList(HamiltonianFactory(params)),
         D(params.value_or_default("D",1.)),
