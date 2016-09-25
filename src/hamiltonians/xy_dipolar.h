@@ -22,13 +22,6 @@ public:
     gh(params){ 
         cutoff_distance=static_cast<double>(params.value_or_default("cutoff_distance",3))*static_cast<double>(params.value_or_default("a",1.));
         Init_Lookup_Tables(params["DISORDER_SEED"]);
-        //for (int i = 0; i < N;++i)
-        //for (int j = 0; j < N;++j)
-        //    std::cout<< std::setw(3)<<i<<std::setw(3)<<j<<std::setw(3)<<reduced_index(i,j).first<<std::setw(3)<<reduced_index(i,j).second<<std::endl;
-        //for(int i=0;i<N;++i)
-        //    for(int j=0;j<N;++j)
-        //        std::cout <<std::setw(4)<<i<<std::setw(4)<<j<<"\t("<<reduced_index(i,j).first<<", "<<reduced_index(i,j).second<<")\t("<<reduced_index(j,i).first<<","<<reduced_index(j,i).second<<")"<<std::endl;
-    
     } 
     virtual double SingleSiteEnergy(std::vector<double> const& spins, int i){
         double e=0.;
@@ -133,11 +126,6 @@ private:
             nl.shrink_to_fit();
         }
         neighbour_list.shrink_to_fit();
-        //for(auto& nl:neighbour_list) std::cout << nl.size()<<std::endl;// not all of them have the same number of neighbours...
-        //int test=8;
-        //for (auto& s : neighbour_list[test]){
-        //    std::cout << test<< std::setw(4)<<s <<std::setw(15)<<std::pow(inv_distance_cubed(test,s),(-2./3))<<std::setw(15)<<angle_w_x(test,s)/M_PI<<std::endl;
-        //}
     }
     inline double distance(vector_type& x, vector_type& y, vector_type& periodic){
         return std::sqrt(std::pow(x[0]-y[0]+periodic[0],2)+std::pow(x[1]-y[1]+periodic[1],2));
