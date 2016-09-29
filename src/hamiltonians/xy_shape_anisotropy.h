@@ -10,10 +10,10 @@
 // Describes a local shape anisotropy, such that a specific directions are more favorable in terms of an angle
 // The parameter A describes how much this is actually the case
 // The parameter p describes how many minima the actual shape anisotropy has.
-class XY_Shape_Anisotropy : public XY_Hamiltonian{
+class XY_Shape_Anisotropy : public XY_Hamiltonian<XY_Shape_Anisotropy>{
 public:
     XY_Shape_Anisotropy (alps::Parameters const& params) : 
-    XY_Hamiltonian(params),
+    XY_Hamiltonian<XY_Shape_Anisotropy>(params),
     A(params.value_or_default("A",1.)),
     p_max(params["p_max"])
     {

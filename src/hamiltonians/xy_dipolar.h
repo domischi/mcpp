@@ -11,10 +11,10 @@
 #include "xy_hamiltonian.h"
 
 template<bool DISORDERED>
-class XY_Dipole : public XY_Hamiltonian{
+class XY_Dipole : public XY_Hamiltonian<XY_Dipole<DISORDERED>>{
 public:
     XY_Dipole (alps::Parameters const& params) : 
-    XY_Hamiltonian(params),
+    XY_Hamiltonian<XY_Dipole<DISORDERED>>(params),
     D(params.value_or_default("D",1)),
     L(params["L"]),
     N(L*L),
