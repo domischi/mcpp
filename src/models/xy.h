@@ -21,7 +21,8 @@
 #include <algorithm> //sort
 #include <utility> //pair
 
-#include "../hamiltonians/hamiltonian_factory.h"
+//#include "../hamiltonians/hamiltonian_factory.h"
+#include "../hamiltonians/hamiltonian_list.h"
 
 #include "../special-observables/special_observables.h"
 
@@ -34,7 +35,7 @@ public :
         L(params["L"]),
         N(num_sites()),
         T(params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"])),
-        HamiltonianList(HamiltonianFactory(params)),
+        HamiltonianList(params),
         D(params.value_or_default("D",1.)),
         Step_Number(0),
         mx(0.),
@@ -197,8 +198,8 @@ private:
     double targeted_acc_ratio;
     double angle_dev;
 
-    //List of pointers to the Hamiltonians, implemented in ../hamiltonians/xy_*.h
-    std::vector<std::shared_ptr<XY_Hamiltonian>> HamiltonianList;
+    // struct of Hamiltonian pointers -> allows CRTP
+    Hamiltonian_List HamiltonianList;
 
     //Easy observables
     double En;
@@ -221,7 +222,6 @@ private:
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);
         if(random_real()<=std::exp(-(new_energy-old_energy)/T)){
-            //if(site==0)std::cout << std::setw(15)<<new_state/M_PI<<std::setw(15)<<old_state/M_PI<<std::endl;
             //update variables due to local change
             mx+=std::cos(new_state)-std::cos(old_state);
             my+=std::sin(new_state)-std::sin(old_state);
@@ -273,14 +273,10 @@ private:
         return -s/2+s*uniform_01();
     }
     double Energy() {
-        double E=0.;
-        for (auto& h : HamiltonianList) E+=h->Energy(spins);
-        return E;
+        return HamiltonianList.Energy(spins);
     }
     double single_site_Energy(int i){
-        double e=0.;
-        for (auto& h : HamiltonianList) e+=h->SingleSiteEnergy(spins, i);
-        return e;
+        return HamiltonianList.SingleSiteEnergy(spins, i);
     }
 };
 
