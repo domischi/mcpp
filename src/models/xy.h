@@ -28,6 +28,8 @@
 
 class xy_worker : public alps::parapack::lattice_mc_worker<>{
 public :
+    enum init_t {GS, Random}; 
+
     xy_worker(const alps::Parameters& params) :
         alps::parapack::lattice_mc_worker<>(params), 
         Thermalization_Sweeps(params.value_or_default("THERMALIZATION",100)),
@@ -52,17 +54,7 @@ public :
             cutoff_distance=params.value_or_default("cutoff_distance",3.);
             double a=params.value_or_default("a",1.);
             cutoff_distance*=a;
-            //Initialize Spins and the local observables
-            spins.resize(N, 0.);
-            if(params["LATTICE"]=="square lattice")//TODO implement check if ground state is striped as used below
-                for(site_iterator s_iter= sites().first; s_iter!=sites().second; ++s_iter){
-                    if(((*s_iter)%2)){//odd y site
-                        spins[*s_iter]=M_PI;
-                    }
-                }
-            else {
-                std::cerr <<"Ground state not explicitly defined, for this lattice, implement this or assume all spins to point in the x direction"<<std::endl;
-            }
+            init_spins(params);
             En=Energy();
             if(measure_mcrg){
                 std::cout << "\tInitialize MCRG with iteration depth "<<mcrg_it_depth<<"..."<<std::flush;
@@ -189,6 +181,7 @@ private:
     int Step_Number;
     int L;
     int N; //L^2
+    init_t init_type;
     std::vector<double> spins; //saves the spins
     double T;
     double D;
@@ -259,6 +252,32 @@ private:
         obs["Mx staggered^2"]<<Mx*Mx;
         if(measure_mcrg) 
             mcrg_->measure(spins, obs);
+    }
+    inline void init_spins(const alps::Parameters& params){
+        init_type=(params.value_or_default("Initialization","GS")=="Random" ? init_t::Random : init_t::GS);
+        spins.resize(N, 0.);
+        switch(init_type) {
+            case init_t::GS:
+                if(params["LATTICE"]=="square lattice")
+                    for(site_iterator s_iter= sites().first; s_iter!=sites().second; ++s_iter){
+                        if(((*s_iter)%2)){//odd y site
+                            spins[*s_iter]=M_PI;
+                        }
+                    }
+                else {
+                    std::cerr <<"Ground state not explicitly defined, for this lattice, implement this or assume all spins to point in the x direction"<<std::endl;
+                }
+                break;
+            case init_t::Random:
+                for(auto& s: spins) {
+                    s=random_real(0,2*M_PI);
+                }
+                break;
+            default:
+                std::cerr << "Smth went terribly wrong as this line should never be hit"<<std::endl;
+        }
+            
+
     }
     inline double beta(){ 
         return 1./T;
