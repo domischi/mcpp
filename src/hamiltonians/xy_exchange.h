@@ -5,11 +5,11 @@
 
 
 // Apply the convention that J>0 -> Ferromagnetic
-class XY_Exchange : public XY_Hamiltonian{
+class XY_Exchange : public XY_Hamiltonian<XY_Exchange>{
 public:
     //typedef typename XY_Hamiltonian<G>::spin_t spin_t;
     XY_Exchange (alps::Parameters const& params) : 
-    XY_Hamiltonian(params),
+    XY_Hamiltonian<XY_Exchange>(params),
     J(params.value_or_default("J",1)),
     L(params["L"]),
     gh(params){
