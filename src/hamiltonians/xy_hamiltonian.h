@@ -11,8 +11,8 @@ class XY_Hamiltonian {
 public:
     typedef double spin_t;
     XY_Hamiltonian (alps::Parameters const&) {}
-    virtual double SingleSiteEnergy(std::vector<double> const& spins, int i) =0;
-    virtual double Energy(std::vector<double> const& spins) {
+    virtual double SingleSiteEnergy(std::vector<double> const& spins, int i) const =0;
+    virtual double Energy(std::vector<double> const& spins) const {
         double E=0.;
         for(int i=0;i<spins.size();++i) {
             E+=SingleSiteEnergy(spins,i);

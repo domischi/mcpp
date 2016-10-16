@@ -19,7 +19,7 @@ public:
     {
         Init_Lookup_Tables(params["DISORDER_SEED"], alps::graph_helper<>(params).num_sites()); 
     }
-    virtual double SingleSiteEnergy(std::vector<double> const& spins, int i){
+    virtual double SingleSiteEnergy(std::vector<double> const& spins, int i) const {
         double e=0.;
         e -= A * std::cos(p[i]*(spins[i]-MinimumAtAngle[i]));
         return e;

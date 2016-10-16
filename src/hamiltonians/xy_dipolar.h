@@ -30,7 +30,7 @@ public:
         cutoff_distance=static_cast<double>(params.value_or_default("cutoff_distance",3))*static_cast<double>(params.value_or_default("a",1.));
         Init_Lookup_Tables(params["DISORDER_SEED"]);
     } 
-    virtual double SingleSiteEnergy(std::vector<double> const& spins, int i){
+    virtual double SingleSiteEnergy(std::vector<double> const& spins, int i) const {
         double e=0.;
         for(int j : neighbour_list[i]){
             e-=D*inv_distance_cubed(i,j)*(1.5*std::cos(spins[i]+spins[j]-2*angle_w_x(i,j))+0.5*std::cos(spins[i]-spins[j]));
@@ -55,7 +55,7 @@ private:
     typedef typename alps::graph_helper<>::site_iterator site_iterator;
 
     //This is a templated if, should be optimized away as it is constant in the class
-    inline int reduced_index(int i, int j){
+    inline int reduced_index(int i, int j) const {
         if(DISORDERED)
             return i+N*j;
         else {
@@ -69,7 +69,7 @@ private:
             return L*x+y;
         }
     }
-    inline int reduced_index(std::pair<int,int> p) {
+    inline int reduced_index(std::pair<int,int> p) const {
         return reduced_index(p.first,p.second);
     }
     void Init_Lookup_Tables(int DISORDER_SEED){
@@ -155,16 +155,16 @@ private:
         }
         neighbour_list.shrink_to_fit();
     }
-    inline double distance(vector_type& x, vector_type& y, vector_type& periodic){
+    inline double distance(vector_type& x, vector_type& y, vector_type& periodic) const {
         return std::sqrt(std::pow(x[0]-y[0]+periodic[0],2)+std::pow(x[1]-y[1]+periodic[1],2));
     }
-    inline double inv_distance_cubed(int i,int j) {
+    inline double inv_distance_cubed(int i,int j) const {
         return dist_3[reduced_index(i,j)];
     }
-    inline double inv_distance_cubed(std::pair<int,int> pair_){
+    inline double inv_distance_cubed(std::pair<int,int> pair_) const {
         return inv_distance_cubed(pair_.first, pair_.second);
     }
-    inline double angle_w_x(int i, int j) {
+    inline double angle_w_x(int i, int j) const {
         return phi[reduced_index(i,j)];
     }
     inline double angle_w_x(std::pair<int,int> pair_){

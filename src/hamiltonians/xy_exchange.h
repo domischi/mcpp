@@ -14,7 +14,7 @@ public:
     L(params["L"]),
     gh(params){
     }
-    virtual double SingleSiteEnergy(std::vector<double> const& spins, int i){
+    virtual double SingleSiteEnergy(std::vector<double> const& spins, int i) const {
         double e=0.;
         neighbour_iterator j, j_end;
         for(std::tie(j,j_end)=gh.neighbors(i); j!= j_end;++j){

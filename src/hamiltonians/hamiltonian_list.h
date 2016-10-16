@@ -34,7 +34,7 @@ struct Hamiltonian_List {
             std::exit(56);
         }
     }
-    double Energy(std::vector<double> const& spins){
+    double Energy(std::vector<double> const& spins) const{
         double E=0.; 
         SingleHamiltonianAllSites(p_dipolar_disordered, spins, E);
         SingleHamiltonianAllSites(p_dipolar,            spins, E);
@@ -42,7 +42,7 @@ struct Hamiltonian_List {
         SingleHamiltonianAllSites(p_shape_anisotropy,   spins, E);
         return E;
     }
-    double SingleSiteEnergy(std::vector<double> const& spins, int i) {
+    double SingleSiteEnergy(std::vector<double> const& spins, int i) const{
         double e=0.;
         SingleHamiltonianSingleSite(p_dipolar_disordered, spins, i, e);
         SingleHamiltonianSingleSite(p_dipolar,            spins, i, e);
@@ -52,11 +52,11 @@ struct Hamiltonian_List {
     }
 
     template<typename p_t>
-    inline void SingleHamiltonianSingleSite(p_t const& p, std::vector<double> const& spins, int i, double& e) {
+    inline void SingleHamiltonianSingleSite(p_t const& p, std::vector<double> const& spins, int i, double& e) const {
         if(p) e+=p->SingleSiteEnergy(spins,i);
     }
     template<typename p_t>
-    inline void SingleHamiltonianAllSites(p_t const& p, std::vector<double> const& spins, double& e) {
+    inline void SingleHamiltonianAllSites(p_t const& p, std::vector<double> const& spins, double& e) const {
         if(p) e+=p->Energy(spins);
     }
 };

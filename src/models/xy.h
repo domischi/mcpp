@@ -39,6 +39,7 @@ public :
         T(params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"])),
         HamiltonianList(params),
         D(params.value_or_default("D",1.)),
+        cutoff_distance(static_cast<double>(params.value_or_default("cutoff_distance",3.))*static_cast<double>(params.value_or_default("a",1.))),
         Step_Number(0),
         mx(0.),
         my(0.),
@@ -46,14 +47,11 @@ public :
         my_stag(0.),
         accepted(0),
         mcrg_it_depth(params.value_or_default("mcrg_iteration_depth",-1)),
+        measure_mcrg(mcrg_it_depth>0),
         Each_Measurement(params.value_or_default("Each_Measurement",15)),
         targeted_acc_ratio(params.value_or_default("Targeted Acceptance Ratio",0.5)),
         angle_dev(0.1*M_PI)
         {
-            measure_mcrg=(mcrg_it_depth>0);
-            cutoff_distance=params.value_or_default("cutoff_distance",3.);
-            double a=params.value_or_default("a",1.);
-            cutoff_distance*=a;
             init_spins(params);
             En=Energy();
             if(measure_mcrg){
@@ -84,15 +82,15 @@ public :
 
     void save(alps::ODump &dump) const{
         dump 
-        << L 
-        << N
-        << T
+        //<< L 
+        //<< N
+        //<< T
         << Step_Number 
         << spins 
         //<< Thermalization_Sweeps
         //<< Measure_Sweeps
         //<< D
-        << cutoff_distance
+        //<< cutoff_distance
         //<< Each_Measurement
         //<< targeted_acc_ratio
         << angle_dev
@@ -111,15 +109,15 @@ public :
     }
     void load(alps::IDump &dump){
         dump 
-        >> L 
-        >> N
-        >> T
+        //>> L 
+        //>> N
+        //>> T
         >> Step_Number 
         >> spins 
         //>> Thermalization_Sweeps
         //>> Measure_Sweeps
         //>> D
-        >> cutoff_distance
+        //>> cutoff_distance
         //>> Each_Measurement
         //>> targeted_acc_ratio
         >> angle_dev
@@ -165,19 +163,19 @@ public :
     }
 private:
     //System parameters
-    int Thermalization_Sweeps;
-    int Measure_Sweeps;
+    const int Thermalization_Sweeps;
+    const int Measure_Sweeps;
     int Step_Number;
-    int L;
-    int N; //L^2
+    const int L;
+    const int N; //L^2
     init_t init_type;
     std::vector<double> spins; //saves the spins
-    double T;
-    double D;
-    double cutoff_distance;
-    int Each_Measurement;
+    const double T;
+    const double D;
+    const double cutoff_distance;
+    const int Each_Measurement;
     
-    double targeted_acc_ratio;
+    const double targeted_acc_ratio;
     double angle_dev;
 
     // struct of Hamiltonian pointers -> allows CRTP
@@ -191,9 +189,9 @@ private:
     double my_stag;
     int accepted;
     //Complex observables
-    bool measure_mcrg;
+    const bool measure_mcrg;
     std::shared_ptr<mcrg> mcrg_;
-    int mcrg_it_depth; //to which depth the mcrg is done
+    const int mcrg_it_depth; //to which depth the mcrg is done
 
     inline void update(){update(random_int(num_sites()));}
     void update(int site){
@@ -278,7 +276,7 @@ private:
             
 
     }
-    inline double beta(){ 
+    inline double beta() const { 
         return 1./T;
     }
     inline int random_int(int j){
@@ -290,10 +288,10 @@ private:
     inline double random_real_shifted(double s){
         return -s/2+s*uniform_01();
     }
-    double Energy() {
+    double Energy() const {
         return HamiltonianList.Energy(spins);
     }
-    double single_site_Energy(int i){
+    double single_site_Energy(int i) const{
         return HamiltonianList.SingleSiteEnergy(spins, i);
     }
 };
