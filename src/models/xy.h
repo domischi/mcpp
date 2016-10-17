@@ -47,7 +47,7 @@ public :
         my_stag(0.),
         accepted(0),
         mcrg_it_depth(params.value_or_default("mcrg_iteration_depth",-1)),
-        measure_mcrg(mcrg_it_depth>0),
+        measure_mcrg(static_cast<bool>(static_cast<int>(params.value_or_default("mcrg_iteration_depth",-1))>0)),
         Each_Measurement(params.value_or_default("Each_Measurement",15)),
         targeted_acc_ratio(params.value_or_default("Targeted Acceptance Ratio",0.5)),
         angle_dev(0.1*M_PI)
