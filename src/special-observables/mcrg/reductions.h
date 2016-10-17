@@ -40,6 +40,23 @@ namespace mcrg_utilities{
         ret.shrink_to_fit();
         return ret; 
 	}
+	std::vector<spin_t> blockspin4x4(const std::vector<spin_t> spins, const int& L, const int& EntryPoint){
+        std::vector<spin_t> ret; //TODO do a bit of index magic, to not need to use the vector capabilities, such that it get's fastened up a bit
+        for(int dx=0; dx<L;dx+=4)
+            for(int dy=0; dy<L;dy+=4){
+                double c=0.;
+                double s=0.;
+                for(int i =0; i<4;++i)
+                for(int j =0; j<4;++j){
+                    double spin=spins[index_o_neighbour(EntryPoint,i+dx,j+dy,L)];
+                    c+=std::cos(spin);
+                    s+=std::sin(spin);
+                }
+                ret.push_back(std::atan2(s,c));
+            }
+        ret.shrink_to_fit();
+        return ret; 
+	}
  
     spin_t inline mod2Pi(double s){
         return s-std::floor(s/(2*M_PI))*2*M_PI;

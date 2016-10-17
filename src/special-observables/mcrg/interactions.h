@@ -82,18 +82,18 @@ std::vector<std::vector<shift_t>> medium1 = {
         {std::make_tuple(0,0,1), std::make_tuple(1,0,0),  std::make_tuple(0,1,1)} , // |_ yxy
         {std::make_tuple(0,0,1), std::make_tuple(1,0,1),  std::make_tuple(0,1,0)} , // |_ yyx
         {std::make_tuple(0,0,1), std::make_tuple(1,0,1),  std::make_tuple(0,1,1)} , // |_ yyy
-        {std::make_tuple(0,0,0), std::make_tuple(0,0,0),  std::make_tuple(0,1,0)} , // 2 ^ 1 xxx
-        {std::make_tuple(0,0,0), std::make_tuple(0,0,0),  std::make_tuple(0,1,1)} , // 2 ^ 1 xxy
-        {std::make_tuple(0,0,0), std::make_tuple(0,0,1),  std::make_tuple(0,1,0)} , // 2 ^ 1 xyx=yxx
-        {std::make_tuple(0,0,0), std::make_tuple(0,0,1),  std::make_tuple(0,1,1)} , // 2 ^ 1 xyy=yxy
-        {std::make_tuple(0,0,1), std::make_tuple(0,0,1),  std::make_tuple(0,1,0)} , // 2 ^ 1 yyx
-        {std::make_tuple(0,0,1), std::make_tuple(0,0,1),  std::make_tuple(0,1,1)} , // 2 ^ 1 yyy
-        {std::make_tuple(0,0,0), std::make_tuple(0,0,0),  std::make_tuple(1,0,0)} , // 2-1 xxx 
-        {std::make_tuple(0,0,0), std::make_tuple(0,0,0),  std::make_tuple(1,0,1)} , // 2-1 xxy
-        {std::make_tuple(0,0,0), std::make_tuple(0,0,1),  std::make_tuple(1,0,0)} , // 2-1 xyx=yxx
-        {std::make_tuple(0,0,0), std::make_tuple(0,0,1),  std::make_tuple(1,0,1)} , // 2-1 xyy=yxy
-        {std::make_tuple(0,0,1), std::make_tuple(0,0,1),  std::make_tuple(1,0,0)} , // 2-1 yyx
-        {std::make_tuple(0,0,1), std::make_tuple(0,0,1),  std::make_tuple(1,0,1)} , // 2-1 yyy
+        //{std::make_tuple(0,0,0), std::make_tuple(0,0,0),  std::make_tuple(0,1,0)} , // 2 ^ 1 xxx
+        //{std::make_tuple(0,0,0), std::make_tuple(0,0,0),  std::make_tuple(0,1,1)} , // 2 ^ 1 xxy
+        //{std::make_tuple(0,0,0), std::make_tuple(0,0,1),  std::make_tuple(0,1,0)} , // 2 ^ 1 xyx=yxx
+        //{std::make_tuple(0,0,0), std::make_tuple(0,0,1),  std::make_tuple(0,1,1)} , // 2 ^ 1 xyy=yxy
+        //{std::make_tuple(0,0,1), std::make_tuple(0,0,1),  std::make_tuple(0,1,0)} , // 2 ^ 1 yyx
+        //{std::make_tuple(0,0,1), std::make_tuple(0,0,1),  std::make_tuple(0,1,1)} , // 2 ^ 1 yyy
+        //{std::make_tuple(0,0,0), std::make_tuple(0,0,0),  std::make_tuple(1,0,0)} , // 2-1 xxx 
+        //{std::make_tuple(0,0,0), std::make_tuple(0,0,0),  std::make_tuple(1,0,1)} , // 2-1 xxy
+        //{std::make_tuple(0,0,0), std::make_tuple(0,0,1),  std::make_tuple(1,0,0)} , // 2-1 xyx=yxx
+        //{std::make_tuple(0,0,0), std::make_tuple(0,0,1),  std::make_tuple(1,0,1)} , // 2-1 xyy=yxy
+        //{std::make_tuple(0,0,1), std::make_tuple(0,0,1),  std::make_tuple(1,0,0)} , // 2-1 yyx
+        //{std::make_tuple(0,0,1), std::make_tuple(0,0,1),  std::make_tuple(1,0,1)} , // 2-1 yyy
 		//Even
 		{std::make_tuple(0,0,0),std::make_tuple(1,0,0)}, //NNx x comp
         {std::make_tuple(0,0,1),std::make_tuple(1,0,1)}, //NNx y comp
