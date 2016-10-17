@@ -14,6 +14,7 @@ public:
     typedef double spin_t;
     typedef mcrg_utilities::shift_t shift_t; //(dx,dy, component)
     enum ReductionTechnique {Decimation,Blockspin, FerroBlockspin, Blockspin4x4, FerroBlockspin4x4};
+    
     mcrg(const alps::Parameters& p, int Iteration_, int MCRG_It_) :
     iteration(Iteration_),
     max_iterations(MCRG_It_),

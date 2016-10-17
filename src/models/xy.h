@@ -21,7 +21,6 @@
 #include <algorithm> //sort
 #include <utility> //pair
 
-//#include "../hamiltonians/hamiltonian_factory.h"
 #include "../hamiltonians/hamiltonian_list.h"
 
 #include "../special-observables/special_observables.h"
@@ -302,8 +301,6 @@ private:
     double T;
     int L;
     int N;
-    int mcrg_it_depth;
-    bool measure_mcrg;
     double beta() const {
         return 1./T;
     }
@@ -311,10 +308,9 @@ public:
     xy_evaluator(alps::Parameters const& params) : 
         T(params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"])),
         L(params["L"]),
-        N(L*L),
-        mcrg_it_depth(params.value_or_default("mcrg_iteration_depth",-1)),
-        measure_mcrg(mcrg_it_depth>0)
-        {}
+        N(L*L)
+        {
+        }
     void evaluate(alps::ObservableSet& obs) const {
         // Binder cumulant
         if(obs.has("M^4")&&obs.has("M^2")){
@@ -355,9 +351,6 @@ public:
             chi = N*beta() * (M2-M*M); 
             obs.addObservable(chi); 
         } else std::cerr << "susceptibility staggered will not be calculated"<<std::endl;
-        //if(measure_mcrg){
-        //    
-        //}
     }
 
 };
