@@ -89,9 +89,13 @@ public:
             }
         }
         std::valarray<double> OUTe(oute.data(), oute.size()), OUTo(outo.data(), outo.size());
-
-        obs["MCRGe S_alpha"+ std::to_string(iteration)]<<OUTe;
-        obs["MCRGo S_alpha"+ std::to_string(iteration)]<<OUTo;
+        
+        std::valarray<double> save_outo=OUTo;
+        save_outo/=N;
+        std::valarray<double> save_oute=OUTe;
+        save_oute/=N;
+        obs["MCRGe S_alpha"+ std::to_string(iteration)]<<save_oute;
+        obs["MCRGo S_alpha"+ std::to_string(iteration)]<<save_outo;
         //measure <S_alpha n S_beta n>
         std::valarray<double> outouto(OUTo.size()*OUTo.size());
         std::valarray<double> outoute(OUTe.size()*OUTe.size());
@@ -106,6 +110,8 @@ public:
                 outoute[i*counte+j]=OUTe[i]*OUTe[j];
             }
         }
+        outoute/=N;
+        outouto/=N;
         obs["MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration)]<<outouto;
         obs["MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration)]<<outoute;
         
@@ -122,6 +128,7 @@ public:
                     outine[i*INe.size()+j]=(OUTe[i]*INe[j]);
                 }
             }
+            outine/=N;
             obs["MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1)]<<outine;
             std::valarray<double> outino(INo.size()*INo.size());
             for(int i=0;i<INo.size();++i){
@@ -129,6 +136,7 @@ public:
                     outino[i*INo.size()+j]=(OUTo[i]*INo[j]);
                 }
             }
+            outino/=N;
             obs["MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1)]<<outino;
         }
         return std::tie(OUTo,OUTe);
