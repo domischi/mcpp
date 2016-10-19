@@ -16,6 +16,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <memory>
 #include <map>
 #include <cassert>
 #include <algorithm> //sort
@@ -47,6 +48,7 @@ public :
         accepted(0),
         mcrg_it_depth(params.value_or_default("mcrg_iteration_depth",-1)),
         measure_mcrg(static_cast<bool>(static_cast<int>(params.value_or_default("mcrg_iteration_depth",-1))>0)),
+        measure_structure_factor(static_cast<bool>(params.value_or_default("structure_factor",false))),
         Each_Measurement(params.value_or_default("Each_Measurement",15)),
         targeted_acc_ratio(params.value_or_default("Targeted Acceptance Ratio",0.5)),
         angle_dev(0.1*M_PI)
@@ -56,6 +58,11 @@ public :
             if(measure_mcrg){
                 std::cout << "\tInitialize MCRG with iteration depth "<<mcrg_it_depth<<"..."<<std::flush;
                 mcrg_=std::make_shared<mcrg>(params,0,mcrg_it_depth);
+                std::cout << "\tdone"<<std::endl;
+            }
+            if(measure_structure_factor){
+                std::cout << "\tInitialize Structure Factor Measurement..."<<std::flush;
+                structure_factor_=std::unique_ptr<structure_factor>(new structure_factor(params));
                 std::cout << "\tdone"<<std::endl;
             }
         }
@@ -76,6 +83,9 @@ public :
             obs << alps::RealObservable("Acceptance Ratio"); //Probably very useful for debugging
             if(measure_mcrg){
                 mcrg_->init_observables(obs);
+            }
+            if(measure_structure_factor){
+                structure_factor_->init_observables(obs);
             }
     }
 
@@ -148,7 +158,7 @@ public :
             }
         }
         obs["Acceptance Ratio"]<<update_angle_deviation(accepted,n_steps);// This is also of interest before thermalization
-        if(is_thermalized()&&(Step_Number%Each_Measurement)){
+        if(is_thermalized()&&(!(Step_Number%Each_Measurement))){
             measure(obs);
             accepted=0;
         }
@@ -191,6 +201,8 @@ private:
     const bool measure_mcrg;
     std::shared_ptr<mcrg> mcrg_;
     const int mcrg_it_depth; //to which depth the mcrg is done
+    const bool measure_structure_factor;
+    std::unique_ptr<structure_factor> structure_factor_;
 
     inline void update(){update(random_int(num_sites()));}
     void update(int site){
@@ -248,6 +260,8 @@ private:
         obs["Mx staggered^2"]<<Mx*Mx;
         if(measure_mcrg) 
             mcrg_->measure(spins, obs);
+        if(measure_structure_factor) 
+            structure_factor_->measure(spins, obs);
     }
     inline void init_spins(const alps::Parameters& params){
         init_type=(params.value_or_default("Initialization","GS")=="Random" ? init_t::Random : init_t::GS);
