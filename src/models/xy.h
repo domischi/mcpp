@@ -260,7 +260,7 @@ private:
         obs["Mx staggered^2"]<<Mx*Mx;
         if(measure_mcrg) 
             mcrg_->measure(spins, obs);
-        if(measure_structure_factor) 
+        if(measure_structure_factor)
             structure_factor_->measure(spins, obs);
     }
     inline void init_spins(const alps::Parameters& params){
