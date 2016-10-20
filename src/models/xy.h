@@ -49,6 +49,7 @@ public :
         mcrg_it_depth(params.value_or_default("mcrg_iteration_depth",-1)),
         measure_mcrg(static_cast<bool>(static_cast<int>(params.value_or_default("mcrg_iteration_depth",-1))>0)),
         measure_structure_factor(static_cast<bool>(params.value_or_default("structure_factor",false))),
+        measure_spin_autocorrelation(static_cast<bool>(static_cast<int>(params.value_or_default("Spin autocorrelation analysis length",-1))>0)),
         Each_Measurement(params.value_or_default("Each_Measurement",15)),
         targeted_acc_ratio(params.value_or_default("Targeted Acceptance Ratio",0.5)),
         angle_dev(0.1*M_PI)
@@ -65,28 +66,36 @@ public :
                 structure_factor_=std::unique_ptr<structure_factor>(new structure_factor(params));
                 std::cout << "\tdone"<<std::endl;
             }
+            if(measure_spin_autocorrelation){
+                std::cout << "\tInitialize Spin Autocorrelation Measurement..."<<std::flush;
+                spin_autocorrelation_=std::unique_ptr<spin_autocorrelation>(new spin_autocorrelation(params));
+                std::cout << "\tdone"<<std::endl;
+            }
         }
     
     void init_observables(alps::Parameters const&, alps::ObservableSet& obs){
-            obs << alps::RealObservable("Energy");
-            obs << alps::RealObservable("Energy^2");
-            obs << alps::RealObservable("M");
-            obs << alps::RealObservable("M^2");
-            obs << alps::RealObservable("M^4");
-            obs << alps::RealObservable("Mx");
-            obs << alps::RealObservable("Mx^2");
-            obs << alps::RealObservable("M staggered");
-            obs << alps::RealObservable("M staggered^2");
-            obs << alps::RealObservable("M staggered^4");
-            obs << alps::RealObservable("Mx staggered");
-            obs << alps::RealObservable("Mx staggered^2");
-            obs << alps::RealObservable("Acceptance Ratio"); //Probably very useful for debugging
-            if(measure_mcrg){
-                mcrg_->init_observables(obs);
-            }
-            if(measure_structure_factor){
-                structure_factor_->init_observables(obs);
-            }
+        obs << alps::RealObservable("Energy");
+        obs << alps::RealObservable("Energy^2");
+        obs << alps::RealObservable("M");
+        obs << alps::RealObservable("M^2");
+        obs << alps::RealObservable("M^4");
+        obs << alps::RealObservable("Mx");
+        obs << alps::RealObservable("Mx^2");
+        obs << alps::RealObservable("M staggered");
+        obs << alps::RealObservable("M staggered^2");
+        obs << alps::RealObservable("M staggered^4");
+        obs << alps::RealObservable("Mx staggered");
+        obs << alps::RealObservable("Mx staggered^2");
+        obs << alps::RealObservable("Acceptance Ratio"); //Probably very useful for debugging
+        if(measure_mcrg){
+            mcrg_->init_observables(obs);
+        }
+        if(measure_structure_factor){
+            structure_factor_->init_observables(obs);
+        }
+        if(measure_spin_autocorrelation){
+            spin_autocorrelation_->init_observables(obs);
+        }
     }
 
     void save(alps::ODump &dump) const{
@@ -203,12 +212,14 @@ private:
     const int mcrg_it_depth; //to which depth the mcrg is done
     const bool measure_structure_factor;
     std::unique_ptr<structure_factor> structure_factor_;
+    const bool measure_spin_autocorrelation;
+    std::unique_ptr<spin_autocorrelation> spin_autocorrelation_;
 
     inline void update(){update(random_int(num_sites()));}
     void update(int site){
         //propose a new state
         double old_state=spins[site];
-        double old_energy=single_site_Energy(site); 
+        double old_energy=single_site_Energy(site);
         double new_state=old_state+random_real_shifted(angle_dev);
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);
@@ -262,6 +273,8 @@ private:
             mcrg_->measure(spins, obs);
         if(measure_structure_factor)
             structure_factor_->measure(spins, obs);
+        if(measure_spin_autocorrelation)
+            spin_autocorrelation_->measure(spins, obs);
     }
     inline void init_spins(const alps::Parameters& params){
         init_type=(params.value_or_default("Initialization","GS")=="Random" ? init_t::Random : init_t::GS);
