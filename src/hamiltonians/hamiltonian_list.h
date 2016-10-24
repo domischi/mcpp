@@ -29,7 +29,7 @@ struct Hamiltonian_List {
         if(params.defined("p_max") && static_cast<double>(params["A"])!=0.){
             p_shape_anisotropy=std::unique_ptr<XY_Shape_Anisotropy>(new XY_Shape_Anisotropy(params)); 
         }
-        if(p_dipolar_disordered && p_dipolar && p_exchange && p_shape_anisotropy) {
+        if(!p_dipolar_disordered && !p_dipolar && !p_exchange && !p_shape_anisotropy) {
             std::cerr << "NO HAMILTONIAN LOADED";
             std::exit(56);
         }
