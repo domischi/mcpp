@@ -23,7 +23,6 @@
 #include <utility> //pair
 
 #include "../hamiltonians/hamiltonian_list.h"
-
 #include "../special-observables/special_observables.h"
 
 class xy_worker : public alps::parapack::lattice_mc_worker<>{
@@ -38,12 +37,10 @@ public :
         N(num_sites()),
         T(params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"])),
         HamiltonianList(params),
-        D(params.value_or_default("D",1.)),
-        cutoff_distance(static_cast<double>(params.value_or_default("cutoff_distance",3.))*static_cast<double>(params.value_or_default("a",1.))),
         Step_Number(0),
         mx(0.),
         my(0.),
-        mx_stag(num_sites()),//stagered in stripes
+        mx_stag(num_sites()), //stagered in stripes
         my_stag(0.),
         accepted(0),
         mcrg_it_depth(params.value_or_default("mcrg_iteration_depth",-1)),
@@ -189,8 +186,6 @@ private:
     init_t init_type;
     std::vector<double> spins; //saves the spins
     const double T;
-    const double D;
-    const double cutoff_distance;
     const int Each_Measurement;
     
     const double targeted_acc_ratio;

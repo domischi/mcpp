@@ -1,45 +1,138 @@
-This file explains you what the parameters are, the default values and sometimes what is useful. I however do not guarantee that this list is complete and/or correct. Where no default value is given, the parameter needs to be given explicitly or the code just doesn't start.
+--------------
+|INTRODUCTION|
+--------------
+    This file explains you what the parameters are, the default values and sometimes what is useful. I however do not guarantee that this list is complete and/or correct. Where no default value is given, the parameter needs to be given explicitly or the code just doesn't start.
 
-LATTICE
-Describes the lattice, it uses the functions of the ALPS library to choose from. At the moment everything is only tested (and partially also only implemented) for the square lattice. The parameter therefore is "square lattice".
+    All parameters are given in the format
+    (Parameter Name): short description
+    Default: (Default value / none if needed)
+    (possible longer description to clarify things)
 
-L
-this tells you how many lattice sites there are in each direction. The total number of sites is L^D
+--------------
+|INTERACTIONS|
+--------------
+    D: Dipolar Interaction Strength
+    Default: 0.
 
+    cutoff_distance: Distance at where the dipolar interaction shall be truncated
+    Default: 3.
+    This is measured in units of a, therefore just changing a doesn't change anything about the truncation 
 
-a
-default value: 1.0
-this describes the lattice spacing. It is possible to tune this, to achieve bigger spacing, the algorithm looks at this distance
+    Dilution Rate: Vacancy concentration for dipolar interaction
+    Default: 0.
 
+    Positional Disorder: Describes the position disorder of sites
+    Default: 0.
+    The positional disorder is given as a 2D Gaussian with standart deviation equal to this parameter centered around 0
 
-T
-defines the temperature in natural units. (e.g. Tc for 2D XY is around 1.4)
+    J: Exchange Strength
+    Default: 0.
+    Describes NN Interactions
 
+    A: Shape Anisotropy strength
+    Default: 0.
 
-THERMALIZATION
-default value: 100
-this tells you how many lattice flips you attempt before you start measuring something
+    p_max: Number of Minima for the Shape Anisotropy
+    Default: 0.
 
+    Remarks:
+        - In the program is distinguished by a disordered and a non disordered dipolar class via a template
+        - Shape Anisotropy class gets only loaded if both, A and p_max are defined
+        - If no Hamiltonian is loaded an error message should appear and the program terminate
 
-SWEEPS
-default value: 5000
-this tells you how many independent samples you measure (the code estimates an autocorrelation time, this feature however isn't totally debugged and potentially is still wrong, use with care)
+------------------
+|GEOMETRY DETAILS|
+------------------
+    LATTICE: Name of the Lattice to use
+    Default: (none)
+    This is determined by the ALPS library, refere to their list of appplicable lattices
 
+    L: Linear length of lattice
+    Default: (none)
+    This is the linear length, not total number of sites (e.g. square lattice has L^2 sites)
 
-UPDATE
-at the moment only one update type is allowed, namely 'ssf', which stands for single spin flip. 
+    a: length of 1st basis vector
+    Default: 1.
 
+---------------------------
+|OTHER PHYSICAL QUANTITIES|
+---------------------------
+    beta: inverse Temperature in natural units
+    T: Temperature in natural units
+    Default: (none)
+    Define only one of them, otherwise undefined behaviour
 
-NUM_CLONES
-default value: 1
-Tells you how many copies of the same parameter set are started in parallel to get higher data usage. This mainly is good for really really high statistics at specific points. E.g. around Tc for Binder cumulant or a MCRG measurement
+----------------------
+|SIMULATIONAL DETAILS|
+----------------------
+    THERMALIZATION: Number of Lattice Sweeps for thermalization
+    Default: 100
+    
+    SWEEPS: Number of Measurements
+    Default: 5000
+    This is not the number of lattice sweeps but measurements (there is a factor inbetween determining the frequency of measurements)
 
+    EACH_MEASUREMENT: Describes the Time between successive measurements
+    Default: 15
 
-cutoff_distance
-defaul value: 3.0
-this tells you how many multiplies of a you want to consider for the interaction. Every two sites further appart than cutoff_distance * a are not considered to interact.
+    UPDATE: Type of Update Procedure to use
+    Default: (none)
+    at the moment only one update type is allowed, namely 'ssf', which stands for single spin flip. 
 
+    Targeted Acceptance Ratio: Fraction of accepted steps to aim for
+    Default: 0.5
 
-mcrg_iteration_depth
-default value: -1 (no MCRG approach is done)
-this means how often in a MCRG approach the lattice is reduced. Please note that the lattice number needs to be even dividable wrt 2^mcrg_iteration_depth (L==i*2^mcrg_iteration_depth)
+    Initialization: Initialize as...
+    Default: "GS"
+    Possible choices are:
+        "GS":       Ground state
+        "Random":   Randomized inital setup
+
+    NUM_CLONES: Number of copies of simulation
+    Default: 1
+    This allows to use more compuation power for the same task, gather faster statistics, however the thermalization is not able to speed up with this
+
+    SEED: Number seeding the RNG responsible for standart actions
+    Default: (given by ALPS)
+    This allows to seed your own RNG, however ALPS provides one if not given
+    
+    DISORDER_SEED: Number seeding the disorder RNG
+    Default: (given by ALPS)
+    This allows to seed your own RNG, however ALPS provides one if not given
+
+---------------------
+|SPECIAL OBSERVABLES|
+---------------------
+    MCRG
+    ----
+    mcrg_iteration_depth: Number of iterations done with MCRG
+    Default: -1 (no MCRG measurement is done)
+
+    MCRG Interactions: which correlations to actually measure
+    Default: (none)
+    Implemented in the interactions.h file, possible choices at the moment are:
+        "small":                standart set, probably enough
+        "medium interactions":  introduces a few more exotic interactions
+        "medium range":         stays with rather conservative interactions, however increases the range compared to small
+        "massive":              is broken and anyway too big for any use, at the moment DO NOT USE
+
+    MCRG Reduction Technique:
+    Default: (none)
+    Implemented in the reductions.h file, possible choices at the moment are:
+        "Decimation":           Uses only a 4th of the spins, ignoring the others
+        "Blockspin":            Compute the average over 4 spins in a Block and use these as new ones
+        "FerroBlockspin":       Same as Blockspin but first rotating the spins, such that the GS is transformed the ferromagnetic
+        "Blockspin4x4":         Use the same as Blockspin but with 16(=4*4) spins
+        "FerroBlockspin4x4":    Same as Blockspin4x4/FerroBlockspin, transform then average over 4*4 spins
+    These are randomized in successive measurements over the starting points of the blocks
+
+    Structure Factor
+    ----------------
+    structure_factor: Boolean if structure factor shall be measured
+    Default: False
+
+    Spin Autocorrelation Time
+    -------------------------
+    Spin Autocorrelation analysis length: In which depth to analyse the spin autocorrelation
+    Default: -1
+    As the full configuration get saved, this can be a time and mostly time consuming task, consider that the class contains (this parameter) * N doubles and in every measurement compare a configuration to all the old ones. Use smaller lattices to still have a fast access to the data
