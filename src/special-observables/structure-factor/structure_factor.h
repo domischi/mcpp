@@ -73,6 +73,7 @@ public:
         memcpy(fftw_in , original.fftw_in , N*sizeof(fftw_complex));
         memcpy(fftw_out, original.fftw_out, N*sizeof(fftw_complex));
         #endif //NFFTW
+        return *this;
     }
     ~structure_factor(){
         #if !NFFTW

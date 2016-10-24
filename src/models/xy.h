@@ -244,7 +244,6 @@ private:
             angle_dev/=1.2;
         if(targeted_acc_ratio<acc_ratio && angle_dev<2*M_PI)
             angle_dev*=1.2;
-        accepted=0;
         return acc_ratio; 
     }
     void measure(alps::ObservableSet& obs){
