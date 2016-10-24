@@ -20,12 +20,13 @@ public:
     }
                 
     void measure(const std::vector<spin_t>& spins, alps::ObservableSet& obs) {
+        old_configurations[actual_index]=std::valarray<double>(spins.data(),spins.size());
         if(filled){
             std::valarray<double> acs(autocorr_analysis_depth);
-            old_configurations[actual_index]=std::valarray<double>(spins.data(),spins.size());
             for(int i =1;i<autocorr_analysis_depth;++i){
                 configuration_t old_configuration=old_configurations[(actual_index-i+autocorr_analysis_depth)%autocorr_analysis_depth];
                 for(int j=0;j<N;++j)
+                    acs[i]+=std::cos(spins[j]-old_configuration[j]);
                 acs[i]/=N;
             }
             acs[0]=1; //the spins are perfectly self correlated 
