@@ -6,12 +6,18 @@
 #include <algorithm>
 #include <valarray>
 #include <alps/parameter.h>
+#if !NFFTW
+    #include <fftw3.h>
+#endif
 
 class structure_factor {
 public:
     typedef double spin_t;
 
     structure_factor(const alps::Parameters& p) :
+    #if !NFFTW 
+    fftw_timelimit_(p.value_or_default("FFTW timelimit for measurement", 10.)),
+    #endif //NFFTW
     L(p["L"]),
     N(L*L)
     {
@@ -20,7 +26,6 @@ public:
         for(std::tie(v,v_end)=gh.reciprocal_basis_vectors() ; v!=v_end ; ++v){
             vector_type vec=*v;
             for(auto& e: vec) e/=L; //calculate the Fouriertransform of the super cell, not the elementary one...
-            std::cout <<vec[0]<<std::endl;
             reciprocal_vectors.push_back(vec);
         }
         for(std::tie(v,v_end)=gh.basis_vectors() ; v!=v_end ; ++v){
@@ -30,9 +35,54 @@ public:
         assert(reciprocal_vectors.size()==basis_vectors.size());
         assert(reciprocal_vectors.size()==2);
         assert(p["LATTICE"]=="square lattice");
+        #if !NFFTW
+        fftw_in=fftw_alloc_complex(N);
+        fftw_out=fftw_alloc_complex(N);
+        fftw_set_timelimit(fftw_timelimit_);
+        plan=fftw_plan_dft_2d(L,L,fftw_in, fftw_out, FFTW_FORWARD, FFTW_MEASURE | FFTW_DESTROY_INPUT);
+        #endif //NFFTW
     }
-                
-    void measure(const std::vector<spin_t>& spins, alps::ObservableSet& obs) const{
+    // Rule of 3 already spams, but I dont need move semantics, therefore I can leave the move constructor and the move assign operator default 
+    structure_factor(const structure_factor &original) :
+        L(original.L),
+        N(original.N),
+        fftw_timelimit_(original.fftw_timelimit_),
+        reciprocal_vectors(original.reciprocal_vectors),
+        basis_vectors(original.basis_vectors)
+    {
+        #if !NFFTW
+        fftw_in=fftw_alloc_complex(N);
+        fftw_out=fftw_alloc_complex(N);
+        fftw_set_timelimit(fftw_timelimit_);
+        plan=fftw_plan_dft_2d(L,L,fftw_in, fftw_out, FFTW_FORWARD, FFTW_MEASURE | FFTW_DESTROY_INPUT);
+        memcpy(fftw_in , original.fftw_in , N*sizeof(fftw_complex));
+        memcpy(fftw_out, original.fftw_out, N*sizeof(fftw_complex));
+        #endif //NFFTW
+    }
+    structure_factor& operator=(const structure_factor& original) {
+        L=original.L;
+        N=original.N;
+        fftw_timelimit_=original.fftw_timelimit_;
+        reciprocal_vectors=original.reciprocal_vectors;
+        basis_vectors=original.basis_vectors;
+        #if !NFFTW
+        fftw_in=fftw_alloc_complex(N);
+        fftw_out=fftw_alloc_complex(N);
+        fftw_set_timelimit(fftw_timelimit_);
+        plan=fftw_plan_dft_2d(L,L,fftw_in, fftw_out, FFTW_FORWARD, FFTW_MEASURE | FFTW_DESTROY_INPUT);
+        memcpy(fftw_in , original.fftw_in , N*sizeof(fftw_complex));
+        memcpy(fftw_out, original.fftw_out, N*sizeof(fftw_complex));
+        #endif //NFFTW
+    }
+    ~structure_factor(){
+        #if !NFFTW
+        fftw_free(fftw_in ); 
+        fftw_free(fftw_out); 
+        fftw_destroy_plan(plan);
+        #endif //NFFTW
+    }
+
+    void measure(const std::vector<spin_t>& spins, alps::ObservableSet& obs) {
         std::valarray<std::complex<double>> Sx(spins.size());
         std::valarray<std::complex<double>> Sy(spins.size());
         std::transform(spins.begin(),spins.end(),begin(Sx),[](double d) {return std::cos(d);});
@@ -52,14 +102,36 @@ public:
         //obs << alps::RealVectorObservable("Structure Factor Y");
         obs << alps::RealVectorObservable("|Structure Factor|^2");
     }
-
 private:
     typedef typename alps::graph_helper<>::vector_type vector_type;
     std::vector<vector_type> reciprocal_vectors; 
     std::vector<vector_type> basis_vectors; 
+    
+    #if !NFFTW
+    fftw_complex *fftw_in;
+    fftw_complex *fftw_out;
+    double fftw_timelimit_; 
+    fftw_plan plan; 
+    #endif //NFFTW
+
     static constexpr std::complex<double> I=std::complex<double>(0.,1.);
     int L,N;
     
+    #if !NFFTW
+    // ATTENTION: THIS IS HACKED, THERE DOES NOT EXIST A NICE VERSION OF THAT PART, 
+    // BUT REMIND THAT THERE IS NO C++ GUARANTEE THAT THIS WILL WORK, 
+    // IT JUST HAPPENS TO BE THE CASE, HOWEVER DO NOT ASSUME THIS TO PERSIST
+    void copy_in(std::valarray<std::complex<double>> IN) {
+        memcpy(fftw_in, std::begin(IN),N*sizeof(fftw_complex));
+    }
+    std::valarray<std::complex<double>> copy_out() {
+        std::valarray<std::complex<double>> ret(N);
+        memcpy(std::begin(ret), fftw_out, N*sizeof(std::complex<double>));
+        return ret;
+    }
+    #endif //NFFTW
+
+    #if NFFTW
     std::valarray<std::complex<double>> fourier_transform(const std::valarray<std::complex<double>>& real, int prefactor=1) const {
         std::valarray<std::complex<double>> reciprocal(N);
         for(int n1=0;n1<L;++n1)
@@ -75,6 +147,12 @@ private:
         }
         return reciprocal;
     }
-
+    #else // !NFFTW (FFTW around)
+    std::valarray<std::complex<double>> fourier_transform(const std::valarray<std::complex<double>>& real, int prefactor=1) {
+        copy_in(real);
+        fftw_execute(plan);
+        return copy_out();
+    }
+    #endif //NFFTW
 };
 #endif //MCPP_STRUCTURE_FACTOR_H_

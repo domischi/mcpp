@@ -2,8 +2,18 @@ PROJECT(mc++)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
+enable_language(C CXX)
+#-------------------------------------------------------------------
+# Options
+#-------------------------------------------------------------------
+
 #if you don't want the full compiler output, set to "OFF"
-SET(CMAKE_VERBOSE_MAKEFILE OFF)
+set(CMAKE_VERBOSE_MAKEFILE OFF)
+set(USE_MPI TRUE)
+set(USE_OPENMP TRUE)
+set(USE_FFTW true)
+set(OPTIMIZE TRUE)
+set(DEBUG FALSE)
 
 #-------------------------------------------------------------------
 # ALPS
@@ -13,15 +23,20 @@ find_package(ALPS REQUIRED PATHS ${ALPS_ROOT_DIR} $ENV{ALPS_HOME} NO_SYSTEM_ENVI
 message(STATUS "Found ALPS: ${ALPS_ROOT_DIR} (revision: ${ALPS_VERSION})")
 include(${ALPS_USE_FILE})
 
-enable_language(C CXX)
 set(LIBS "${ALPS_LIBRARIES}")
+
 #-------------------------------------------------------------------
-# Options
+# FFTW
 #-------------------------------------------------------------------
-option(USE_MPI TRUE)
-option(USE_OPENMP TRUE)
-option(OPTIMIZE TRUE)
-option(DEBUG FALSE)
+if(USE_FFTW)
+    find_path (FFTW_INCLUDES fftw3.h)
+    find_library (FFTW_LIBRARIES NAMES fftw3)
+    mark_as_advanced (FFTW_LIBRARIES FFTW_INCLUDES)
+    set(FFTW_LIBS "${FFTW_LIBRARIES}")
+    message(STATUS "Found FFTW")
+else(USE_FFTW)
+    add_definitions(-DNFFTW) 
+endif(USE_FFTW)
 
 #-------------------------------------------------------------------
 # Flags
@@ -82,4 +97,5 @@ configure_file(
 SET(SRCS ${SRCS} src/main.cpp src/parapack_register.cpp)
 ADD_EXECUTABLE(mc++ ${SRCS})
 TARGET_LINK_LIBRARIES(mc++ ${LIBS})
+TARGET_LINK_LIBRARIES(mc++ ${FFTW_LIBS})
 INSTALL(TARGETS mc++ DESTINATION $ENV{HOME}/bin)
