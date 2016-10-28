@@ -287,7 +287,6 @@ private:
         } else if (params.value_or_default("Initialization","GS")=="GS") {
             init_type=init_t::GS;
         } else if (params.value_or_default("Initialization","GS")=="Ferro"){
-            std::cout << "initialize with ferro " <<std::endl;
             init_type=init_t::Ferro;
         }
         spins.resize(N, 0.);
