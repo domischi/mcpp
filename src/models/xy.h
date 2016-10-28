@@ -28,7 +28,7 @@
 
 class xy_worker : public alps::parapack::lattice_mc_worker<>{
 public :
-    enum init_t {GS, Random}; 
+    enum init_t {GS, Random, Ferro}; 
 
     xy_worker(const alps::Parameters& params) :
         alps::parapack::lattice_mc_worker<>(params), 
@@ -40,6 +40,7 @@ public :
         HamiltonianList(params),
         D(params.value_or_default("D",1.)),
         cutoff_distance(static_cast<double>(params.value_or_default("cutoff_distance",3.))*static_cast<double>(params.value_or_default("a",1.))),
+        ising(static_cast<bool>(params.value_or_default("Ising", false))),
         Step_Number(0),
         mx(0.),
         my(0.),
@@ -186,6 +187,7 @@ private:
     int Step_Number;
     const int L;
     const int N; //L^2
+    bool ising;
     init_t init_type;
     std::vector<double> spins; //saves the spins
     const double T;
@@ -221,6 +223,9 @@ private:
         double old_state=spins[site];
         double old_energy=single_site_Energy(site);
         double new_state=old_state+random_real_shifted(angle_dev);
+        if(ising) {
+            new_state=old_state+M_PI; //Only allow Spin Flip updates
+        }
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);
         if(random_real()<=std::exp(-(new_energy-old_energy)/T)){
@@ -277,7 +282,14 @@ private:
             spin_autocorrelation_->measure(spins, obs);
     }
     inline void init_spins(const alps::Parameters& params){
-        init_type=(params.value_or_default("Initialization","GS")=="Random" ? init_t::Random : init_t::GS);
+        if(params.value_or_default("Initialization","GS")=="Random"){
+            init_type=init_t::Random;
+        } else if (params.value_or_default("Initialization","GS")=="GS") {
+            init_type=init_t::GS;
+        } else if (params.value_or_default("Initialization","GS")=="Ferro"){
+            std::cout << "initialize with ferro " <<std::endl;
+            init_type=init_t::Ferro;
+        }
         spins.resize(N, 0.);
         switch(init_type) {
             case init_t::GS:
@@ -295,6 +307,8 @@ private:
                 for(auto& s: spins) {
                     s=random_real(0,2*M_PI);
                 }
+                break;
+            case init_t::Ferro: //Already initialized as Ferro due to resize
                 break;
             default:
                 std::cerr << "Smth went terribly wrong as this line should never be hit"<<std::endl;
