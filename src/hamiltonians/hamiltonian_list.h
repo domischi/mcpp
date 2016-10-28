@@ -26,7 +26,7 @@ struct Hamiltonian_List {
         if(params.defined("J") && static_cast<double>(params["J"])!=0.){
             p_exchange=std::unique_ptr<XY_Exchange>(new XY_Exchange(params)); 
         }
-        if( params.defined("A")     && static_cast<double>(params["A"])    !=0.
+        if( params.defined("A")     && static_cast<double>(params["A"])    !=0. &&
             params.defined("p_max") && static_cast<double>(params["p_max"])!=0.){
             p_shape_anisotropy=std::unique_ptr<XY_Shape_Anisotropy>(new XY_Shape_Anisotropy(params)); 
         }
