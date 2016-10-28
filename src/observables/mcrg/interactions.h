@@ -37,6 +37,23 @@ std::vector<std::vector<shift_t>> small = {
         {std::make_tuple(0,0,0),std::make_tuple(-1,1,1)},//d-11 xy comp
         {std::make_tuple(0,0,1),std::make_tuple(-1,1,0)} //d-11 yx comp
     };
+/*
+    This is a small set designed for Ising
+    Only in the component x -> as the simulation is running for Ising
+    Odd:  only field term
+    Even: NNx, NNy, d11, d-11 and 4 Spin
+*/
+//TODO check if One restricts itself to only non-equivalent sites (for Ising e.g. NNx and NNy are equivalent) the strange degeneracy gets lifted, this might also be the case for the dipolar interaction as essentially the sites are equivalent
+std::vector<std::vector<shift_t>> small_Ising = {
+		//Odd
+		{std::make_tuple(0,0,0)}, // field term along x
+		//Even
+		{std::make_tuple(0,0,0),std::make_tuple(1,0,0)}, //NNx 
+        {std::make_tuple(0,0,0),std::make_tuple(0,1,0)}, //NNy 
+        {std::make_tuple(0,0,0),std::make_tuple(1,1,0)}, //d11 
+        {std::make_tuple(0,0,0),std::make_tuple(-1,1,0)},//d-11 
+        {std::make_tuple(0,0,0),std::make_tuple(0,1,0),std::make_tuple(1,0,0),std::make_tuple(1,1,0)}, // 4 Spin
+    };
 
 /*
     This is medium set, including NNx, NNy, d11, d-11
