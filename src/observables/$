@@ -27,7 +27,7 @@
 
 class xy_worker : public alps::parapack::lattice_mc_worker<>{
 public :
-    enum init_t {GS, Random, Ferro}; 
+    enum init_t {GS, Random}; 
 
     xy_worker(const alps::Parameters& params) :
         alps::parapack::lattice_mc_worker<>(params), 
@@ -37,8 +37,11 @@ public :
         N(num_sites()),
         T(params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"])),
         HamiltonianList(params),
-        ising(static_cast<bool>(params.value_or_default("Ising", false))),
         Step_Number(0),
+        //mx(0.),
+        //my(0.),
+        //mx_stag(num_sites()), //stagered in stripes
+        //my_stag(0.),
         accepted(0),
         measure_basic_observables(static_cast<bool>(params.value_or_default("basic_observables",true))),
         mcrg_it_depth(params.value_or_default("mcrg_iteration_depth",-1)),
@@ -52,7 +55,7 @@ public :
             init_spins(params);
             En=Energy();
             if(measure_basic_observables){
-                basic_observables_=std::unique_ptr<basic_observables>(new basic_observables(params));
+                basic_observables_=std::make_shared<mcrg>(params,0,mcrg_it_depth);
             }
             if(measure_mcrg){
                 std::cout << "\tInitialize MCRG with iteration depth "<<mcrg_it_depth<<"..."<<std::flush;
@@ -77,9 +80,6 @@ public :
         obs << alps::RealObservable("Acceptance Ratio"); //Probably very useful for debugging
         if(measure_mcrg){
             mcrg_->init_observables(obs);
-        }
-        if(measure_basic_observables){
-            basic_observables_->init_observables(obs);
         }
         if(measure_structure_factor){
             structure_factor_->init_observables(obs);
@@ -107,10 +107,10 @@ public :
         //<< phi
         //<< neighbour_list
         << En
-        //<< mx
-        //<< my
-        //<< mx_stag
-        //<< my_stag
+        << mx
+        << my
+        << mx_stag
+        << my_stag
         << accepted
         //<< measure_mcrg
         //<< mcrg_it_depth
@@ -134,10 +134,10 @@ public :
         //>> phi
         //>> neighbour_list
         >> En
-        //>> mx
-        //>> my
-        //>> mx_stag
-        //>> my_stag
+        >> mx
+        >> my
+        >> mx_stag
+        >> my_stag
         >> accepted
         //>> measure_mcrg
         //>> mcrg_it_depth
@@ -177,7 +177,6 @@ private:
     int Step_Number;
     const int L;
     const int N; //L^2
-    bool ising;
     init_t init_type;
     std::vector<double> spins; //saves the spins
     const double T;
@@ -213,24 +212,21 @@ private:
         double old_state=spins[site];
         double old_energy=single_site_Energy(site);
         double new_state=old_state+random_real_shifted(angle_dev);
-        if(ising) {
-            new_state=old_state+M_PI; //Only allow Spin Flip updates
-        }
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);
         if(random_real()<=std::exp(-(new_energy-old_energy)/T)){
             //update variables due to local change
-            //mx+=std::cos(new_state)-std::cos(old_state);
-            //my+=std::sin(new_state)-std::sin(old_state);
+            mx+=std::cos(new_state)-std::cos(old_state);
+            my+=std::sin(new_state)-std::sin(old_state);
 
-            ////update with the corresponding prefactor
-            //int prefactor_x=1;
-            //int prefactor_y=1;
-            //if(((site%L)%2)) prefactor_x=-1; //for even y sites -1
-            //if(((site/L)%2)) prefactor_y=-1; //for even x sites -1
-            //mx_stag+=prefactor_x*(std::cos(new_state)-std::cos(old_state));
-            //my_stag+=prefactor_y*(std::sin(new_state)-std::sin(old_state));
-            En+=(new_energy-old_energy)/2; //TODO check if this is wrong...
+            //update with the corresponding prefactor
+            int prefactor_x=1;
+            int prefactor_y=1;
+            if(((site%L)%2)) prefactor_x=-1; //for even y sites -1
+            if(((site/L)%2)) prefactor_y=-1; //for even x sites -1
+            mx_stag+=prefactor_x*(std::cos(new_state)-std::cos(old_state));
+            my_stag+=prefactor_y*(std::sin(new_state)-std::sin(old_state));
+            En+=(new_energy-old_energy)/2;
             ++accepted;
         }
         else{ //switch back
@@ -250,22 +246,20 @@ private:
     void measure(alps::ObservableSet& obs){
         obs["Energy"]<<En/num_sites();
         obs["Energy^2"]<<std::pow(En/num_sites(),2);
-        //double M= std::sqrt(mx*mx+my*my)/num_sites();
-        //obs["M"]<<M;
-        //obs["M^2"]<<M*M;
-        //obs["M^4"]<<M*M*M*M;
-        //double Mx=mx/num_sites();
-        //obs["Mx"]<<Mx; 
-        //obs["Mx^2"]<<Mx*Mx;
-        //M= std::sqrt(mx_stag*mx_stag+my_stag*my_stag)/num_sites();
-        //obs["M staggered"]<<M;
-        //obs["M staggered^2"]<<M*M;
-        //obs["M staggered^4"]<<M*M*M*M;
-        //Mx=mx_stag/num_sites();
-        //obs["Mx staggered"]<<Mx; 
-        //obs["Mx staggered^2"]<<Mx*Mx;
-        if(measure_basic_observables) 
-            basic_observables_->measure(spins, obs);
+        double M= std::sqrt(mx*mx+my*my)/num_sites();
+        obs["M"]<<M;
+        obs["M^2"]<<M*M;
+        obs["M^4"]<<M*M*M*M;
+        double Mx=mx/num_sites();
+        obs["Mx"]<<Mx; 
+        obs["Mx^2"]<<Mx*Mx;
+        M= std::sqrt(mx_stag*mx_stag+my_stag*my_stag)/num_sites();
+        obs["M staggered"]<<M;
+        obs["M staggered^2"]<<M*M;
+        obs["M staggered^4"]<<M*M*M*M;
+        Mx=mx_stag/num_sites();
+        obs["Mx staggered"]<<Mx; 
+        obs["Mx staggered^2"]<<Mx*Mx;
         if(measure_mcrg) 
             mcrg_->measure(spins, obs);
         if(measure_structure_factor)
@@ -274,13 +268,7 @@ private:
             spin_autocorrelation_->measure(spins, obs);
     }
     inline void init_spins(const alps::Parameters& params){
-        if(params.value_or_default("Initialization","GS")=="Random"){
-            init_type=init_t::Random;
-        } else if (params.value_or_default("Initialization","GS")=="GS") {
-            init_type=init_t::GS;
-        } else if (params.value_or_default("Initialization","GS")=="Ferro"){
-            init_type=init_t::Ferro;
-        }
+        init_type=(params.value_or_default("Initialization","GS")=="Random" ? init_t::Random : init_t::GS);
         spins.resize(N, 0.);
         switch(init_type) {
             case init_t::GS:
@@ -298,8 +286,6 @@ private:
                 for(auto& s: spins) {
                     s=random_real(0,2*M_PI);
                 }
-                break;
-            case init_t::Ferro: //Already initialized as Ferro due to resize
                 break;
             default:
                 std::cerr << "Smth went terribly wrong as this line should never be hit"<<std::endl;
@@ -369,11 +355,11 @@ public:
             obs.addObservable(c_V); 
         } else std::cerr << "c_V will not be calculated"<<std::endl;
         // susceptibility 
-        if(obs.has("M")&&obs.has("M^2")){
-            alps::RealObsevaluator M = obs["M"];
-            alps::RealObsevaluator M2 = obs["M^2"];
+        if(obs.has("Mx")&&obs.has("Mx^2")){
+            alps::RealObsevaluator Mx = obs["Mx"];
+            alps::RealObsevaluator Mx2 = obs["Mx^2"];
             alps::RealObsevaluator chi("susceptibility");
-            chi = N*beta() * (M2-M*M); 
+            chi = beta() * (Mx2-Mx*Mx);
             obs.addObservable(chi); 
         } else std::cerr << "susceptibility will not be calculated"<<std::endl;
         if(obs.has("M staggered")&&obs.has("M staggered^2")){

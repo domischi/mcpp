@@ -50,7 +50,7 @@ IF(DEBUG)
 ENDIF(DEBUG)
 
 IF(OPTIMIZE)
-    SET(COMMON_FLAGS "${COMMON_FLAGS} -O3 -ffast-math")
+    SET(COMMON_FLAGS "${COMMON_FLAGS} -O3 -ffast-math -ftree-vectorize")
 ENDIF(OPTIMIZE)
 
 IF(USE_MPI)

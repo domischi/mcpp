@@ -7,6 +7,8 @@ Installation Guide:
     - Download the ALPS library (http://alps.comp-phys.org/) and install it according to the tutorial on the ALPS page
     - Set the environment variable ALPS_DIR to where ever you installed the library to (e.g. /opt/alps/share/alps, for this you need to do the make install with root privileges)
         sudo vim /etc/environment
+    - (If the structure factor is heavily used) Download the FFTW library and install it (on Ubuntu easier:)
+        sudo apt-get install libfftw3-dev 
     - Clone the mc++ program
         git clone https://github.com/domischi/mcpp.git
     - Change into mc++ folder
