@@ -349,7 +349,7 @@ public:
             alps::RealObsevaluator m2 = obs["M^2"];
             alps::RealObsevaluator m4 = obs["M^4"];
             alps::RealObsevaluator binder("BinderCumulant"); 
-            binder = m4/(m2*m2);
+            binder = 1.-m4/(m2*m2*3);
             obs.addObservable(binder); 
         } else std::cerr << "Binder cumulant will not be calculated"<<std::endl;
         if(obs.has("M staggered^4")&&obs.has("M staggered^2")){
