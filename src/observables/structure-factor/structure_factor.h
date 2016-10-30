@@ -46,7 +46,9 @@ public:
     structure_factor(const structure_factor &original) :
         L(original.L),
         N(original.N),
+        #if !NFFTW 
         fftw_timelimit_(original.fftw_timelimit_),
+        #endif //NFFTW
         reciprocal_vectors(original.reciprocal_vectors),
         basis_vectors(original.basis_vectors)
     {
@@ -62,17 +64,18 @@ public:
     structure_factor& operator=(const structure_factor& original) {
         L=original.L;
         N=original.N;
-        fftw_timelimit_=original.fftw_timelimit_;
         reciprocal_vectors=original.reciprocal_vectors;
         basis_vectors=original.basis_vectors;
         #if !NFFTW
         fftw_in=fftw_alloc_complex(N);
         fftw_out=fftw_alloc_complex(N);
+        fftw_timelimit_=original.fftw_timelimit_;
         fftw_set_timelimit(fftw_timelimit_);
         plan=fftw_plan_dft_2d(L,L,fftw_in, fftw_out, FFTW_FORWARD, FFTW_MEASURE | FFTW_DESTROY_INPUT);
         memcpy(fftw_in , original.fftw_in , N*sizeof(fftw_complex));
         memcpy(fftw_out, original.fftw_out, N*sizeof(fftw_complex));
         #endif //NFFTW
+        return *this;
     }
     ~structure_factor(){
         #if !NFFTW

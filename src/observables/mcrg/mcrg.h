@@ -79,7 +79,7 @@ public:
         int counto=0;
         int counte=0;
         //measure the S_alpha in the not reduced lattice
-        for(int i=0;i<interactions.size();++i) {
+        for(int i=0;i<n_interactions();++i) {
             if(interactions[i].size()%2) { //odd
                 outo.push_back(S_alpha(spins, interactions[i]));
                 ++counto;

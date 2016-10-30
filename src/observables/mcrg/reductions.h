@@ -16,7 +16,7 @@ namespace mcrg_utilities{
         return x+L*y;
     }
 
-	std::vector<spin_t> decimate(const std::vector<spin_t> spins, const int& L, const int& EntryPoint){
+	std::vector<spin_t> decimate(const std::vector<spin_t>& spins, const int& L, const int& EntryPoint){
         std::vector<spin_t> ret; //TODO do a bit of index magic, to not need to use the vector capabilities, such that it get's fastened up a bit
         for(int dx=0; dx<L;dx+=2)
             for(int dy=0; dy<L;dy+=2)
@@ -25,7 +25,7 @@ namespace mcrg_utilities{
         return ret; 
 	}
 
-	std::vector<spin_t> blockspin(const std::vector<spin_t> spins, const int& L, const int& EntryPoint){
+	std::vector<spin_t> blockspin(const std::vector<spin_t>& spins, const int& L, const int& EntryPoint){
         std::vector<spin_t> ret; //TODO do a bit of index magic, to not need to use the vector capabilities, such that it get's fastened up a bit
         for(int dx=0; dx<L;dx+=2)
             for(int dy=0; dy<L;dy+=2){
@@ -40,7 +40,7 @@ namespace mcrg_utilities{
         ret.shrink_to_fit();
         return ret; 
 	}
-	std::vector<spin_t> blockspin4x4(const std::vector<spin_t> spins, const int& L, const int& EntryPoint){
+	std::vector<spin_t> blockspin4x4(const std::vector<spin_t>& spins, const int& L, const int& EntryPoint){
         std::vector<spin_t> ret; //TODO do a bit of index magic, to not need to use the vector capabilities, such that it get's fastened up a bit
         for(int dx=0; dx<L;dx+=4)
             for(int dy=0; dy<L;dy+=4){
