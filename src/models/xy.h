@@ -47,7 +47,10 @@ public :
         measure_spin_autocorrelation(static_cast<bool>(static_cast<int>(params.value_or_default("Spin autocorrelation analysis length",-1))>0)),
         Each_Measurement(params.value_or_default("Each_Measurement",15)),
         targeted_acc_ratio(params.value_or_default("Targeted Acceptance Ratio",0.5)),
-        angle_dev(0.1*M_PI)
+        angle_dev(    params.value_or_default("Angle Deviation Start", 0.1*M_PI)),
+        angle_dev_fac(params.value_or_default("Angle Deviation Factor",1.2)),
+        angle_dev_min(params.value_or_default("Angle Deviation Min",   1e-3*M_PI)),
+        angle_dev_max(params.value_or_default("Angle Deviation Max",   2*M_PI))
         {
             init_spins(params);
             En=Energy();
@@ -185,6 +188,7 @@ private:
     
     const double targeted_acc_ratio;
     double angle_dev;
+    const double angle_dev_min, angle_dev_max, angle_dev_fac;
 
     // struct of Hamiltonian pointers -> allows CRTP
     Hamiltonian_List HamiltonianList;
@@ -240,10 +244,10 @@ private:
     //this updates the range for the update
     double update_angle_deviation(int accepted, int n_steps){
         double acc_ratio=accepted*1./n_steps;
-        if(targeted_acc_ratio>acc_ratio && angle_dev>1e-3*M_PI)
-            angle_dev/=1.2;
-        if(targeted_acc_ratio<acc_ratio && angle_dev<2*M_PI)
-            angle_dev*=1.2;
+        if(targeted_acc_ratio>acc_ratio && angle_dev>angle_dev_min) 
+            angle_dev/=angle_dev_fac;
+        if(targeted_acc_ratio<acc_ratio && angle_dev<angle_dev_max)
+            angle_dev*=angle_dev_fac;
         accepted=0;
         return acc_ratio; 
     }

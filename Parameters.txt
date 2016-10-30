@@ -82,6 +82,19 @@
     Targeted Acceptance Ratio: Fraction of accepted steps to aim for
     Default: 0.5
 
+    Angle Deviation Start: Which angle deviation to start with
+    Default: PI/10.
+    
+    Angle Deviation Factor: Update factor for angle deviation
+    Default: 1.2
+    Determines the update factor such that the acceptance ratio will be achieved
+
+    Angle Deviation Min: Lowest acceptable angle deviation
+    Default: PI/1000.
+
+    Angle Deviation Max: Maximal acceptable angle deviation
+    Default: 2*PI
+
     Initialization: Initialize as...
     Default: "GS"
     Possible choices are:
