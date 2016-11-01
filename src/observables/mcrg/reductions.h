@@ -5,6 +5,10 @@
 #include <cmath>
 namespace mcrg_utilities{
     typedef double spin_t;
+    
+    spin_t inline mod2Pi(double s){
+        return s-std::floor(s/(2*M_PI))*2*M_PI;
+    }
 
    	inline int index_o_neighbour (int i, int dx,int dy, int L){
         int x,y;
@@ -30,21 +34,22 @@ namespace mcrg_utilities{
         for(int dx=0; dx<L;dx+=3)
             for(int dy=0; dy<L;dy+=3){
                 double angle_sum=
-                    spins[index_o_neighbour(EntryPoint,  dx,  dy,L)]
-                   +spins[index_o_neighbour(EntryPoint,1+dx,  dy,L)]
-                   +spins[index_o_neighbour(EntryPoint,2+dx,  dy,L)]
-                   +spins[index_o_neighbour(EntryPoint,  dx,1+dy,L)]
-                   +spins[index_o_neighbour(EntryPoint,1+dx,1+dy,L)]
-                   +spins[index_o_neighbour(EntryPoint,2+dx,1+dy,L)]
-                   +spins[index_o_neighbour(EntryPoint,  dx,2+dy,L)]
-                   +spins[index_o_neighbour(EntryPoint,1+dx,2+dy,L)]
-                   +spins[index_o_neighbour(EntryPoint,2+dx,2+dy,L)];
+                    mod2Pi(spins[index_o_neighbour(EntryPoint,  dx,  dy,L)]) 
+                   +mod2Pi(spins[index_o_neighbour(EntryPoint,1+dx,  dy,L)])
+                   +mod2Pi(spins[index_o_neighbour(EntryPoint,2+dx,  dy,L)])
+                   +mod2Pi(spins[index_o_neighbour(EntryPoint,  dx,1+dy,L)])
+                   +mod2Pi(spins[index_o_neighbour(EntryPoint,1+dx,1+dy,L)])
+                   +mod2Pi(spins[index_o_neighbour(EntryPoint,2+dx,1+dy,L)])
+                   +mod2Pi(spins[index_o_neighbour(EntryPoint,  dx,2+dy,L)])
+                   +mod2Pi(spins[index_o_neighbour(EntryPoint,1+dx,2+dy,L)])
+                   +mod2Pi(spins[index_o_neighbour(EntryPoint,2+dx,2+dy,L)]);
                 if(angle_sum>4.5*M_PI)
                     ret.push_back(M_PI);
                 else
                     ret.push_back(0.);
             }
         ret.shrink_to_fit();
+        std::cout << ret[0]<<std::endl;
         return ret; 
     }
 
@@ -81,10 +86,6 @@ namespace mcrg_utilities{
         return ret; 
 	}
  
-    spin_t inline mod2Pi(double s){
-        return s-std::floor(s/(2*M_PI))*2*M_PI;
-    }
-    
     std::vector<spin_t> ferromagnetic_transformation(const std::vector<spin_t>& spins, int L, int EntryPoint){
         std::vector<spin_t> ret=spins;
         for(int dx=0; dx<L;dx+=2)
