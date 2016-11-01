@@ -13,7 +13,7 @@ class mcrg {
 public:
     typedef double spin_t;
     typedef mcrg_utilities::shift_t shift_t; //(dx,dy, component)
-    enum ReductionTechnique {Decimation,Blockspin, FerroBlockspin, Blockspin4x4, FerroBlockspin4x4};
+    enum ReductionTechnique {Decimation,Blockspin, FerroBlockspin, Blockspin4x4, FerroBlockspin4x4, IsingMajority};
     
     mcrg(const alps::Parameters& p, int Iteration_, int MCRG_It_) :
     iteration(Iteration_),
@@ -31,6 +31,8 @@ public:
         } else if(p["MCRG Interactions"]=="massive"){
             std::cout << "Consider this to be a way to large interaction set. This is just me having fun implementing interactions, however if you wanna use it, feel free to do so, however it will take forever and a day to finish";
             interactions=mcrg_utilities::massive;
+        } else if(p["MCRG Interactions"]=="ising" ){
+            interactions=mcrg_utilities::small_Ising;
         } else {
             std::cerr<<"Did not recognise the interaction set to use for MCRG, aborting..."<<std::endl;
             std::exit(20);
@@ -49,12 +51,14 @@ public:
             reduction_type=ReductionTechnique::Blockspin4x4;
         } else if(p["MCRG Reduction Technique"]=="FerroBlockspin4x4"){
             reduction_type=ReductionTechnique::FerroBlockspin4x4;
+        } else if(p["MCRG Reduction Technique"]=="IsingMajority"){
+            reduction_type=ReductionTechnique::IsingMajority;
         } else {
             std::cerr << "Did not recognise the reduction process to use for MCRG, aborting..."<<std::endl;
             std::exit(21); 
         }
         assert(lattice_name_=="square lattice"); //not sure if this works
-        assert(!(L%2));
+        //assert(!(L%2));
        
         //If this is not the last iteration, construct the MCRG class for the next smaller lattice 
         if(!is_last_iteration()) {
@@ -221,6 +225,9 @@ private:
         }
         if(reduction_type==ReductionTechnique::Blockspin4x4){
             return mcrg_utilities::blockspin4x4(spins,L,0);//TODO make the entry point random
+        }
+        if(reduction_type==ReductionTechnique::IsingMajority){
+            return mcrg_utilities::ising_majority(spins,L,0);//TODO make the entry point random
         }
         if(reduction_type==ReductionTechnique::FerroBlockspin4x4){
             if(is_first_iteration()){

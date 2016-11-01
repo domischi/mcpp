@@ -25,6 +25,29 @@ namespace mcrg_utilities{
         return ret; 
 	}
 
+    std::vector<spin_t> ising_majority(const std::vector<spin_t>& spins, const int& L, const int& EntryPoint) {
+        std::vector<spin_t> ret;
+        for(int dx=0; dx<L;dx+=3)
+            for(int dy=0; dy<L;dy+=3){
+                double angle_sum=
+                    spins[index_o_neighbour(EntryPoint,  dx,  dy,L)]
+                   +spins[index_o_neighbour(EntryPoint,1+dx,  dy,L)]
+                   +spins[index_o_neighbour(EntryPoint,2+dx,  dy,L)]
+                   +spins[index_o_neighbour(EntryPoint,  dx,1+dy,L)]
+                   +spins[index_o_neighbour(EntryPoint,1+dx,1+dy,L)]
+                   +spins[index_o_neighbour(EntryPoint,2+dx,1+dy,L)]
+                   +spins[index_o_neighbour(EntryPoint,  dx,2+dy,L)]
+                   +spins[index_o_neighbour(EntryPoint,1+dx,2+dy,L)]
+                   +spins[index_o_neighbour(EntryPoint,2+dx,2+dy,L)];
+                if(angle_sum>4.5*M_PI)
+                    ret.push_back(M_PI);
+                else
+                    ret.push_back(0.);
+            }
+        ret.shrink_to_fit();
+        return ret; 
+    }
+
 	std::vector<spin_t> blockspin(const std::vector<spin_t>& spins, const int& L, const int& EntryPoint){
         std::vector<spin_t> ret; //TODO do a bit of index magic, to not need to use the vector capabilities, such that it get's fastened up a bit
         for(int dx=0; dx<L;dx+=2)
