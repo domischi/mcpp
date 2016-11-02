@@ -63,7 +63,10 @@ public:
         //If this is not the last iteration, construct the MCRG class for the next smaller lattice 
         if(!is_last_iteration()) {
             alps::Parameters p_descendant=p;
-            p_descendant["L"]=L/2;
+            if(reduction_type==ReductionTechnique::IsingMajority)
+                p_descendant["L"]=L/3;
+            else
+                p_descendant["L"]=L/2;
             descendant=std::make_shared<mcrg>(p_descendant,iteration+1,MCRG_It_);
         }
     }
@@ -96,9 +99,9 @@ public:
         std::valarray<double> OUTe(oute.data(), oute.size()), OUTo(outo.data(), outo.size());
         
         std::valarray<double> save_outo=OUTo;
-        save_outo/=N;
+        //save_outo/=N;
         std::valarray<double> save_oute=OUTe;
-        save_oute/=N;
+        //save_oute/=N;
         obs["MCRGe S_alpha"+ std::to_string(iteration)]<<save_oute;
         obs["MCRGo S_alpha"+ std::to_string(iteration)]<<save_outo;
         //measure <S_alpha n S_beta n>
@@ -115,8 +118,8 @@ public:
                 outoute[i*counte+j]=OUTe[i]*OUTe[j];
             }
         }
-        outoute/=N;
-        outouto/=N;
+        //outoute/=N;
+        //outouto/=N;
         obs["MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration)]<<outouto;
         obs["MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration)]<<outoute;
         
@@ -133,7 +136,7 @@ public:
                     outine[i*INe.size()+j]=(OUTe[i]*INe[j]);
                 }
             }
-            outine/=N;
+            //outine/=N;
             obs["MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1)]<<outine;
             std::valarray<double> outino(INo.size()*INo.size());
             for(int i=0;i<INo.size();++i){
@@ -141,7 +144,7 @@ public:
                     outino[i*INo.size()+j]=(OUTo[i]*INo[j]);
                 }
             }
-            outino/=N;
+            //outino/=N;
             obs["MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1)]<<outino;
         }
         return std::tie(OUTo,OUTe);
@@ -150,11 +153,11 @@ public:
     void init_observables(alps::ObservableSet& obs){
         obs << alps::RealVectorObservable("MCRGe S_alpha"+ std::to_string(iteration));
         obs << alps::RealVectorObservable("MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration));
-        obs << alps::RealVectorObservable("MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1));
         obs << alps::RealVectorObservable("MCRGo S_alpha"+ std::to_string(iteration));
         obs << alps::RealVectorObservable("MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration));
-        obs << alps::RealVectorObservable("MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1));
         if(!is_last_iteration()){
+            obs << alps::RealVectorObservable("MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1));
+            obs << alps::RealVectorObservable("MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1));
             descendant->init_observables(obs);
         }
     }
@@ -168,7 +171,7 @@ private:
     ReductionTechnique reduction_type;
 
     bool inline is_last_iteration(){
-        return max_iterations<iteration;
+        return max_iterations<=iteration;
     }
     bool inline is_first_iteration(){
         return !iteration; //if iteration==0 this is true
