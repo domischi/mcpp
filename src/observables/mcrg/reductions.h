@@ -49,7 +49,6 @@ namespace mcrg_utilities{
                     ret.push_back(0.);
             }
         ret.shrink_to_fit();
-        std::cout << ret[0]<<std::endl;
         return ret; 
     }
 
