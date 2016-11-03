@@ -1,10 +1,7 @@
-# ****************************************************************************
-# 
-# This tutorial shows how to simply generate the input files, start the task in python (not recommended on a cluster) and then evaluate. It is designed to the dipolar XY system in 2D, where the order parameter is a staggered magnetic field (stripe like)
-#
-# To a big proportion this tutorial is written by Brigitte Surer <surerb@phys.ethz.ch> in the spinmc part of the ALPS library. As it is similar the code was reused. 
-# 
-# ****************************************************************************
+#************************************************************************# 
+# This simple script allows for a graphical temperature Sweep of the     #
+# structure factor modulus squared (proportional to a scattering signal) #
+#************************************************************************#
 
 import pyalps
 import matplotlib.pyplot as plt
@@ -14,33 +11,32 @@ from numpy import linspace, sqrt
 from os import path, mkdir, listdir
 import numpy as np
 import re
+
 #prepare the input parameters
 parms = []
-#for l in [16,32,64,128]: 
-#for l in [32]: 
-#    for t in [0,0.5]:
-#    #for t in linspace(0.5,0.6,2):
-#        parms.append(
-#            { 
-#                 'LATTICE'        : "square lattice", 
-#                 'T'              : t,
-#                 'D'              : 1.,
-#                 'THERMALIZATION' : 110,
-#                 'SWEEPS'         : 210,
-#                 'UPDATE'         : "ssf",
-#                 'cutoff_distance': 1.8,
-#                 'L'              : l,
-#                 'structure_factor': True,
-#                 'Targeted Acceptance Ratio': 0.4,
-#                 'Each_Measurement': 15
-#            }
-#           )
-#
-##write the input file and run the simulation
-#input_file = pyalps.writeInputFiles('parm',parms)
-##pyalps.runApplication('mc++',input_file,Tmin=5)
-## use the following instead if you have MPI
-#pyalps.runApplication('mc++',input_file,Tmin=5,MPI=1)
+for l in [32]: 
+    for t in linspace(0.,1.4,14):
+        parms.append(
+            { 
+                 'LATTICE'        : "square lattice", 
+                 'T'              : t,
+                 'D'              : 1.,
+                 'THERMALIZATION' : 50000,
+                 'SWEEPS'         : 20000,
+                 'UPDATE'         : "ssf",
+                 'cutoff_distance': 1.8,
+                 'L'              : l,
+                 'structure_factor': True,
+                 'Targeted Acceptance Ratio': 0.4,
+                 'Each_Measurement': 15
+            }
+           )
+
+#write the input file and run the simulation
+input_file = pyalps.writeInputFiles('parm',parms)
+#pyalps.runApplication('mc++',input_file,Tmin=5)
+# use the following instead if you have MPI
+pyalps.runApplication('mc++',input_file,Tmin=5,MPI=1)
 data = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm'),['|Structure Factor|^2'])
 
 def Get_0k_range(L):
