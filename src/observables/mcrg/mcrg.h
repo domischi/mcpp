@@ -43,30 +43,32 @@ public:
         //Choose reduction technique
         if(p["MCRG Reduction Technique"]=="Decimation"){
             reduction_type=ReductionTechnique::Decimation;
+            b=2;
         } else if(p["MCRG Reduction Technique"]=="Blockspin"){
             reduction_type=ReductionTechnique::Blockspin;
+            b=2;
         } else if(p["MCRG Reduction Technique"]=="FerroBlockspin"){
             reduction_type=ReductionTechnique::FerroBlockspin;
+            b=2;
         } else if(p["MCRG Reduction Technique"]=="Blockspin4x4"){
             reduction_type=ReductionTechnique::Blockspin4x4;
+            b=4;
         } else if(p["MCRG Reduction Technique"]=="FerroBlockspin4x4"){
             reduction_type=ReductionTechnique::FerroBlockspin4x4;
+            b=4;
         } else if(p["MCRG Reduction Technique"]=="IsingMajority"){
             reduction_type=ReductionTechnique::IsingMajority;
+            b=3;
         } else {
             std::cerr << "Did not recognise the reduction process to use for MCRG, aborting..."<<std::endl;
             std::exit(21); 
         }
         assert(lattice_name_=="square lattice"); //not sure if this works
-        //assert(!(L%2));
-       
+        assert(!(L%b));
         //If this is not the last iteration, construct the MCRG class for the next smaller lattice 
         if(!is_last_iteration()) {
             alps::Parameters p_descendant=p;
-            if(reduction_type==ReductionTechnique::IsingMajority)
-                p_descendant["L"]=L/3;
-            else
-                p_descendant["L"]=L/2;
+            p_descendant["L"]=int(L/b); //probably should check for the sqrt updates
             descendant=std::make_shared<mcrg>(p_descendant,iteration+1,MCRG_It_);
         }
     }
@@ -167,7 +169,7 @@ private:
     int iteration;
     int max_iterations; 
     int L,N;
-
+    double b; // linear scaling factor
     ReductionTechnique reduction_type;
 
     bool inline is_last_iteration(){
