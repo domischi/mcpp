@@ -43,6 +43,19 @@ public:
         obs << alps::RealVectorObservable("Spin Autocorrelation");
     }
 
+    void save(alps::ODump &dump) const{
+        dump
+            << actual_index 
+            << filled 
+            << old_configurations;
+    }
+
+    void load(alps::IDump &dump){
+        dump
+            >> actual_index 
+            >> filled 
+            >> old_configurations;
+    }
 private:
     const int L,N;
     const int autocorr_analysis_depth;

@@ -33,6 +33,8 @@ public:
         obs << alps::RealObservable("M staggered^4");
     }
 
+    // Intentionally left empty as only const values are inside the class (initialization due to constructor)
+    void save(alps::ODump &dump) const{ }
 private:
     const int L,N;
 
