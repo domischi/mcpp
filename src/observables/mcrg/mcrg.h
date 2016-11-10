@@ -153,6 +153,8 @@ private:
         //Choose Interaction Set
         if(s=="small"){
             i=mcrg_utilities::small;
+        } else if(s=="very small"){
+            i=mcrg_utilities::very_small;
         } else if(s=="medium interactions"){
             i=mcrg_utilities::medium1;
         } else if(s=="medium range" || s=="medium" ){
