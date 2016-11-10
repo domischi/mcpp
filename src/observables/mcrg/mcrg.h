@@ -24,6 +24,8 @@ public:
         //Choose Interaction Set
         if(p["MCRG Interactions"]=="small"){
             interactions=mcrg_utilities::small;
+        } else if(p["MCRG Interactions"]=="very small"){
+            interactions=mcrg_utilities::very_small;
         } else if(p["MCRG Interactions"]=="medium interactions"){
             interactions=mcrg_utilities::medium1;
         } else if(p["MCRG Interactions"]=="medium range" || p["MCRG Interactions"]=="medium" ){
