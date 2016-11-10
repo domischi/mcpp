@@ -19,45 +19,13 @@ public:
     iteration(Iteration_),
     max_iterations(MCRG_It_),
     L(p["L"]),
-    N(L*L)
+    N(L*L),
+    reduction_type(init_reduction_technique(static_cast<std::string>(p["MCRG Reduction Technique"]))),
+    scale_factor_b(init_b(reduction_type)),
+    interactions(init_interactions(static_cast<std::string>(p["MCRG Interactions"])))
     {
-        //Choose Interaction Set
-        if(p["MCRG Interactions"]=="small"){
-            interactions=mcrg_utilities::small;
-        } else if(p["MCRG Interactions"]=="very small"){
-            interactions=mcrg_utilities::very_small;
-        } else if(p["MCRG Interactions"]=="medium interactions"){
-            interactions=mcrg_utilities::medium1;
-        } else if(p["MCRG Interactions"]=="medium range" || p["MCRG Interactions"]=="medium" ){
-            interactions=mcrg_utilities::medium2;
-        } else if(p["MCRG Interactions"]=="massive"){
-            std::cout << "Consider this to be a way to large interaction set. This is just me having fun implementing interactions, however if you wanna use it, feel free to do so, however it will take forever and a day to finish";
-            interactions=mcrg_utilities::massive;
-        } else {
-            std::cerr<<"Did not recognise the interaction set to use for MCRG, aborting..."<<std::endl;
-            std::exit(20);
-        }
-        for(auto& i : interactions) i.shrink_to_fit();
-        interactions.shrink_to_fit();
-        
-        //Choose reduction technique
-        if(p["MCRG Reduction Technique"]=="Decimation"){
-            reduction_type=ReductionTechnique::Decimation;
-        } else if(p["MCRG Reduction Technique"]=="Blockspin"){
-            reduction_type=ReductionTechnique::Blockspin;
-        } else if(p["MCRG Reduction Technique"]=="FerroBlockspin"){
-            reduction_type=ReductionTechnique::FerroBlockspin;
-        } else if(p["MCRG Reduction Technique"]=="Blockspin4x4"){
-            reduction_type=ReductionTechnique::Blockspin4x4;
-        } else if(p["MCRG Reduction Technique"]=="FerroBlockspin4x4"){
-            reduction_type=ReductionTechnique::FerroBlockspin4x4;
-        } else {
-            std::cerr << "Did not recognise the reduction process to use for MCRG, aborting..."<<std::endl;
-            std::exit(21); 
-        }
         assert(lattice_name_=="square lattice"); //not sure if this works
         assert(!(L%2));
-       
         //If this is not the last iteration, construct the MCRG class for the next smaller lattice 
         if(!is_last_iteration()) {
             alps::Parameters p_descendant=p;
@@ -65,15 +33,6 @@ public:
             descendant=std::make_shared<mcrg>(p_descendant,iteration+1,MCRG_It_);
         }
     }
-                
-    //first index: which interaction
-    //second index: listing the vectors of the shift
-    //third index (shift_t): a pair of ints denoting the shift wrt to the first one (always (0,0))
-    std::vector<std::vector<shift_t>> interactions;
-    inline int n_interactions(){
-        return interactions.size();
-    }
-
 
     std::tuple<std::valarray<double>,std::valarray<double>> measure(const std::vector<spin_t>& spins, alps::ObservableSet& obs){
         //std::valarray<double> OUT(n_interactions());
@@ -156,15 +115,73 @@ public:
             descendant->init_observables(obs);
         }
     }
-
+    // Intentionally left empty, as there are no non-const members
+    void save(alps::ODump &dump) const{ }
 private:
     std::shared_ptr<mcrg> descendant;
-    int iteration;
-    int max_iterations; 
-    int L,N;
+    const int iteration;
+    const int max_iterations; 
+    const int L,N;
 
-    ReductionTechnique reduction_type;
-
+    const ReductionTechnique reduction_type;
+    //first index: which interaction
+    //second index: listing the vectors of the shift
+    //third index (shift_t): a pair of ints denoting the shift wrt to the first one (always (0,0))
+    const std::vector<std::vector<shift_t>> interactions;
+    const int scale_factor_b;
+    ReductionTechnique init_reduction_technique(std::string s) const {
+        if(s=="Decimation"){
+            return ReductionTechnique::Decimation;
+        } else if(s=="Blockspin"){
+            return ReductionTechnique::Blockspin;
+        } else if(s=="FerroBlockspin"){
+            return ReductionTechnique::FerroBlockspin;
+        } else if(s=="Blockspin4x4"){
+            return ReductionTechnique::Blockspin4x4;
+        } else if(s=="FerroBlockspin4x4"){
+            return ReductionTechnique::FerroBlockspin4x4;
+        } else {
+            std::cerr << "Did not recognise the reduction process to use for MCRG, aborting..."<<std::endl;
+            std::exit(21); 
+        }
+    }
+    inline int n_interactions(){
+        return interactions.size();
+    }
+    std::vector<std::vector<shift_t>> init_interactions(std::string s) const {
+        std::vector<std::vector<shift_t>> i; 
+        //Choose Interaction Set
+        if(s=="small"){
+            i=mcrg_utilities::small;
+        } else if(s=="medium interactions"){
+            i=mcrg_utilities::medium1;
+        } else if(s=="medium range" || s=="medium" ){
+            i=mcrg_utilities::medium2;
+        } else if(s=="massive"){
+            std::cout << "Consider this to be a way to large interaction set. This is just me having fun implementing interactions, however if you wanna use it, feel free to do so, however it will take forever and a day to finish";
+            i=mcrg_utilities::massive;
+        } else {
+            std::cerr<<"Did not recognise the interaction set to use for MCRG, aborting..."<<std::endl;
+            std::exit(20);
+        }
+        for(auto& in : i) in.shrink_to_fit();
+        i.shrink_to_fit();
+        return i;
+    }
+    int init_b(ReductionTechnique rt){
+        switch (rt) {
+            case ReductionTechnique::Decimation:
+               return 2; 
+            case ReductionTechnique::Blockspin:
+               return 2; 
+            case ReductionTechnique::FerroBlockspin:
+               return 2;
+            case ReductionTechnique::Blockspin4x4:
+               return 4;
+            case ReductionTechnique::FerroBlockspin4x4:
+               return 4;
+        }
+    }
     bool inline is_last_iteration(){
         return max_iterations<iteration;
     }

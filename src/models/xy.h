@@ -94,57 +94,34 @@ public :
 
     void save(alps::ODump &dump) const{
         dump 
-        //<< L 
-        //<< N
-        //<< T
         << Step_Number 
         << spins 
-        //<< Thermalization_Sweeps
-        //<< Measure_Sweeps
-        //<< D
-        //<< cutoff_distance
-        //<< Each_Measurement
-        //<< targeted_acc_ratio
         << angle_dev
-        //<< dist3_
-        //<< phi
-        //<< neighbour_list
         << En
-        //<< mx
-        //<< my
-        //<< mx_stag
-        //<< my_stag
-        << accepted
-        //<< measure_mcrg
-        //<< mcrg_it_depth
-        ;
+        << accepted;
+        if(measure_basic_observables){
+            basic_observables_->save(dump);
+        }
+        if(measure_mcrg){
+            mcrg_->save(dump);
+        }
+        if(measure_structure_factor){
+            structure_factor_->save(dump);
+        }
+        if(measure_spin_autocorrelation){
+            spin_autocorrelation_->save(dump);
+        }
     }
     void load(alps::IDump &dump){
         dump 
-        //>> L 
-        //>> N
-        //>> T
         >> Step_Number 
         >> spins 
-        //>> Thermalization_Sweeps
-        //>> Measure_Sweeps
-        //>> D
-        //>> cutoff_distance
-        //>> Each_Measurement
-        //>> targeted_acc_ratio
         >> angle_dev
-        //>> dist3_
-        //>> phi
-        //>> neighbour_list
         >> En
-        //>> mx
-        //>> my
-        //>> mx_stag
-        //>> my_stag
         >> accepted
-        //>> measure_mcrg
-        //>> mcrg_it_depth
         ;
+        if(measure_spin_autocorrelation)
+            spin_autocorrelation_->load(dump);
     }
     void run(alps::ObservableSet& obs){
         using namespace alps::alea;
@@ -195,10 +172,6 @@ private:
 
     //Easy observables
     double En;
-    //double mx;
-    //double my;
-    //double mx_stag;
-    //double my_stag;
     int accepted;
     //Observables
     const bool measure_basic_observables;
