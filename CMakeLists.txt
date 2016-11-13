@@ -44,13 +44,13 @@ endif(USE_FFTW)
 SET(COMMON_FLAGS "-w")
 
 IF(DEBUG)
-    SET(COMMON_FLAGS "${COMMON_FLAGS} -pg -g -Wall")
+    SET(COMMON_FLAGS "${COMMON_FLAGS} -pg -g -Wall -ftree-vectorizer-verbose=2")
     ELSE(DEBUG)
     SET(COMMON_FLAGS "${COMMON_FLAGS} -DNDEBUG")
 ENDIF(DEBUG)
 
 IF(OPTIMIZE)
-    SET(COMMON_FLAGS "${COMMON_FLAGS} -O3 -ffast-math -ftree-vectorize")
+    SET(COMMON_FLAGS "${COMMON_FLAGS} -O3 -ffast-math -ftree-vectorize -march=native")
 ENDIF(OPTIMIZE)
 
 IF(USE_MPI)
