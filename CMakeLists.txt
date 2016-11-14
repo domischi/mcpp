@@ -6,7 +6,6 @@ enable_language(C CXX)
 #-------------------------------------------------------------------
 # Options
 #-------------------------------------------------------------------
-
 #if you don't want the full compiler output, set to "OFF"
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 set(USE_MPI TRUE)
@@ -14,7 +13,7 @@ set(USE_OPENMP TRUE)
 set(USE_FFTW true)
 set(OPTIMIZE TRUE)
 set(DEBUG FALSE)
-
+set(DEBUG_VECTORIZATION FALSE)
 #-------------------------------------------------------------------
 # ALPS
 #-------------------------------------------------------------------
@@ -44,10 +43,13 @@ endif(USE_FFTW)
 SET(COMMON_FLAGS "-w")
 
 IF(DEBUG)
-    SET(COMMON_FLAGS "${COMMON_FLAGS} -pg -g -Wall -ftree-vectorizer-verbose=2")
+    SET(COMMON_FLAGS "${COMMON_FLAGS} -pg -g -Wall")
     ELSE(DEBUG)
     SET(COMMON_FLAGS "${COMMON_FLAGS} -DNDEBUG")
 ENDIF(DEBUG)
+IF(DEBUG_VECTORIZATION)
+    SET(COMMON_FLAGS "${COMMON_FLAGS} -fopt-info-vec-missed")
+ENDIF(DEBUG_VECTORIZATION)
 
 IF(OPTIMIZE)
     SET(COMMON_FLAGS "${COMMON_FLAGS} -O3 -ffast-math -ftree-vectorize -march=native")
