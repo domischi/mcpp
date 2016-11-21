@@ -16,7 +16,7 @@ struct Hamiltonian_List {
     std::unique_ptr<XY_Shape_Anisotropy> p_shape_anisotropy;
 
     Hamiltonian_List(alps::Parameters const& params) {
-         if(params.defined("D") && static_cast<double>(params["D"])!=0.){
+        if(params.defined("D") && static_cast<double>(params["D"])!=0.){
             if((params.defined("Dilution Rate") && static_cast<double>(params["Dilution Rate"])!=0.) || (params.defined("Position Disorder") && static_cast<double>(params["Position Disorder"])!=0.)){
                 p_dipolar_disordered=std::unique_ptr<XY_Dipole<true>>(new XY_Dipole<true>(params)); 
             }
