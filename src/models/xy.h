@@ -261,7 +261,7 @@ private:
         spins.resize(N, 0.);
         switch(init_type) {
             case init_t::GS:
-                if(params["LATTICE"]=="square lattice")
+                if(params["LATTICE"]=="square lattice" || params["LATTICE"]=="anisotropic square lattice")
                     for(site_iterator s_iter= sites().first; s_iter!=sites().second; ++s_iter){
                         if(((*s_iter)%2)){//odd y site
                             spins[*s_iter]=M_PI;
