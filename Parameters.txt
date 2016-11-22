@@ -113,9 +113,9 @@
     Default: (given by ALPS)
     This allows to seed your own RNG, however ALPS provides one if not given
 
----------------------
-|SPECIAL OBSERVABLES|
----------------------
+-------------
+|OBSERVABLES|
+-------------
     MCRG
     ----
     mcrg_iteration_depth: Number of iterations done with MCRG
@@ -149,3 +149,8 @@
     Spin Autocorrelation analysis length: In which depth to analyse the spin autocorrelation
     Default: -1
     As the full configuration get saved, this can be a time and mostly time consuming task, consider that the class contains (this parameter) * N doubles and in every measurement compare a configuration to all the old ones. Use smaller lattices to still have a fast access to the data
+    
+    Last Configuration
+    -------------------------
+    measure last configuration: boolean to determine if it should measure the last configuration or not
+    Default: False 
