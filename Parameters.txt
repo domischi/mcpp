@@ -25,6 +25,10 @@
     Default: 0.
     The positional disorder is given as a 2D Gaussian with standart deviation equal to this parameter centered around 0
 
+    debug dipolar: print information about the coordinates in the dipolar case
+    Default: false
+    Only works if dipolar is loaded (other than that anyway no influence of the lattice itself)
+
     J: Exchange Strength
     Default: 0.
     Describes NN Interactions
