@@ -18,7 +18,8 @@ public:
     D(params.value_or_default("D",1)),
     L(params["L"]),
     N(L*L),
-    gh(params) {
+    gh(params),
+    print_debug_information(static_cast<bool>(params.value_or_default("debug dipolar",false))){
         if(DISORDERED){
             dilution_rate=params.value_or_default("Dilution Rate", 0.);
             position_std_dev=static_cast<double>(params.value_or_default("Position Disorder", 0.))*static_cast<double>(params.value_or_default("a",1.));
@@ -40,6 +41,7 @@ public:
 
 private:
     int L,N;
+    const bool print_debug_information;
     double D;
     double dilution_rate;
     double position_std_dev;
@@ -103,6 +105,13 @@ private:
                 periodic_translations.push_back(ppb);
             }
         }
+        if(print_debug_information){
+            for(int i=0;i<periodic_translations.size();++i){
+                std::cout <<"Periodic Translation No " <<std::setw(2) <<i<<" with vector ("
+                    << std::setw(8) << periodic_translations[i][0]<<","
+                    << std::setw(8) << periodic_translations[i][1]<<")"<<std::endl;
+            }
+        }
         for(int i=0;i<gh.num_sites();++i) neighbour_list.push_back(std::vector<int>());
         std::map<int,double> dist_map;
         std::mt19937 rng(DISORDER_SEED);
@@ -110,7 +119,7 @@ private:
         std::vector<double> dR(gh.dimension()*N);
         if(DISORDERED&&position_std_dev>0.) { //should again be optimized away
             std::normal_distribution<double> dist(0,position_std_dev);
-            for(int i=0;i<2*N;++i) dR[i]=dist(rng);
+            for(int i=0;i<gh.dimension()*N;++i) dR[i]=dist(rng);
         }
         for(site_iterator s_iter = gh.sites().first; s_iter !=gh.sites().second; ++s_iter )
         for(site_iterator s_iter2= gh.sites().first; s_iter2!=gh.sites().second; ++s_iter2)
@@ -121,6 +130,12 @@ private:
                 for(int d=0;d<gh.dimension();++d){
                     c1[d]+=dR[*s_iter +d];
                     c2[d]+=dR[*s_iter2+d];
+                }
+                if(print_debug_information && *s_iter2==1 && p==periodic_translations[0]){
+                    vector_type c(gh.coordinate(*s_iter));
+                    std::cout <<"Site: " <<std::setw(3) <<*s_iter<<" with vector ("
+                        << std::setw(8) << c1[0]<<","
+                        << std::setw(8) << c1[1]<<")"<<std::endl;
                 }
                 double dist=distance(c1,c2,p);
                 int ri = reduced_index(*s_iter, *s_iter2);
