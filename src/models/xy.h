@@ -27,7 +27,7 @@
 
 class xy_worker : public alps::parapack::lattice_mc_worker<>{
 public :
-    enum init_t {GS, Random, Ferro}; 
+    enum init_t {GS, Random, Ferro, Vortex}; 
 
     xy_worker(const alps::Parameters& params) :
         alps::parapack::lattice_mc_worker<>(params), 
@@ -246,11 +246,16 @@ private:
             init_type=init_t::GS;
         } else if (params.value_or_default("Initialization","GS")=="Ferro"){
             init_type=init_t::Ferro;
+        } else if (params.value_or_default("Initialization","GS")=="Vortex"){
+            init_type=init_t::Vortex;
+        } else {
+            std::cerr<< "Did not recognise the initialization type, typo? Abort now...";
+            std::exit(3);
         }
         spins.resize(N, 0.);
         switch(init_type) {
             case init_t::GS:
-                if(params["LATTICE"]=="square lattice" || params["LATTICE"]=="anisotropic square lattice")
+                if((params["LATTICE"]=="square lattice" || params["LATTICE"]=="anisotropic square lattice") && !(L%2))
                     for(site_iterator s_iter= sites().first; s_iter!=sites().second; ++s_iter){
                         if(((*s_iter)%2)){//odd y site
                             spins[*s_iter]=M_PI;
@@ -266,6 +271,26 @@ private:
                 }
                 break;
             case init_t::Ferro: //Already initialized as Ferro due to resize
+                break;
+            case init_t::Vortex: //Already initialized as Ferro due to resize
+                if((params["LATTICE"]=="square lattice" || params["LATTICE"]=="anisotropic square lattice") && !(L%2))
+                    for(site_iterator s_iter= sites().first; s_iter!=sites().second; ++s_iter){
+                        if((*s_iter)%2){//odd y site
+                            if((*s_iter/L)%2)//odd x site
+                                spins[*s_iter]=7./4*M_PI;
+                            else//even x site
+                                spins[*s_iter]=1./4*M_PI;
+                        }
+                        else{//even y site
+                            if((*s_iter/L)%2)//odd x site
+                                spins[*s_iter]=5./4*M_PI;
+                            else//even x site
+                                spins[*s_iter]=3./4*M_PI;
+                        }
+                    }
+                else {
+                    std::cerr <<"Vortex state not explicitly defined, for this lattice, implement this or assume all spins to point in the x direction"<<std::endl;
+                }
                 break;
             default:
                 std::cerr << "Smth went terribly wrong as this line should never be hit"<<std::endl;
