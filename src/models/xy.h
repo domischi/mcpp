@@ -194,7 +194,7 @@ private:
         //propose a new state
         double old_state=spins[site];
         double old_energy=single_site_Energy(site);
-        double new_state=old_state+random_real_shifted(angle_dev);
+        double new_state=mod2Pi(old_state+random_real_shifted(angle_dev));
         if(ising) {
             new_state= (old_state>0.5*M_PI ? 0 : M_PI); //Only allow Spin Flip updates
         }
@@ -223,6 +223,9 @@ private:
         return Step_Number==Measure_Sweeps*Each_Measurement+Thermalization_Sweeps;
     }
     
+    double inline mod2Pi(double const& s) const {
+        return s-std::floor(s/(2*M_PI))*2*M_PI;
+    }
     void measure(alps::ObservableSet& obs){
         obs["Energy"]<<En/num_sites();
         obs["Energy^2"]<<std::pow(En/num_sites(),2);
