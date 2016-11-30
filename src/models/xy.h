@@ -201,7 +201,7 @@ private:
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);
         if(random_real()<=std::exp(-(new_energy-old_energy)/T)){
-            En+=(new_energy-old_energy)/2; //TODO check if this is wrong...
+            En+=new_energy-old_energy;
             ++accepted;
         }
         else{ //switch back
