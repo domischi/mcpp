@@ -37,6 +37,18 @@ std::vector<std::vector<shift_t>> small = {
         {std::make_tuple(0,0,0),std::make_tuple(-1,1,1)},//d-11 xy comp
         {std::make_tuple(0,0,1),std::make_tuple(-1,1,0)} //d-11 yx comp
     };
+std::vector<std::vector<shift_t>> very_small = {
+		//Odd
+		{std::make_tuple(0,0,0)}, // field term along x
+		//Even
+		{std::make_tuple(0,0,0),std::make_tuple(1,0,0)}, //NNx x comp
+        {std::make_tuple(0,0,0),std::make_tuple(1,0,1)}, //NNx xy comp
+        {std::make_tuple(0,0,0),std::make_tuple(0,1,0)}, //NNy x comp
+        {std::make_tuple(0,0,0),std::make_tuple(1,1,0)}, //d11 x comp
+        {std::make_tuple(0,0,1),std::make_tuple(1,1,1)}, //d11 y comp
+        {std::make_tuple(0,0,0),std::make_tuple(1,1,1)}, //d11 xy comp
+        {std::make_tuple(0,0,1),std::make_tuple(1,1,0)}, //d11 yx comp
+    };
 /*
     This is a small set designed for Ising
     Only in the component x -> as the simulation is running for Ising

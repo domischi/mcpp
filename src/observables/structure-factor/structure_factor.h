@@ -61,22 +61,9 @@ public:
         memcpy(fftw_out, original.fftw_out, N*sizeof(fftw_complex));
         #endif //NFFTW
     }
-    structure_factor& operator=(const structure_factor& original) {
-        L=original.L;
-        N=original.N;
-        reciprocal_vectors=original.reciprocal_vectors;
-        basis_vectors=original.basis_vectors;
-        #if !NFFTW
-        fftw_in=fftw_alloc_complex(N);
-        fftw_out=fftw_alloc_complex(N);
-        fftw_timelimit_=original.fftw_timelimit_;
-        fftw_set_timelimit(fftw_timelimit_);
-        plan=fftw_plan_dft_2d(L,L,fftw_in, fftw_out, FFTW_FORWARD, FFTW_MEASURE | FFTW_DESTROY_INPUT);
-        memcpy(fftw_in , original.fftw_in , N*sizeof(fftw_complex));
-        memcpy(fftw_out, original.fftw_out, N*sizeof(fftw_complex));
-        #endif //NFFTW
-        return *this;
-    }
+
+    structure_factor& operator=(const structure_factor& original) = delete; //as there are const members which could be very dangerous, just forbid the use of an assignment
+
     ~structure_factor(){
         #if !NFFTW
         fftw_free(fftw_in ); 
@@ -92,8 +79,6 @@ public:
         std::transform(spins.begin(),spins.end(),begin(Sy),[](double d) {return std::sin(d);});
         Sx=fourier_transform(Sx);
         Sy=fourier_transform(Sy);
-        //obs["Structure Factor X"]<<Sx; 
-        //obs["Structure Factor Y"]<<Sy; 
         std::valarray<double> S2(spins.size());
         for(int i =0;i<spins.size();++i)
             S2[i]=std::pow(std::abs(Sx[i]),2)+std::pow(std::abs(Sy[i]),2);
@@ -101,10 +86,10 @@ public:
     }
 
     void init_observables(alps::ObservableSet& obs) const {
-        //obs << alps::RealVectorObservable("Structure Factor X");
-        //obs << alps::RealVectorObservable("Structure Factor Y");
         obs << alps::RealVectorObservable("|Structure Factor|^2");
     }
+    //Intentionally left empty
+    void save(alps::ODump &dump) const{ }
 private:
     typedef typename alps::graph_helper<>::vector_type vector_type;
     std::vector<vector_type> reciprocal_vectors; 
@@ -113,12 +98,12 @@ private:
     #if !NFFTW
     fftw_complex *fftw_in;
     fftw_complex *fftw_out;
-    double fftw_timelimit_; 
+    const double fftw_timelimit_; 
     fftw_plan plan; 
     #endif //NFFTW
 
     static constexpr std::complex<double> I=std::complex<double>(0.,1.);
-    int L,N;
+    const int L,N;
     
     #if !NFFTW
     // ATTENTION: THIS IS HACKED, THERE DOES NOT EXIST A NICE VERSION OF THAT PART, 

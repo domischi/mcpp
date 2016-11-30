@@ -27,7 +27,7 @@
 
 class xy_worker : public alps::parapack::lattice_mc_worker<>{
 public :
-    enum init_t {GS, Random, Ferro}; 
+    enum init_t {GS, Random, Ferro, Vortex}; 
 
     xy_worker(const alps::Parameters& params) :
         alps::parapack::lattice_mc_worker<>(params), 
@@ -41,6 +41,7 @@ public :
         Step_Number(0),
         accepted(0),
         measure_basic_observables(static_cast<bool>(params.value_or_default("basic_observables",true))),
+        measure_last_configuration(static_cast<bool>(params.value_or_default("measure last configuration",false))),
         mcrg_it_depth(params.value_or_default("mcrg_iteration_depth",-1)),
         measure_mcrg(static_cast<bool>(static_cast<int>(params.value_or_default("mcrg_iteration_depth",-1))>0)),
         measure_structure_factor(static_cast<bool>(params.value_or_default("structure_factor",false))),
@@ -78,6 +79,9 @@ public :
         obs << alps::RealObservable("Energy");
         obs << alps::RealObservable("Energy^2");
         obs << alps::RealObservable("Acceptance Ratio"); //Probably very useful for debugging
+        if(measure_last_configuration){
+            obs<<alps::RealVectorObservable("Last Configuration");
+        }
         if(measure_mcrg){
             mcrg_->init_observables(obs);
         }
@@ -94,57 +98,34 @@ public :
 
     void save(alps::ODump &dump) const{
         dump 
-        //<< L 
-        //<< N
-        //<< T
         << Step_Number 
         << spins 
-        //<< Thermalization_Sweeps
-        //<< Measure_Sweeps
-        //<< D
-        //<< cutoff_distance
-        //<< Each_Measurement
-        //<< targeted_acc_ratio
         << angle_dev
-        //<< dist3_
-        //<< phi
-        //<< neighbour_list
         << En
-        //<< mx
-        //<< my
-        //<< mx_stag
-        //<< my_stag
-        << accepted
-        //<< measure_mcrg
-        //<< mcrg_it_depth
-        ;
+        << accepted;
+        if(measure_basic_observables){
+            basic_observables_->save(dump);
+        }
+        if(measure_mcrg){
+            mcrg_->save(dump);
+        }
+        if(measure_structure_factor){
+            structure_factor_->save(dump);
+        }
+        if(measure_spin_autocorrelation){
+            spin_autocorrelation_->save(dump);
+        }
     }
     void load(alps::IDump &dump){
         dump 
-        //>> L 
-        //>> N
-        //>> T
         >> Step_Number 
         >> spins 
-        //>> Thermalization_Sweeps
-        //>> Measure_Sweeps
-        //>> D
-        //>> cutoff_distance
-        //>> Each_Measurement
-        //>> targeted_acc_ratio
         >> angle_dev
-        //>> dist3_
-        //>> phi
-        //>> neighbour_list
         >> En
-        //>> mx
-        //>> my
-        //>> mx_stag
-        //>> my_stag
         >> accepted
-        //>> measure_mcrg
-        //>> mcrg_it_depth
         ;
+        if(measure_spin_autocorrelation)
+            spin_autocorrelation_->load(dump);
     }
     void run(alps::ObservableSet& obs){
         using namespace alps::alea;
@@ -161,7 +142,7 @@ public :
             }
         }
         obs["Acceptance Ratio"]<<update_angle_deviation(accepted,n_steps);// This is also of interest before thermalization
-        if(is_thermalized()&&(!(Step_Number%Each_Measurement))){
+        if(is_thermalized()&&(!((Step_Number-Thermalization_Sweeps)%Each_Measurement))){
             measure(obs);
             accepted=0;
         }
@@ -195,11 +176,8 @@ private:
 
     //Easy observables
     double En;
-    //double mx;
-    //double my;
-    //double mx_stag;
-    //double my_stag;
     int accepted;
+    const bool measure_last_configuration;
     //Observables
     const bool measure_basic_observables;
     std::shared_ptr<basic_observables> basic_observables_;
@@ -223,18 +201,7 @@ private:
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);
         if(random_real()<=std::exp(-(new_energy-old_energy)/T)){
-            //update variables due to local change
-            //mx+=std::cos(new_state)-std::cos(old_state);
-            //my+=std::sin(new_state)-std::sin(old_state);
-
-            ////update with the corresponding prefactor
-            //int prefactor_x=1;
-            //int prefactor_y=1;
-            //if(((site%L)%2)) prefactor_x=-1; //for even y sites -1
-            //if(((site/L)%2)) prefactor_y=-1; //for even x sites -1
-            //mx_stag+=prefactor_x*(std::cos(new_state)-std::cos(old_state));
-            //my_stag+=prefactor_y*(std::sin(new_state)-std::sin(old_state));
-            En+=(new_energy-old_energy)/2; //TODO check if this is wrong...
+            En+=new_energy-old_energy;
             ++accepted;
         }
         else{ //switch back
@@ -251,23 +218,18 @@ private:
         accepted=0;
         return acc_ratio; 
     }
+
+    inline bool is_last_MC_step(){
+        return Step_Number==Measure_Sweeps*Each_Measurement+Thermalization_Sweeps;
+    }
+    
     void measure(alps::ObservableSet& obs){
         obs["Energy"]<<En/num_sites();
         obs["Energy^2"]<<std::pow(En/num_sites(),2);
-        //double M= std::sqrt(mx*mx+my*my)/num_sites();
-        //obs["M"]<<M;
-        //obs["M^2"]<<M*M;
-        //obs["M^4"]<<M*M*M*M;
-        //double Mx=mx/num_sites();
-        //obs["Mx"]<<Mx; 
-        //obs["Mx^2"]<<Mx*Mx;
-        //M= std::sqrt(mx_stag*mx_stag+my_stag*my_stag)/num_sites();
-        //obs["M staggered"]<<M;
-        //obs["M staggered^2"]<<M*M;
-        //obs["M staggered^4"]<<M*M*M*M;
-        //Mx=mx_stag/num_sites();
-        //obs["Mx staggered"]<<Mx; 
-        //obs["Mx staggered^2"]<<Mx*Mx;
+        if(measure_last_configuration && is_last_MC_step()){
+            std::valarray<double> s(spins.data(),spins.size());
+            obs["Last Configuration"]<<s;
+        }
         if(measure_basic_observables) 
             basic_observables_->measure(spins, obs);
         if(measure_mcrg) 
@@ -284,11 +246,16 @@ private:
             init_type=init_t::GS;
         } else if (params.value_or_default("Initialization","GS")=="Ferro"){
             init_type=init_t::Ferro;
+        } else if (params.value_or_default("Initialization","GS")=="Vortex"){
+            init_type=init_t::Vortex;
+        } else {
+            std::cerr<< "Did not recognise the initialization type, typo? Abort now...";
+            std::exit(3);
         }
         spins.resize(N, 0.);
         switch(init_type) {
             case init_t::GS:
-                if(params["LATTICE"]=="square lattice")
+                if((params["LATTICE"]=="square lattice" || params["LATTICE"]=="anisotropic square lattice") && !(L%2))
                     for(site_iterator s_iter= sites().first; s_iter!=sites().second; ++s_iter){
                         if(((*s_iter)%2)){//odd y site
                             spins[*s_iter]=M_PI;
@@ -305,11 +272,29 @@ private:
                 break;
             case init_t::Ferro: //Already initialized as Ferro due to resize
                 break;
+            case init_t::Vortex: //Already initialized as Ferro due to resize
+                if((params["LATTICE"]=="square lattice" || params["LATTICE"]=="anisotropic square lattice") && !(L%2))
+                    for(site_iterator s_iter= sites().first; s_iter!=sites().second; ++s_iter){
+                        if((*s_iter)%2){//odd y site
+                            if((*s_iter/L)%2)//odd x site
+                                spins[*s_iter]=7./4*M_PI;
+                            else//even x site
+                                spins[*s_iter]=1./4*M_PI;
+                        }
+                        else{//even y site
+                            if((*s_iter/L)%2)//odd x site
+                                spins[*s_iter]=5./4*M_PI;
+                            else//even x site
+                                spins[*s_iter]=3./4*M_PI;
+                        }
+                    }
+                else {
+                    std::cerr <<"Vortex state not explicitly defined, for this lattice, implement this or assume all spins to point in the x direction"<<std::endl;
+                }
+                break;
             default:
                 std::cerr << "Smth went terribly wrong as this line should never be hit"<<std::endl;
         }
-            
-
     }
     inline double beta() const { 
         return 1./T;
