@@ -196,7 +196,7 @@ private:
         double old_energy=single_site_Energy(site);
         double new_state=old_state+random_real_shifted(angle_dev);
         if(ising) {
-            new_state=old_state+M_PI; //Only allow Spin Flip updates
+            new_state= (old_state>0.5*M_PI ? 0 : M_PI); //Only allow Spin Flip updates
         }
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);

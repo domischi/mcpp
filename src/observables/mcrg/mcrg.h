@@ -25,24 +25,15 @@ public:
     interactions(init_interactions(static_cast<std::string>(p["MCRG Interactions"])))
     {
         assert(p["LATTICE"]=="square lattice"); //not sure if this works
-        assert(!(L%2));
+        //assert(!(L%2));
         //If this is not the last iteration, construct the MCRG class for the next smaller lattice 
         if(!is_last_iteration()) {
             alps::Parameters p_descendant=p;
-            p_descendant["L"]=int(L/b); //probably should check for the sqrt updates
+            p_descendant["L"]=int(L/scale_factor_b); //probably should check for the sqrt updates
             descendant=std::make_shared<mcrg>(p_descendant,iteration+1,MCRG_It_);
         }
     }
                 
-    //first index: which interaction
-    //second index: listing the vectors of the shift
-    //third index (shift_t): a pair of ints denoting the shift wrt to the first one (always (0,0))
-    std::vector<std::vector<shift_t>> interactions;
-    inline int n_interactions(){
-        return interactions.size();
-    }
-
-
     std::tuple<std::valarray<double>,std::valarray<double>> measure(const std::vector<spin_t>& spins, alps::ObservableSet& obs){
         //std::valarray<double> OUT(n_interactions());
         std::vector<double> oute, outo;
@@ -62,9 +53,9 @@ public:
         std::valarray<double> OUTe(oute.data(), oute.size()), OUTo(outo.data(), outo.size());
         
         std::valarray<double> save_outo=OUTo;
-        save_outo/=N;
+        //save_outo/=N;
         std::valarray<double> save_oute=OUTe;
-        save_oute/=N;
+        //save_oute/=N;
         obs["MCRGe S_alpha"+ std::to_string(iteration)]<<save_oute;
         obs["MCRGo S_alpha"+ std::to_string(iteration)]<<save_outo;
         //measure <S_alpha n S_beta n>
@@ -81,8 +72,8 @@ public:
                 outoute[i*counte+j]=OUTe[i]*OUTe[j];
             }
         }
-        outoute/=N;
-        outouto/=N;
+        //outoute/=N;
+        //outouto/=N;
         obs["MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration)]<<outouto;
         obs["MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration)]<<outoute;
         
@@ -99,7 +90,7 @@ public:
                     outine[i*INe.size()+j]=(OUTe[i]*INe[j]);
                 }
             }
-            outine/=N;
+            //outine/=N;
             obs["MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1)]<<outine;
             std::valarray<double> outino(INo.size()*INo.size());
             for(int i=0;i<INo.size();++i){
@@ -107,7 +98,7 @@ public:
                     outino[i*INo.size()+j]=(OUTo[i]*INo[j]);
                 }
             }
-            outino/=N;
+            //outino/=N;
             obs["MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1)]<<outino;
         }
         return std::tie(OUTo,OUTe);
@@ -149,6 +140,8 @@ private:
             return ReductionTechnique::Blockspin4x4;
         } else if(s=="FerroBlockspin4x4"){
             return ReductionTechnique::FerroBlockspin4x4;
+        } else if(s=="IsingMajority"){
+            return ReductionTechnique::IsingMajority;
         } else {
             std::cerr << "Did not recognise the reduction process to use for MCRG, aborting..."<<std::endl;
             std::exit(21); 
@@ -171,6 +164,8 @@ private:
         } else if(s=="massive"){
             std::cout << "Consider this to be a way to large interaction set. This is just me having fun implementing interactions, however if you wanna use it, feel free to do so, however it will take forever and a day to finish";
             i=mcrg_utilities::massive;
+        } else if(s=="ising"){
+            i=mcrg_utilities::small_Ising;
         } else {
             std::cerr<<"Did not recognise the interaction set to use for MCRG, aborting..."<<std::endl;
             std::exit(20);
@@ -187,6 +182,8 @@ private:
                return 2; 
             case ReductionTechnique::FerroBlockspin:
                return 2;
+            case ReductionTechnique::IsingMajority:
+               return 3;
             case ReductionTechnique::Blockspin4x4:
                return 4;
             case ReductionTechnique::FerroBlockspin4x4:
@@ -194,7 +191,7 @@ private:
         }
     }
     bool inline is_last_iteration(){
-        return max_iterations<iteration;
+        return max_iterations<=iteration;
     }
     bool inline is_first_iteration(){
         return !iteration; //if iteration==0 this is true
