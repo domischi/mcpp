@@ -13,7 +13,7 @@ class mcrg {
 public:
     typedef double spin_t;
     typedef mcrg_utilities::shift_t shift_t; //(dx,dy, component)
-    enum ReductionTechnique {Decimation,Blockspin, FerroBlockspin, Blockspin4x4, FerroBlockspin4x4};
+    enum ReductionTechnique {Decimation,Blockspin, FerroBlockspin, Blockspin4x4, FerroBlockspin4x4, IsingMajority};
     
     mcrg(const alps::Parameters& p, int Iteration_, int MCRG_It_) :
     iteration(Iteration_),
@@ -24,15 +24,24 @@ public:
     scale_factor_b(init_b(reduction_type)),
     interactions(init_interactions(static_cast<std::string>(p["MCRG Interactions"])))
     {
-        assert(lattice_name_=="square lattice"); //not sure if this works
+        assert(p["LATTICE"]=="square lattice"); //not sure if this works
         assert(!(L%2));
         //If this is not the last iteration, construct the MCRG class for the next smaller lattice 
         if(!is_last_iteration()) {
             alps::Parameters p_descendant=p;
-            p_descendant["L"]=L/2;
+            p_descendant["L"]=int(L/b); //probably should check for the sqrt updates
             descendant=std::make_shared<mcrg>(p_descendant,iteration+1,MCRG_It_);
         }
     }
+                
+    //first index: which interaction
+    //second index: listing the vectors of the shift
+    //third index (shift_t): a pair of ints denoting the shift wrt to the first one (always (0,0))
+    std::vector<std::vector<shift_t>> interactions;
+    inline int n_interactions(){
+        return interactions.size();
+    }
+
 
     std::tuple<std::valarray<double>,std::valarray<double>> measure(const std::vector<spin_t>& spins, alps::ObservableSet& obs){
         //std::valarray<double> OUT(n_interactions());
@@ -242,6 +251,9 @@ private:
         }
         if(reduction_type==ReductionTechnique::Blockspin4x4){
             return mcrg_utilities::blockspin4x4(spins,L,0);//TODO make the entry point random
+        }
+        if(reduction_type==ReductionTechnique::IsingMajority){
+            return mcrg_utilities::ising_majority(spins,L,0);//TODO make the entry point random
         }
         if(reduction_type==ReductionTechnique::FerroBlockspin4x4){
             if(is_first_iteration()){
