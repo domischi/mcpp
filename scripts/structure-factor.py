@@ -3,45 +3,56 @@
 # structure factor modulus squared (proportional to a scattering signal) #
 #************************************************************************#
 
+# I know that the script pollutes the standard output, however up to now 
+# I didn't find a solution, as the problem is with a dangeling pointer.
+# This issue is resolved with IPython, however as alps does link against
+# the standard python this is not a possibility. For now just ignore the 
+# ouput of the save function
+
 import pyalps
-import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider, Button, CheckButtons
-import pyalps.plot
 from numpy import linspace, sqrt
 from os import path, mkdir, listdir
 import numpy as np
 import re
 
-GenerateParameterFiles=True
-Run=False
-Evaluate=False
-if GenerateParameterFiles:
+T=True
+F=False
+
+ANALYZE       =T
+GENERATE_INPUT=F
+RUN_SIMULATION=F
+
+if ANALYZE:
+    import matplotlib.pyplot as plt
+    from matplotlib.widgets import Slider, Button, CheckButtons
+    import pyalps.plot
+if GENERATE_INPUT:
     #prepare the input parameters
     parms = []
-    for l in [64]: 
-        for t in linspace(0.,3.0,31):
-            parms.append(
-                { 
-                     'LATTICE'        : "square lattice", 
-                     'T'              : t,
-                     'D'              : 1.,
-                     'THERMALIZATION' : 50000,
-                     'SWEEPS'         : 20000,
-                     'UPDATE'         : "ssf",
-                     'cutoff_distance': 1.8,
-                     'L'              : l,
-                     'structure_factor': True,
-                     'Targeted Acceptance Ratio': 0.4,
-                     'Each_Measurement': 15
-                }
-               )
+    l=32
+    for t in linspace(0.0,1.2,25):
+        parms.append(
+            { 
+                 'LATTICE'        : "square lattice", 
+                 'Initialization' : 'Vortex',
+                 'T'              : t,
+                 'D'              : 1.,
+                 'measure last configuration' : True,
+                 'THERMALIZATION' : 50000,
+                 'SWEEPS'         : 15000,
+                 'UPDATE'         : "ssf",
+                 'cutoff_distance': 3.0,
+                 'L'              : l,
+                 'structure_factor': True,
+                 'Targeted Acceptance Ratio': 0.4,
+                 'Each_Measurement': 15
+            }
+           )
     #write the input file and run the simulation
     input_file = pyalps.writeInputFiles('parm',parms)
-    if Run: 
-        pyalps.runApplication('mc++',input_file,Tmin=5)
-        # use the following instead if you have MPI
-        #pyalps.runApplication('mc++',input_file,Tmin=5,MPI=1)
-if Evaluate:
+if RUN_SIMULATION:
+    pyalps.runApplication('mc++',input_file,Tmin=5,MPI=1)
+if ANALYZE:
     data = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm'),['|Structure Factor|^2'])
 
     def Get_0k_range(L):
@@ -79,13 +90,13 @@ if Evaluate:
     width=0.5-boarder_width
     height_plots=(1-bottom_start)/3.-boarder_width
 
-    # HM= heat map, TS= temperature slider
+# HM= heat map, TS= temperature slider
     axHM = plt.axes([left_start                    , bottom_start,                      width, 1-bottom_start])
     ax0k = plt.axes([left_start+width+boarder_width, bottom_start+(height_plots+boarder_width)*2, width, height_plots])
     axk0 = plt.axes([left_start+width+boarder_width, bottom_start,                      width, height_plots])
     axkk = plt.axes([left_start+width+boarder_width, bottom_start+height_plots+boarder_width, width, height_plots])
 
-    #GUI
+#GUI
     height_slider=0.05
     bottom_slider= bottom_start - 0.1
     width_slider=right_end-left_start-0.05
@@ -155,11 +166,8 @@ if Evaluate:
         else:
             return 1
 
-    def plot_data(S2_data, S2_err):
-        normalization_constraint=max(S2_data.flatten())
-        S2_data=S2_data/normalization_constraint
-        S2_err =S2_err /normalization_constraint
-        plt.sca(axHM)
+    def plot_heatmap(ax, S2_data, S2_err):
+        plt.sca(ax)
         plt.cla()
         plt.xlabel(r'$k_x$')
         plt.ylabel(r'$k_y$')
@@ -167,7 +175,8 @@ if Evaluate:
             plt.imshow(S2_data, interpolation='nearest', origin='lower')
         else:
             plt.imshow(np.log(S2_data), interpolation='nearest', origin='lower')
-        plt.sca(ax0k)
+    def plot_0k(ax,S2_data,S2_err):
+        plt.sca(ax)
         plt.cla()
         plt.xlabel(r'$k$')
         plt.ylabel(r'$|S(0,k)|^2$')
@@ -175,7 +184,8 @@ if Evaluate:
             plt.errorbar(linspace(0,1,L), Get_0k_data(S2_data,L),yerr=Get_0k_data(S2_err,L))
         else:
             plt.semilogy(linspace(0,1,L), Get_0k_data(S2_data,L))
-        plt.sca(axk0)
+    def plot_k0(ax,S2_data,S2_err):
+        plt.sca(ax)
         plt.cla()
         plt.xlabel(r'$k$')
         plt.ylabel(r'$|S(k,0)|^2$')
@@ -183,7 +193,8 @@ if Evaluate:
             plt.errorbar(linspace(0,1,L), Get_k0_data(S2_data,L),yerr=Get_k0_data(S2_err,L))
         else:
             plt.semilogy(linspace(0,1,L), Get_k0_data(S2_data,L))
-        plt.sca(axkk)
+    def plot_kk(ax,S2_data,S2_err):
+        plt.sca(ax)
         plt.cla()
         plt.xlabel(r'$k$')
         plt.ylabel(r'$|S(k,k)|^2$')
@@ -191,10 +202,15 @@ if Evaluate:
             plt.errorbar(linspace(0,1,L), Get_kk_data(S2_data,L),yerr=Get_kk_data(S2_err,L))
         else:
             plt.semilogy(linspace(0,1,L), Get_kk_data(S2_data,L))
-        fig.canvas.draw() 
-        
 
-    def update(dummy):
+    def plot_data(S2_data, S2_err):
+        plot_heatmap(axHM,S2_data, S2_err)
+        plot_0k(ax0k,S2_data, S2_err)
+        plot_kk(axkk,S2_data, S2_err)
+        plot_k0(axk0,S2_data, S2_err)
+        fig.canvas.draw() 
+       
+    def get_S2_val():
         T=SlT.val
         if not Interpolate:
             i=GetClosestTIndex(T)
@@ -211,12 +227,19 @@ if Evaluate:
             else:
                 data =S2[i,:,:] 
                 error=S2E[i,:,:]
-            
+        normalization_constraint=max(data.flatten())
+        data=data/normalization_constraint
+        error =error /normalization_constraint
+        return data, error
+
+    def update(dummy):
+        data, error=get_S2_val()
         plot_data(data, error)
         
     NEW_SESSION=True
     SESSION_ID=0
-    def GetSaveName():
+    
+    def GetIDString():
         global NEW_SESSION
         global SESSION_ID
         PathToWorkingFolder='.'
@@ -237,11 +260,46 @@ if Evaluate:
             SESSION_ID=tmp_session_id+1
         else:         
             FILE_ID=tmp_file_id+1
-        return PathToWorkingFolder+'/snapshots/snapshot.'+str(SESSION_ID)+'.'+str(FILE_ID)+'.pdf'
+        return str(SESSION_ID)+'.'+str(FILE_ID)
+    def GetSnapshotName(SessionID):
+        PathToWorkingFolder='.'
+        PathToResultsFolder=PathToWorkingFolder+'/snapshots'
+        return PathToWorkingFolder+'/snapshots/snapshot.'+SessionID+'.pdf'
+    def GetHeatmapName(SessionID):
+        PathToWorkingFolder='.'
+        PathToResultsFolder=PathToWorkingFolder+'/snapshots'
+        return PathToWorkingFolder+'/snapshots/heatmap.'+SessionID+'.pdf'
+    def Get0kName(SessionID):
+        PathToWorkingFolder='.'
+        PathToResultsFolder=PathToWorkingFolder+'/snapshots'
+        return PathToWorkingFolder+'/snapshots/Plot.0k.'+SessionID+'.pdf'
+    def GetkkName(SessionID):
+        PathToWorkingFolder='.'
+        PathToResultsFolder=PathToWorkingFolder+'/snapshots'
+        return PathToWorkingFolder+'/snapshots/Plot.kk.'+SessionID+'.pdf'
+    def Getk0Name(SessionID):
+        PathToWorkingFolder='.'
+        PathToResultsFolder=PathToWorkingFolder+'/snapshots'
+        return PathToWorkingFolder+'/snapshots/Plot.k0.'+SessionID+'.pdf'
+
+    def save_helper(SessionID, NameFunction, data, err, PlotFunction):
+        f=plt.figure()
+        ax=f.gca()
+        PlotFunction(ax,data,err)
+        f.savefig(NameFunction(SessionID))
+        try:
+            plt.close(f)
+        except:
+            pass
 
     def save(dummy):
-        plt.savefig(GetSaveName())
-        
+        SessionID=GetIDString()
+        plt.savefig(GetSnapshotName(SessionID))
+        data,err=get_S2_val()
+        save_helper(SessionID, GetHeatmapName, data, err, plot_heatmap)
+        save_helper(SessionID, Getk0Name,      data, err, plot_k0)
+        save_helper(SessionID, Get0kName,      data, err, plot_0k)
+        save_helper(SessionID, GetkkName,      data, err, plot_kk)
     SlT.on_changed(update)
     BuSv.on_clicked(save)
     update(0)
