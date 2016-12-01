@@ -91,7 +91,8 @@ if ANALYZE:
     height_plots=(1-bottom_start)/3.-boarder_width
 
 # HM= heat map, TS= temperature slider
-    axHM = plt.axes([left_start                    , bottom_start,                      width, 1-bottom_start])
+    axHM = plt.axes([left_start                    , bottom_start,                      width, .98-bottom_start])
+    axCB = plt.axes([left_start+width+boarder_width*0.2, bottom_start,                      boarder_width*0.2, .98-bottom_start])
     ax0k = plt.axes([left_start+width+boarder_width, bottom_start+(height_plots+boarder_width)*2, width, height_plots])
     axk0 = plt.axes([left_start+width+boarder_width, bottom_start,                      width, height_plots])
     axkk = plt.axes([left_start+width+boarder_width, bottom_start+height_plots+boarder_width, width, height_plots])
@@ -171,10 +172,15 @@ if ANALYZE:
         plt.cla()
         plt.xlabel(r'$k_x$')
         plt.ylabel(r'$k_y$')
+	dx=1./len(S2_data)
+	dy=1./len(S2_data)
+	y, x = np.mgrid[slice(0, 1 + dy, dy),
+			slice(0, 1 + dx, dx)]
         if not SLyPlot:
-            plt.imshow(S2_data, interpolation='nearest', origin='lower')
+            im = ax.pcolormesh(x, y,S2_data)
         else:
-            plt.imshow(np.log(S2_data), interpolation='nearest', origin='lower')
+            im = ax.pcolormesh(x, y,np.log( S2_data))
+        fig.colorbar(im, cax=axCB)
     def plot_0k(ax,S2_data,S2_err):
         plt.sca(ax)
         plt.cla()
@@ -291,12 +297,31 @@ if ANALYZE:
             plt.close(f)
         except:
             pass
+    def save_heatmp(SessionID, NameFunction, data, err, PlotFunction):
+        f=plt.figure()
+        ax=f.gca()
+        plt.xlabel(r'$k_x$')
+        plt.ylabel(r'$k_y$')
+	dx=1./len(data)
+	dy=1./len(data)
+	y, x = np.mgrid[slice(0, 1 + dy, dy),
+			slice(0, 1 + dx, dx)]
+        if not SLyPlot:
+            im = ax.pcolormesh(x, y,data)
+        else:
+            im = ax.pcolormesh(x, y,np.log(data))
+        fig.colorbar(im, ax=ax)
+        f.savefig(NameFunction(SessionID))
+        try:
+            plt.close(f)
+        except:
+            pass
 
     def save(dummy):
         SessionID=GetIDString()
         plt.savefig(GetSnapshotName(SessionID))
         data,err=get_S2_val()
-        save_helper(SessionID, GetHeatmapName, data, err, plot_heatmap)
+        save_heatmp(SessionID, GetHeatmapName, data, err, plot_heatmap)
         save_helper(SessionID, Getk0Name,      data, err, plot_k0)
         save_helper(SessionID, Get0kName,      data, err, plot_0k)
         save_helper(SessionID, GetkkName,      data, err, plot_kk)
