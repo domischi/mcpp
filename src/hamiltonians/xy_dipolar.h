@@ -28,7 +28,12 @@ public:
             dilution_rate=0;
             position_std_dev=0;
         }
-        cutoff_distance=static_cast<double>(params.value_or_default("cutoff_distance",3))*std::max(static_cast<double>(params.value_or_default("a",1.)),static_cast<double>(params.value_or_default("b",1.)));
+        cutoff_distance=static_cast<double>(params.value_or_default("cutoff_distance",3));
+        if (cutoff_distance>=L/2.){
+            std::cerr<<"Too small lattice for such a cutoff, there is an ambiguity and you should check what you are doing... Aborting..."<<std::endl;
+            std::exit(3);
+        }
+        cutoff_distance*=std::max(static_cast<double>(params.value_or_default("a",1.)),static_cast<double>(params.value_or_default("b",1.)));
         Init_Lookup_Tables(params["DISORDER_SEED"]);
     } 
     virtual double SingleSiteEnergy(std::vector<double> const& spins, int i) const {
