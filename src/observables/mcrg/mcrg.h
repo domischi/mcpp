@@ -13,13 +13,15 @@ class mcrg {
 public:
     typedef double spin_t;
     typedef mcrg_utilities::shift_t shift_t; //(dx,dy, component)
-    enum ReductionTechnique {Decimation,Blockspin, FerroBlockspin, Blockspin4x4, FerroBlockspin4x4, IsingMajority};
+    enum ReductionTechnique {Decimation,Blockspin, FerroBlockspin, Blockspin4x4, FerroBlockspin4x4, IsingMajority, BlockspinCubic};
+    enum LatticeType {SquareLatticeIsh, CubicLatticeIsh};
     
     mcrg(const alps::Parameters& p, int Iteration_, int MCRG_It_) :
     iteration(Iteration_),
     max_iterations(MCRG_It_),
     L(p["L"]),
     N(L*L),
+    lattice_type(init_lattice_type(static_cast<std::string>(p["LATTICE"]))),
     reduction_type(init_reduction_technique(static_cast<std::string>(p["MCRG Reduction Technique"]))),
     scale_factor_b(init_b(reduction_type)),
     interactions(init_interactions(static_cast<std::string>(p["MCRG Interactions"])))
@@ -122,7 +124,7 @@ private:
     const int iteration;
     const int max_iterations; 
     const int L,N;
-
+    const LatticeType lattice_type;
     const ReductionTechnique reduction_type;
     //first index: which interaction
     //second index: listing the vectors of the shift
@@ -133,7 +135,10 @@ private:
         if(s=="Decimation"){
             return ReductionTechnique::Decimation;
         } else if(s=="Blockspin"){
-            return ReductionTechnique::Blockspin;
+            if(lattice_type==LatticeType::SquareLatticeIsh)
+                return ReductionTechnique::Blockspin;
+            if(lattice_type==LatticeType::CubicLatticeIsh)
+                return ReductionTechnique::BlockspinCubic;
         } else if(s=="FerroBlockspin"){
             return ReductionTechnique::FerroBlockspin;
         } else if(s=="Blockspin4x4"){
@@ -147,6 +152,18 @@ private:
             std::exit(21); 
         }
     }
+    LatticeType init_lattice_type(std::string s) const {
+        if(s=="square lattice" or s=="anisotropic square lattice") {
+            return LatticeType::SquareLatticeIsh;
+        }
+        else if(s=="simple cubic lattice" or s=="anisotropic simple cubic lattice") {
+            return LatticeType::CubicLatticeIsh;
+        }
+        else {
+            std::cerr << "Didn't find the latticetype for mcrg, check if your lattice is already implemented for MCRG"<<std::endl;
+            std::exit(4);
+        }
+    }
     inline int n_interactions(){
         return interactions.size();
     }
@@ -157,13 +174,13 @@ private:
             i=mcrg_utilities::small;
         } else if(s=="very small"){
             i=mcrg_utilities::very_small;
-        } else if(s=="medium interactions"){
-            i=mcrg_utilities::medium1;
-        } else if(s=="medium range" || s=="medium" ){
-            i=mcrg_utilities::medium2;
-        } else if(s=="massive"){
-            std::cout << "Consider this to be a way to large interaction set. This is just me having fun implementing interactions, however if you wanna use it, feel free to do so, however it will take forever and a day to finish";
-            i=mcrg_utilities::massive;
+        //} else if(s=="medium interactions"){
+        //    i=mcrg_utilities::medium1;
+        //} else if(s=="medium range" || s=="medium" ){
+        //    i=mcrg_utilities::medium2;
+        //} else if(s=="massive"){
+        //    std::cout << "Consider this to be a way to large interaction set. This is just me having fun implementing interactions, however if you wanna use it, feel free to do so, however it will take forever and a day to finish";
+        //    i=mcrg_utilities::massive;
         } else if(s=="ising"){
             i=mcrg_utilities::small_Ising;
         } else {
@@ -201,7 +218,15 @@ private:
         return mcrg_utilities::mod2Pi(s); 
     }
 
-    inline int index_o_neighbour (int i, int dx,int dy){ return mcrg_utilities::index_o_neighbour(i,dx,dy,L);}
+
+    inline int index_o_neighbour (const int& i, std::vector<int> const& dxdydz) const { 
+        switch(lattice_type){
+            case SquareLatticeIsh:
+                return mcrg_utilities::index_o_neighbour_square(i,dxdydz[0],dxdydz[1],L);
+            case CubicLatticeIsh:
+                return mcrg_utilities::index_o_neighbour_cubic(i,dxdydz[0],dxdydz[1],dxdydz[2],L);
+        }
+    }
 
     //This generally calculates all the S_alpha
     //for this it iterates over all the lattice sites i. For each of them all the shifts are calculated and taken into consideration with the correlation
@@ -214,8 +239,8 @@ private:
             double tmp=1.;
             for(int j = 0; j <shifts.size();++j){ //Pairwise build up the scalar products
                 shift_t s = shifts[j];
-                double angle=spins[index_o_neighbour(i,std::get<0>(s),std::get<1>(s))];
-                int component=std::get<2>(s);
+                double angle=spins[index_o_neighbour(i,std::get<1>(s))];
+                int component=std::get<0>(s);
                 if(component==0){
                     tmp*=std::cos(angle);
                 } else if(component==1){
@@ -234,6 +259,9 @@ private:
     std::vector<spin_t> reduce(const std::vector<spin_t>& spins){
         if(reduction_type==ReductionTechnique::Decimation){
             return mcrg_utilities::decimate(spins,L,0);//TODO make the entry point random
+        }
+        if(reduction_type==ReductionTechnique::BlockspinCubic){
+            return mcrg_utilities::blockspin_cubic(spins,L,0);//TODO make the entry point random
         }
         if(reduction_type==ReductionTechnique::Blockspin){
             return mcrg_utilities::blockspin(spins,L,0);//TODO make the entry point random
