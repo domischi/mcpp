@@ -26,7 +26,7 @@ public:
     scale_factor_b(init_b(reduction_type)),
     interactions(init_interactions(static_cast<std::string>(p["MCRG Interactions"])))
     {
-        assert(p["LATTICE"]=="square lattice"); //not sure if this works
+        //assert(p["LATTICE"]=="square lattice"); //not sure if this works
         //assert(!(L%2));
         //If this is not the last iteration, construct the MCRG class for the next smaller lattice 
         if(!is_last_iteration()) {
@@ -196,6 +196,8 @@ private:
                return 2; 
             case ReductionTechnique::Blockspin:
                return 2; 
+            case ReductionTechnique::BlockspinCubic:
+               return 2; 
             case ReductionTechnique::FerroBlockspin:
                return 2;
             case ReductionTechnique::IsingMajority:
@@ -204,6 +206,9 @@ private:
                return 4;
             case ReductionTechnique::FerroBlockspin4x4:
                return 4;
+            default:
+               std::cerr<< "Did not recognize the ReductionTechnique. Aborting...."<<std::endl;
+               std::exit(4);
         }
     }
     bool inline is_last_iteration(){
@@ -242,7 +247,7 @@ private:
                 } else if(component==1){
                     tmp*=std::sin(angle);
                 } else {
-                    std::cout << "In S_alpha with a not recognised component, The values is "<< component<<"... Aborting..."<< std::endl;
+                    std::cerr << "In S_alpha with a not recognised component, The values is "<< component<<"... Aborting..."<< std::endl;
                     std::exit(19);
                 }
             }
