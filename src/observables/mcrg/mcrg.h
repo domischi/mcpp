@@ -174,13 +174,10 @@ private:
             i=mcrg_utilities::small;
         } else if(s=="very small"){
             i=mcrg_utilities::very_small;
-        //} else if(s=="medium interactions"){
-        //    i=mcrg_utilities::medium1;
-        //} else if(s=="medium range" || s=="medium" ){
-        //    i=mcrg_utilities::medium2;
-        //} else if(s=="massive"){
-        //    std::cout << "Consider this to be a way to large interaction set. This is just me having fun implementing interactions, however if you wanna use it, feel free to do so, however it will take forever and a day to finish";
-        //    i=mcrg_utilities::massive;
+        } else if(s=="medium interaction"){
+            i=mcrg_utilities::medium_interaction;
+        } else if(s=="medium range" || s=="medium" ){
+            i=mcrg_utilities::medium_range;
         } else if(s=="ising"){
             i=mcrg_utilities::small_Ising;
         } else {

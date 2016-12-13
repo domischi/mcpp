@@ -42,7 +42,7 @@ namespace mcrg_utilities{
     }
 
 	std::vector<spin_t> blockspin_cubic(const std::vector<spin_t>& spins, const int& L, const int& EntryPoint){
-        std::vector<spin_t> ret; //TODO do a bit of index magic, to not need to use the vector capabilities, such that it get's fastened up a bit
+        std::vector<spin_t> ret;
         for(int dx=0; dx<L;dx+=2)
             for(int dy=0; dy<L;dy+=2)
                 for(int dz=0; dz<L;dz+=2){
