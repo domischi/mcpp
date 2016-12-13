@@ -180,6 +180,8 @@ private:
             i=mcrg_utilities::medium_range;
         } else if(s=="ising"){
             i=mcrg_utilities::small_Ising;
+        } else if(s=="xy-3d-small"){
+            i=mcrg_utilities::xy_3d_small;
         } else {
             std::cerr<<"Did not recognise the interaction set to use for MCRG, aborting..."<<std::endl;
             std::exit(20);
@@ -227,9 +229,6 @@ private:
 
     //This generally calculates all the S_alpha
     //for this it iterates over all the lattice sites i. For each of them all the shifts are calculated and taken into consideration with the correlation
-    //Example: field term along x: shift[j].size()==1, {{0,0,0}}
-    //Example: NNx along xy: shift[j].size()==2, { {0,0,0} , {1,0,1} }
-    //For more examples have a look at the interactions.h file
     double S_alpha (const std::vector<spin_t>& spins, std::vector<shift_t> shifts) {
         double S_a=0;
         for(int i =0;i<N;++i){
