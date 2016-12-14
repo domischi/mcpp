@@ -343,5 +343,12 @@ std::vector<std::vector<shift_t>> xy_3d_small =
 	{ std::make_tuple(1,std::vector<int>{ 0, 0, 0}), std::make_tuple(1,std::vector<int>{ 0, 0, 1}) },
 	{ std::make_tuple(1,std::vector<int>{ 0, 0, 0}), std::make_tuple(1,std::vector<int>{ 0, 0, 0}) }
 };
+std::vector<std::vector<shift_t>> xy_3d_very_small = 
+{
+	{ std::make_tuple(0,std::vector<int>{ 0, 0, 0}) },
+	{ std::make_tuple(1,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0, 0}) },
+	{ std::make_tuple(1,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 0,-1}) },
+	{ std::make_tuple(1,std::vector<int>{ 0, 0, 0}), std::make_tuple(1,std::vector<int>{ 1, 0, 0}) },
+};
 }
 #endif //MCPP_MCRG_INTERACTIONS_H_

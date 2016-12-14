@@ -182,6 +182,8 @@ private:
             i=mcrg_utilities::small_Ising;
         } else if(s=="xy-3d-small"){
             i=mcrg_utilities::xy_3d_small;
+        } else if(s=="xy-3d-very-small"){
+            i=mcrg_utilities::xy_3d_very_small;
         } else {
             std::cerr<<"Did not recognise the interaction set to use for MCRG, aborting..."<<std::endl;
             std::exit(20);
