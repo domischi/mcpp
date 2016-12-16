@@ -199,6 +199,8 @@ private:
         switch (rt) {
             case ReductionTechnique::Decimation:
                return 2; 
+            case ReductionTechnique::DecimationCubic:
+               return 2; 
             case ReductionTechnique::Blockspin:
                return 2; 
             case ReductionTechnique::BlockspinCubic:
