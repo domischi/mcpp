@@ -13,7 +13,7 @@ class mcrg {
 public:
     typedef double spin_t;
     typedef mcrg_utilities::shift_t shift_t; //(dx,dy, component)
-    enum ReductionTechnique {Decimation,Blockspin, FerroBlockspin, Blockspin4x4, FerroBlockspin4x4, IsingMajority, BlockspinCubic};
+    enum ReductionTechnique {Decimation,Blockspin, FerroBlockspin, Blockspin4x4, FerroBlockspin4x4, IsingMajority, BlockspinCubic, DecimationCubic};
     enum LatticeType {SquareLatticeIsh, CubicLatticeIsh};
     
     mcrg(const alps::Parameters& p, int Iteration_, int MCRG_It_) :
@@ -133,7 +133,10 @@ private:
     const int scale_factor_b;
     ReductionTechnique init_reduction_technique(std::string s) const {
         if(s=="Decimation"){
-            return ReductionTechnique::Decimation;
+            if(lattice_type==LatticeType::SquareLatticeIsh)
+                return ReductionTechnique::Decimation;
+            if(lattice_type==LatticeType::CubicLatticeIsh)
+                return ReductionTechnique::DecimationCubic;
         } else if(s=="Blockspin"){
             if(lattice_type==LatticeType::SquareLatticeIsh)
                 return ReductionTechnique::Blockspin;
@@ -262,6 +265,9 @@ private:
     std::vector<spin_t> reduce(const std::vector<spin_t>& spins){
         if(reduction_type==ReductionTechnique::Decimation){
             return mcrg_utilities::decimate(spins,L,0);//TODO make the entry point random
+        }
+        if(reduction_type==ReductionTechnique::DecimationCubic){
+            return mcrg_utilities::decimate_cubic(spins,L,0);//TODO make the entry point random
         }
         if(reduction_type==ReductionTechnique::BlockspinCubic){
             return mcrg_utilities::blockspin_cubic(spins,L,0);//TODO make the entry point random

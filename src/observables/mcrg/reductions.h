@@ -17,6 +17,15 @@ namespace mcrg_utilities{
         ret.shrink_to_fit();
         return ret; 
 	}
+	std::vector<spin_t> decimate_cubic(const std::vector<spin_t>& spins, const int& L, const int& EntryPoint){
+        std::vector<spin_t> ret; //TODO do a bit of index magic, to not need to use the vector capabilities, such that it get's fastened up a bit
+        for(int dx=0; dx<L;dx+=2)
+            for(int dy=0; dy<L;dy+=2)
+                for(int dz=0; dz<L;dz+=2)
+                    ret.push_back(spins[index_o_neighbour_cubic(EntryPoint,dx,dy,dz,L)]);
+        ret.shrink_to_fit();
+        return ret; 
+	}
 
     std::vector<spin_t> ising_majority(const std::vector<spin_t>& spins, const int& L, const int& EntryPoint) {
         std::vector<spin_t> ret;
