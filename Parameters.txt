@@ -27,7 +27,7 @@
 
     debug dipolar: print information about the coordinates in the dipolar case
     Default: false
-    Only works if dipolar is loaded (other than that anyway no influence of the lattice itself)
+    Mainly useful if positional disorder is introduced, otherwise please use "print debug information"
 
     J: Exchange Strength
     Default: 0.
@@ -116,6 +116,10 @@
     DISORDER_SEED: Number seeding the disorder RNG
     Default: (given by ALPS)
     This allows to seed your own RNG, however ALPS provides one if not given
+
+    print debug information:
+    Default: False
+    Prints the periodic translations as well as the coordinates of each site, only use this for short tests, as otherwise the ouput files explode in length
 
 -------------
 |OBSERVABLES|

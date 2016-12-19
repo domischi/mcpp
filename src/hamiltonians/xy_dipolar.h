@@ -110,13 +110,6 @@ private:
                 periodic_translations.push_back(ppb);
             }
         }
-        if(print_debug_information){
-            for(int i=0;i<periodic_translations.size();++i){
-                std::cout <<"Periodic Translation No " <<std::setw(2) <<i<<" with vector ("
-                    << std::setw(8) << periodic_translations[i][0]<<","
-                    << std::setw(8) << periodic_translations[i][1]<<")"<<std::endl;
-            }
-        }
         for(int i=0;i<gh.num_sites();++i) neighbour_list.push_back(std::vector<int>());
         std::map<int,double> dist_map;
         std::mt19937 rng(DISORDER_SEED);

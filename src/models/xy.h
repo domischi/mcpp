@@ -15,6 +15,7 @@
 #include <cmath>
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <memory>
 #include <map>
@@ -51,10 +52,13 @@ public :
         angle_dev(    params.value_or_default("Angle Deviation Start", 0.1*M_PI)),
         angle_dev_fac(params.value_or_default("Angle Deviation Factor",1.2)),
         angle_dev_min(params.value_or_default("Angle Deviation Min",   1e-3*M_PI)),
-        angle_dev_max(params.value_or_default("Angle Deviation Max",   2*M_PI))
+        angle_dev_max(params.value_or_default("Angle Deviation Max",   2*M_PI)),
+        print_debug_information(static_cast<bool>(params.value_or_default("print debug information",false)))
         {
             init_spins(params);
             En=Energy();
+            if(print_debug_information)
+                print_debug();
             if(measure_basic_observables){
                 basic_observables_=std::unique_ptr<basic_observables>(new basic_observables(params));
             }
@@ -166,7 +170,9 @@ private:
     std::vector<double> spins; //saves the spins
     const double T;
     const int Each_Measurement;
-    
+    const bool print_debug_information;
+
+
     const double targeted_acc_ratio;
     double angle_dev;
     const double angle_dev_min, angle_dev_max, angle_dev_fac;
@@ -208,6 +214,50 @@ private:
             spins[site]=old_state;
         }
     }
+
+    std::string pprint_vector(vector_type v){
+        std::stringstream ret;
+        ret<<"(";
+        for(int d=0;d<dimension()-1;++d)
+            ret<<std::setw(8)<<v[d]<<",";
+        ret<<std::setw(8)<<v[dimension()-1];
+        ret<<")";
+        return ret.str();
+    }
+
+    void print_debug(){
+        std::vector<vector_type> basis;
+        basis_vector_iterator v, v_end;
+        for(std::tie(v,v_end)=basis_vectors();v!= v_end;++v){
+            basis.push_back(*v);
+        }
+        std::vector<vector_type> periodic_translations;
+        int dim = dimension();
+        assert(dim==basis[0].size());
+        periodic_translations.push_back(vector_type(dim,0.));
+        vector_type pmb(dimension()),ppb(dimension()); //periodic_translation+-L*basis
+        for(auto& actual_basis_vector : basis){
+            int size_periodic_translations=periodic_translations.size();
+            for(int i=0;i<size_periodic_translations;++i){//to avoid double counting a specific vector, and to not have a segfault
+                vector_type p = periodic_translations[i];
+                for(int d =0;d<dimension();++d){
+                    pmb[d]=(p[d]-L*(actual_basis_vector[d]));
+                    ppb[d]=(p[d]+L*(actual_basis_vector[d]));
+                }
+                periodic_translations.push_back(pmb);
+                periodic_translations.push_back(ppb);
+            }
+        }
+        for(int i=0;i<periodic_translations.size();++i){
+            std::cout <<"Periodic Translation No " <<std::setw(2) <<i<<" with vector "<<pprint_vector(periodic_translations[i]) <<std::endl;
+        }
+        for(site_iterator s_iter = sites().first; s_iter !=sites().second; ++s_iter){
+            vector_type c(coordinate(*s_iter));
+            std::cout <<"Site: " <<std::setw(3) <<*s_iter<<" with vector "<<pprint_vector(c);
+            std::cout<<std::endl;
+        }
+    }
+
     //this updates the range for the update
     double update_angle_deviation(int accepted, int n_steps){
         double acc_ratio=accepted*1./n_steps;
