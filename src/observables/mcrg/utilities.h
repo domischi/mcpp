@@ -27,7 +27,7 @@ namespace mcrg_utilities{
         y=(i/L+dy)%L;
         z=(i%L+dz)%L;
         assert(x<L&&y<L&&z<L);
-        return x+L*(y+L*z);
+        return z+L*(y+L*x);
     }
 
 }
