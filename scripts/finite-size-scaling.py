@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
 import pyalps.plot
 from numpy import linspace, log
-
+parms=[]
 for l in range(12,36,4): #12,16,...,40 
     for t in linspace(0,1.4,14):
         parms.append(
@@ -34,28 +34,28 @@ pyalps.runApplication('mc++',input_file,Tmin=5,MPI=1)
 def f_alpha(Le, Lo, b=2, d=2):
     return 2-d*log(b)/log(Le)
 def f_beta(Le, Lo, b=2, d=2):
-    return log(b)/log(Le)*(log(Lo)/log(b)-2)
+    return (d*log(b)-log(Lo))/log(Le) 
 def f_gamma(Le, Lo, b=2, d=2):
     return log(b)/log(Le)*(2*log(Lo)/log(b)-d)
 def f_nu(Le, Lo, b=2, d=2):
     return log(b)/log(Le)
 
 #load the susceptibility and collect it as function of temperature T
-data = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm'),['M staggered', 'c_V', 'BinderCumulant staggered', 'susceptibility staggered'])
+data = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm'),['M', 'c_V', 'BinderCumulant', 'susceptibility'])
 
-Tc0=0.82
-Tc_min=0.7
-Tc_max=0.9
-le0=1.78
-le_min=1.5
-le_max=2.0
-lo0=1.78
-lo_min=1.5
-lo_max=2.0
-alpha0=f_alpha(le0,lo0)
-beta0 =f_beta(le0,lo0)
-gamma0=f_gamma(le0,lo0)
-nu0   =f_nu(le0,lo0)
+Tc0=2.269
+Tc_min=2
+Tc_max=2.5
+le0=2
+le_min=1.
+le_max=10
+lo0=3.66802
+lo_min=1
+lo_max=15
+alpha0=f_alpha(le0,lo0,d=2)
+beta0 =f_beta(le0,lo0,d=2)
+gamma0=f_gamma(le0,lo0,d=2)
+nu0   =f_nu(le0,lo0,d=2)
 
 left_start=0.05
 right_end=1-left_start
@@ -66,13 +66,14 @@ width=0.5-boarder_width
 height=0.35-boarder_width
 
 fig = plt.subplots()
-plt.subplots_adjust(left=left_start, bottom=bottom_start, right = width-boarder_width, top=bottom_start+height-boarder_width)
-axM= plt.axes([left_start, bottom_start,width,height])
+plt.subplots_adjust(left=left_start, bottom=bottom_start, right = left_start+width, top=bottom_start+height)
+#axM= plt.axes([left_start, bottom_start,width,height])
+axM=plt.gca()
 axChi = plt.axes([left_start, bottom_start+height+boarder_width,width,height])
 axBinder = plt.axes([left_start+width+boarder_width, bottom_start,width,height])
 axCv = plt.axes([left_start+width+boarder_width,  bottom_start+height+boarder_width, width,height]) 
 plt.sca(axChi)
-chi = pyalps.collectXY(data,x='T',y='susceptibility staggered',foreach=['L'])
+chi = pyalps.collectXY(data,x='T',y='susceptibility',foreach=['L'])
 for d in chi:
     d.props['label']='L='+str(d.props['L'])
     d.x -= Tc0
@@ -84,7 +85,7 @@ pyalps.plot.plot(chi)
 plt.xlabel(r'$(T-T_c)L^{\frac{1}{\nu}}$', fontsize='x-large')
 plt.ylabel(r'$\chi L^{\frac{-\gamma}{\nu}}$', fontsize='x-large')
 plt.title(r'$\chi$', fontsize='x-large')
-binder = pyalps.collectXY(data,x='T',y='BinderCumulant staggered',foreach=['L'])
+binder = pyalps.collectXY(data,x='T',y='BinderCumulant',foreach=['L'])
 plt.sca(axBinder)
 for d in binder:
     d.props['label']='L='+str(d.props['L'])
@@ -97,7 +98,7 @@ pyalps.plot.plot(binder)
 plt.xlabel(r'$(T-T_c)L^{\frac{1}{\nu}}$', fontsize='x-large')
 plt.ylabel(r'$U^4$', fontsize='x-large')
 plt.title('Binder', fontsize='x-large')
-M = pyalps.collectXY(data,x='T',y='M staggered',foreach=['L'])
+M = pyalps.collectXY(data,x='T',y='M',foreach=['L'])
 plt.sca(axM)
 for d in M:
     d.props['label']='L='+str(d.props['L'])
@@ -139,11 +140,11 @@ def update(val):
     lo = slo.val
     le = sle.val
     Tc = stc.val
-    alpha = f_alpha(le,lo)
-    beta  = f_beta(le,lo) 
-    gamma = f_gamma(le,lo)
-    nu    = f_nu(le,lo) 
-    chi = pyalps.collectXY(data,x='T',y='susceptibility staggered',foreach=['L'])
+    alpha = f_alpha(le,lo, d=2)
+    beta  = f_beta(le,lo, d=2) 
+    gamma = f_gamma(le,lo, d=2)
+    nu    = f_nu(le,lo, d=2) 
+    chi = pyalps.collectXY(data,x='T',y='susceptibility',foreach=['L'])
     plt.sca(axChi)
     for d in chi:
         d.props['label']='L='+str(d.props['L'])
@@ -171,7 +172,7 @@ def update(val):
     plt.xlabel(r'$(T-T_c)L^{\frac{1}{\nu}}$', fontsize='x-large')
     plt.ylabel(r'$C_V L^{\frac{-\alpha}{\nu}}$', fontsize='x-large')
     plt.title(r'$cv$', fontsize='x-large')
-    binder = pyalps.collectXY(data,x='T',y='BinderCumulant staggered',foreach=['L'])
+    binder = pyalps.collectXY(data,x='T',y='BinderCumulant',foreach=['L'])
     plt.sca(axBinder)
     for d in binder:
         d.props['label']='L='+str(d.props['L'])
@@ -184,7 +185,7 @@ def update(val):
     plt.xlabel(r'$(T-T_c)L^{\frac{1}{\nu}}$', fontsize='x-large')
     plt.ylabel(r'$U^4$', fontsize='x-large')
     plt.title('Binder', fontsize='x-large')
-    M = pyalps.collectXY(data,x='T',y='M staggered',foreach=['L'])
+    M = pyalps.collectXY(data,x='T',y='M',foreach=['L'])
     plt.sca(axM)
     for d in M:
         d.props['label']='L='+str(d.props['L'])
@@ -198,7 +199,7 @@ def update(val):
     plt.xlabel(r'$(T-T_c)L^{\frac{1}{\nu}}$', fontsize='x-large')
     plt.ylabel(r'$ML^{\frac{\beta}{\nu}}$', fontsize='x-large')
     plt.title(r'$M$', fontsize='x-large')
-    fig.canvas.draw_idle()
+    #fig.canvas.draw_idle()
 
 sle.on_changed(update)
 stc.on_changed(update)
