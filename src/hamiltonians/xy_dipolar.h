@@ -9,7 +9,7 @@
 #include <iomanip>
 
 #include "xy_hamiltonian.h"
-
+#include "../utilities.h"
 template<bool DISORDERED>
 class XY_Dipole : public XY_Hamiltonian<XY_Dipole<DISORDERED>>{
 public:
@@ -17,7 +17,7 @@ public:
     XY_Hamiltonian<XY_Dipole<DISORDERED>>(params),
     D(params.value_or_default("D",1)),
     L(params["L"]),
-    N(L*L),
+    N(mcpp::init_N(params)),
     gh(params),
     print_debug_information(static_cast<bool>(params.value_or_default("debug dipolar",false))){
         if(DISORDERED){

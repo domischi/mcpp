@@ -25,7 +25,7 @@
 
 #include "../hamiltonians/hamiltonian_list.h"
 #include "../observables/observables.h"
-
+#include "../utilities.h"
 class xy_worker : public alps::parapack::lattice_mc_worker<>{
 public :
     enum init_t {GS, Random, Ferro, Vortex}; 
@@ -382,7 +382,7 @@ public:
     xy_evaluator(alps::Parameters const& params) : 
         T(params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"])),
         L(params["L"]),
-        N(L*L)
+        N(mcpp::init_N(params))
         {
         }
     void evaluate(alps::ObservableSet& obs) const {

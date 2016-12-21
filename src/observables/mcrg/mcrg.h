@@ -8,6 +8,8 @@
 #include <tuple>
 #include "interactions.h"
 #include "reductions.h"
+#include "../../utilities.h"
+
 class mcrg; //Needed as it is recursively called
 class mcrg {
 public:
@@ -20,14 +22,12 @@ public:
     iteration(Iteration_),
     max_iterations(MCRG_It_),
     L(p["L"]),
-    N(L*L),
+    N(mcpp::init_N(p)),
     lattice_type(init_lattice_type(static_cast<std::string>(p["LATTICE"]))),
     reduction_type(init_reduction_technique(static_cast<std::string>(p["MCRG Reduction Technique"]))),
     scale_factor_b(init_b(reduction_type)),
     interactions(init_interactions(static_cast<std::string>(p["MCRG Interactions"])))
     {
-        //assert(p["LATTICE"]=="square lattice"); //not sure if this works
-        //assert(!(L%2));
         //If this is not the last iteration, construct the MCRG class for the next smaller lattice 
         if(!is_last_iteration()) {
             alps::Parameters p_descendant=p;

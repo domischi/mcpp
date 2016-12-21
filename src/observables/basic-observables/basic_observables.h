@@ -2,14 +2,14 @@
 #define MCPP_BASIC_OBSERVABLES_H_
 
 #include <alps/parameter.h>
-
+#include "../../utilities.h"
 class basic_observables {
 public:
     typedef double spin_t;
 
     basic_observables(const alps::Parameters& p) :
     L(p["L"]),
-    N(L*L)
+    N(mcpp::init_N(p))
     {
     }
                 

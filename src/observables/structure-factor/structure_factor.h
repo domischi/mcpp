@@ -9,7 +9,7 @@
 #if !NFFTW
     #include <fftw3.h>
 #endif
-
+#include "../../utilities.h"
 class structure_factor {
 public:
     typedef double spin_t;
@@ -19,7 +19,7 @@ public:
     fftw_timelimit_(p.value_or_default("FFTW timelimit for measurement", 10.)),
     #endif //NFFTW
     L(p["L"]),
-    N(L*L)
+    N(mcpp::init_N(p))
     {
         alps::graph_helper<> gh(p);
         alps::graph_helper<>::basis_vector_iterator v,v_end;
