@@ -189,6 +189,8 @@ private:
             i=mcrg_utilities::xy_3d_very_small;
         } else if(s=="xy-3d-medium"){
             i=mcrg_utilities::xy_3d_medium;
+        } else if(s=="xy-3d-massive"){
+            i=mcrg_utilities::xy_3d_massive;
         } else {
             std::cerr<<"Did not recognise the interaction set to use for MCRG, aborting..."<<std::endl;
             std::exit(20);
