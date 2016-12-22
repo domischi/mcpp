@@ -458,6 +458,22 @@ std::vector<std::vector<shift_t>> xy_3d_massive =
 	{ std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 0,-1, 0}), std::make_tuple(0,std::vector<int>{-1, 0, 0}) },
 	{ std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 1}) }
 };
-
+// This is the interaction set also Swendsen used in his publication 1983
+std::vector<std::vector<shift_t>> xy_3d_swendsen = 
+{
+	{ std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 1, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 1, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 2, 0, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 2, 1, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 2, 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 2, 2, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 0, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 1, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 1, 1}) }
+};
 }
 #endif //MCPP_MCRG_INTERACTIONS_H_

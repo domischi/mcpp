@@ -191,6 +191,8 @@ private:
             i=mcrg_utilities::xy_3d_medium;
         } else if(s=="xy-3d-massive"){
             i=mcrg_utilities::xy_3d_massive;
+        } else if(s=="xy-3d-swendsen"){
+            i=mcrg_utilities::xy_3d_swendsen;
         } else {
             std::cerr<<"Did not recognise the interaction set to use for MCRG, aborting..."<<std::endl;
             std::exit(20);
