@@ -37,6 +37,63 @@ std::vector<std::vector<shift_t>> small = {
     {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(1,std::vector<int> {-1, 1} )}, //d-11 xy comp
     {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {-1, 1} )}  //d-11 yx comp
 };
+
+
+// Do a hand crafted, good set for dXY //TODO understand a good handcrafted interaction set
+std::vector<std::vector<shift_t>> dXY_handcrafted = {
+    //Odd
+        //field term
+        {std::make_tuple(0,std::vector<int> {0,0} )},
+        //3 body interaction
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,0} )}, // cubic site term
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {1,0} )}, // (00) (00) (10) 
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {1,1} )}, // (00) (00) (11)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(1,std::vector<int> {1,1} )}, // (00) (00) (11) cross
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {2,0} )}, // (00) (00) (20)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {2,1} )}, // (00) (00) (21)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(1,std::vector<int> {2,1} )}, // (00) (00) (21) cross
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {2,2} )}, // (00) (00) (22)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(1,std::vector<int> {2,2} )}, // (00) (00) (22) cross
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {3,0} )}, // (00) (00) (30)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {3,1} )}, // (00) (00) (31)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(1,std::vector<int> {3,1} )}, // (00) (00) (31) cross
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {3,2} )}, // (00) (00) (32)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(1,std::vector<int> {3,2} )}, // (00) (00) (32) cross
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {3,3} )}, // (00) (00) (33)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(1,std::vector<int> {3,3} )}, // (00) (00) (33) cross
+    //Even
+        //constant offset
+        {}, //TODO understand if this is really necessary, and if so what this means...
+        //same component
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 0} )}, // (00)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // (10)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // (11)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // (20)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 1} )}, // (21)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 2} )}, // (22)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 0} )}, // (30)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 1} )}, // (31)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 2} )}, // (32)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 3} )}, // (33)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 0} )}, // (40)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 1} )}, // (41)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 2} )}, // (42)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 0} )}, // (50)
+        //cross component
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(1,std::vector<int> { 1, 1} )}, // (11)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(1,std::vector<int> { 2, 1} )}, // (21)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(1,std::vector<int> { 2, 2} )}, // (22)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(1,std::vector<int> { 3, 1} )}, // (31)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(1,std::vector<int> { 3, 2} )}, // (32)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(1,std::vector<int> { 3, 3} )}, // (33)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(1,std::vector<int> { 4, 1} )}, // (41)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(1,std::vector<int> { 4, 2} )}, // (42)
+        //Biquadratic terms
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 0} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // (10)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 0} ), std::make_tuple(0,std::vector<int> { 2, 0} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // (20)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 0, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // (11) same component
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(1,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 0, 0} ), std::make_tuple(1,std::vector<int> { 1, 1} )}  // (11) cross component
+};
 std::vector<std::vector<shift_t>> very_small = { 
     //Odd
     {std::make_tuple(0,std::vector<int> {0,0} )}, // field term along x

@@ -181,6 +181,8 @@ private:
             i=mcrg_utilities::medium_interaction;
         } else if(s=="medium range" || s=="medium" ){
             i=mcrg_utilities::medium_range;
+        } else if(s=="dXY" ){
+            i=mcrg_utilities::dXY_handcrafted;
         } else if(s=="ising"){
             i=mcrg_utilities::small_Ising;
         } else if(s=="xy-3d-small"){
