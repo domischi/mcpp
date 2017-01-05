@@ -62,8 +62,6 @@ std::vector<std::vector<shift_t>> dXY_handcrafted = {
         {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {3,3} )}, // (00) (00) (33)
         {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(1,std::vector<int> {3,3} )}, // (00) (00) (33) cross
     //Even
-        //constant offset
-        {}, //TODO understand if this is really necessary, and if so what this means...
         //same component
         {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 0} )}, // (00)
         {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // (10)
