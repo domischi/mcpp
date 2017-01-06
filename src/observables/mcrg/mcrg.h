@@ -26,6 +26,7 @@ public:
     lattice_type(init_lattice_type(static_cast<std::string>(p["LATTICE"]))),
     reduction_type(init_reduction_technique(static_cast<std::string>(p["MCRG Reduction Technique"]))),
     scale_factor_b(init_b(reduction_type)),
+    entry_point(N-1),
     interactions(init_interactions(static_cast<std::string>(p["MCRG Interactions"])))
     {
         //If this is not the last iteration, construct the MCRG class for the next smaller lattice 
@@ -37,6 +38,7 @@ public:
     }
                 
     std::tuple<std::valarray<double>,std::valarray<double>> measure(const std::vector<spin_t>& spins, alps::ObservableSet& obs){
+        ++entry_point%=N;//loop over the sites as entry points
         //std::valarray<double> OUT(n_interactions());
         std::vector<double> oute, outo;
         int counto=0;
@@ -81,7 +83,7 @@ public:
         
         if(!is_last_iteration()){//This is not the last instantation of the mcrg
             //reduce the lattice and call the descendant on the renormalized system
-            std::vector<spin_t> reduced_spins = reduce(spins);
+            std::vector<spin_t> reduced_spins = reduce(spins, entry_point);
             std::valarray<double> INo(OUTo.size()),INe(OUTe.size());
             std::tie(INo, INe) =  descendant->measure(reduced_spins,obs);
             //calculate <S_alpha n-1 S_beta n>
@@ -117,8 +119,14 @@ public:
             descendant->init_observables(obs);
         }
     }
-    // Intentionally left empty, as there are no non-const members
-    void save(alps::ODump &dump) const{ }
+    void save(alps::ODump &dump) const{
+        dump
+            << entry_point;
+    }
+    void load(alps::IDump &dump) {
+        dump 
+            >> entry_point;
+    }
 private:
     std::shared_ptr<mcrg> descendant;
     const int iteration;
@@ -131,6 +139,7 @@ private:
     //third index (shift_t): a pair of ints denoting the shift wrt to the first one (always (0,0))
     const std::vector<std::vector<shift_t>> interactions;
     const int scale_factor_b;
+    int entry_point;
     ReductionTechnique init_reduction_technique(std::string s) const {
         if(s=="Decimation"){
             if(lattice_type==LatticeType::SquareLatticeIsh)
@@ -272,40 +281,40 @@ private:
     }
 
     //this function reduces the spin lattice to a quarter of the size by adding the vectors of 4 neighbouring sites together to one and then calculates the angle back and saves it in OUT
-    std::vector<spin_t> reduce(const std::vector<spin_t>& spins){
+    std::vector<spin_t> reduce(const std::vector<spin_t>& spins, const int& entry_point){
         if(reduction_type==ReductionTechnique::Decimation){
-            return mcrg_utilities::decimate(spins,L,0);//TODO make the entry point random
+            return mcrg_utilities::decimate(spins,L,entry_point);//TODO make the entry point random
         }
         if(reduction_type==ReductionTechnique::DecimationCubic){
-            return mcrg_utilities::decimate_cubic(spins,L,0);//TODO make the entry point random
+            return mcrg_utilities::decimate_cubic(spins,L,entry_point);//TODO make the entry point random
         }
         if(reduction_type==ReductionTechnique::BlockspinCubic){
-            return mcrg_utilities::blockspin_cubic(spins,L,0);//TODO make the entry point random
+            return mcrg_utilities::blockspin_cubic(spins,L,entry_point);//TODO make the entry point random
         }
         if(reduction_type==ReductionTechnique::Blockspin){
-            return mcrg_utilities::blockspin(spins,L,0);//TODO make the entry point random
+            return mcrg_utilities::blockspin(spins,L,entry_point);//TODO make the entry point random
         }
         if(reduction_type==ReductionTechnique::FerroBlockspin){
             if(is_first_iteration()){
-                std::vector<spin_t> working_data=mcrg_utilities::ferromagnetic_transformation(spins,L,0); //TODO make entry point random
-                return mcrg_utilities::blockspin(working_data,L,0);
+                std::vector<spin_t> working_data=mcrg_utilities::ferromagnetic_transformation(spins,L,entry_point); //TODO make entry point random
+                return mcrg_utilities::blockspin(working_data,L,entry_point);
             }
             else
-                return mcrg_utilities::blockspin(spins,L,0);//TODO make the entry point random
+                return mcrg_utilities::blockspin(spins,L,entry_point);//TODO make the entry point random
         }
         if(reduction_type==ReductionTechnique::Blockspin4x4){
-            return mcrg_utilities::blockspin4x4(spins,L,0);//TODO make the entry point random
+            return mcrg_utilities::blockspin4x4(spins,L,entry_point);//TODO make the entry point random
         }
         if(reduction_type==ReductionTechnique::IsingMajority){
-            return mcrg_utilities::ising_majority(spins,L,0);//TODO make the entry point random
+            return mcrg_utilities::ising_majority(spins,L,entry_point);//TODO make the entry point random
         }
         if(reduction_type==ReductionTechnique::FerroBlockspin4x4){
             if(is_first_iteration()){
                 std::vector<spin_t> working_data=mcrg_utilities::ferromagnetic_transformation(spins,L,0); //TODO make entry point random
-                return mcrg_utilities::blockspin4x4(working_data,L,0);
+                return mcrg_utilities::blockspin4x4(working_data,L,entry_point);
             }
             else
-                return mcrg_utilities::blockspin4x4(spins,L,0);//TODO make the entry point random
+                return mcrg_utilities::blockspin4x4(spins,L,entry_point);//TODO make the entry point random
         }
     }
 };

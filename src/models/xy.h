@@ -130,6 +130,8 @@ public :
         ;
         if(measure_spin_autocorrelation)
             spin_autocorrelation_->load(dump);
+        if(measure_mcrg)
+            mcrg_->load(dump);
     }
     void run(alps::ObservableSet& obs){
         using namespace alps::alea;
