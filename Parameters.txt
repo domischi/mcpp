@@ -33,11 +33,29 @@
     Default: 0.
     Describes NN Interactions
 
-    A: Shape Anisotropy strength
+    Shape Anisotropy Strength:
     Default: 0.
+    Hamiltonian is of the form -A*cos(p[i]*(phi[i]-phi0[i]))
 
-    p_max: Number of Minima for the Shape Anisotropy
-    Default: 0.
+    Shape Anisotropy Angle:
+    Default: (none)
+    If not set, the angles are randomly distributed over the circle, such that the prefered orientations are uncorrelated, if set they preferrably align in the same direction (up to p)
+
+    Shape Anisotropy Distribution Type:
+    Default: Fixed
+    This gives the possible distributions for the local shape anisotropy. 
+        Case Fixed:
+            all have the same shape (potentially differently orientated)
+        Case Uniform:
+            the number of minima is equally distributed in {1,2,...,p}
+
+    Shape Anisotropy p:
+    Default: (none)
+    Depending on the distribution, this parameter determines different things. 
+        Case Fixed:
+            The p to use for all (constant shape anisotropy)
+        Case Uniform:
+            the number of minima is equally distributed in {1,2,...,p} 
 
     Remarks:
         - In the program is distinguished by a disordered and a non disordered dipolar class via a template

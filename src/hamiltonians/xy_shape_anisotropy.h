@@ -4,8 +4,10 @@
 #include <vector>
 #include <random>
 #include <cmath>
+#include <iostream>
 
 #include "xy_hamiltonian.h"
+#include "../utilities.h"
 
 // Describes a local shape anisotropy, such that a specific directions are more favorable in terms of an angle
 // The parameter A describes how much this is actually the case
@@ -14,10 +16,13 @@ class XY_Shape_Anisotropy : public XY_Hamiltonian<XY_Shape_Anisotropy>{
 public:
     XY_Shape_Anisotropy (alps::Parameters const& params) : 
     XY_Hamiltonian<XY_Shape_Anisotropy>(params),
-    A(params.value_or_default("A",1.)),
-    p_max(params["p_max"])
+    A(params.value_or_default("Shape Anisotropy Strength",1.)),
+    fixed_angle(params.defined("Shape Anisotropy Angle")),
+    angle(params.value_or_default("Shape Anisotropy Angle",0.)),
+    distribution(Init_Distribution_Type(params)),
+    p_max(params["Shape Anisotropy p"])
     {
-        Init_Lookup_Tables(params["DISORDER_SEED"], alps::graph_helper<>(params).num_sites()); 
+        Init_Lookup_Tables(params["DISORDER_SEED"], mcpp::init_N(params)); 
     }
     virtual double SingleSiteEnergy(std::vector<double> const& spins, int i) const {
         double e=0.;
@@ -26,19 +31,45 @@ public:
     }
     
 private:
-    int p_max;
-    double A;
-
+    enum distribution_t {fixed_p, uniform_int};
+    const distribution_t distribution;
+    const int p_max;
+    const double A;
+    const bool fixed_angle;
+    const double angle;
     std::vector<double> MinimumAtAngle;
     std::vector<int> p;
 
+    distribution_t Init_Distribution_Type(alps::Parameters const& params) const {
+        if(params.value_or_default("Shape Anisotropy Distribution Type", "Fixed") == "Fixed")
+            return distribution_t::fixed_p;
+        else if (params.value_or_default("Shape Anisotropy Distribution Type","Fixed") == "Uniform")
+            return distribution_t::uniform_int;
+        else{
+            std::cerr << "Did not recognize Shape Anisotropy Distribution Type, aborting..." <<std::endl;
+            std::exit(4);
+        }
+    }
+
     void Init_Lookup_Tables(int DISORDER_SEED, int N){
         std::mt19937 rng(DISORDER_SEED);
-        std::uniform_int_distribution<int> int_dist(1,p_max); //TODO this might not be the most meaningful distribution for p, as this randomly draws an isotropy, however if most of the dots are circular, then this would enforce a useless constraint
         std::uniform_real_distribution<double> real_dist(0,2*M_PI); 
         for(int i = 0;i<N;++i){
-            MinimumAtAngle.push_back(real_dist(rng));
-            p.push_back(int_dist(rng));
+            if(fixed_angle)
+                MinimumAtAngle.push_back(angle);
+            else
+                MinimumAtAngle.push_back(real_dist(rng));
+        }
+        switch(distribution){
+            case distribution_t::fixed_p:
+                p=std::vector<int>(N,p_max);
+                break;
+            case distribution_t::uniform_int:
+                std::uniform_int_distribution<int> int_dist(1,p_max);
+                for(int i = 0; i<N;++i){
+                    p.push_back(int_dist(rng));
+                }
+                break;
         }
         MinimumAtAngle.shrink_to_fit();
         p.shrink_to_fit();
