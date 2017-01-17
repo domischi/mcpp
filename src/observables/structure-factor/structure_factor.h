@@ -36,8 +36,10 @@ public:
         assert(reciprocal_vectors.size()==2);
         assert(p["LATTICE"]=="square lattice");
         #if !NFFTW
-        fftw_in=fftw_alloc_complex(N);
-        fftw_out=fftw_alloc_complex(N);
+        fftw_in =(fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N);
+        fftw_out=(fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N);
+        //fftw_in =fftw_alloc_complex(N);
+        //fftw_out=fftw_alloc_complex(N);
         fftw_set_timelimit(fftw_timelimit_);
         plan=fftw_plan_dft_2d(L,L,fftw_in, fftw_out, FFTW_FORWARD, FFTW_MEASURE | FFTW_DESTROY_INPUT);
         #endif //NFFTW
