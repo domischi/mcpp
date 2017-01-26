@@ -10,7 +10,26 @@ namespace mcpp{
     typedef typename alps::graph_helper<>::basis_vector_iterator basis_vector_iterator;
     typedef typename alps::graph_helper<>::site_iterator site_iterator;
     typedef std::vector<std::vector<int>> neighbour_list_type;
-   
+    typedef double spin_t;   
+    std::pair<double,double> magnetization_and_staggered_magnetization(const std::vector<spin_t>& spins, const int L) {
+        double mx =0.;
+        double my =0.;
+        double mxs=0.;
+        double mys=0.;
+        //at least theoretically vectorizable, however should not be the bottleneck
+        for(int i=0;i<spins.size();++i) {
+            spin_t sp=spins[i];
+            double c=std::cos(sp);
+            double s=std::sin(sp);
+            mx+=c;
+            my+=s;
+            int prefactor_x=1;
+            int prefactor_y=1;
+            mxs+= ((i%L)%2 ? -1 : 1) * c; //for even y sites -1
+            mys+= ((i/L)%2 ? -1 : 1) * s; //for even x sites -1
+        }
+        return std::make_pair(std::sqrt(mx*mx+my*my)/spins.size(),std::sqrt(mxs*mxs+mys*mys)/spins.size());
+    }
     int init_N (const alps::Parameters& p){
         return alps::graph_helper<>(p).num_sites();
     }
