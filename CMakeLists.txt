@@ -68,7 +68,7 @@ IF(USE_OPENMP)
     SET(COMMON_FLAGS "${COMMON_FLAGS} -fopenmp -DUSE_OPENMP")
 ENDIF(USE_OPENMP)
 
-SET(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS} ${COMMON_FLAGS}")
+SET(CMAKE_CXX_FLAGS "-std=c++14 ${CMAKE_CXX_FLAGS} ${COMMON_FLAGS}")
 SET(CMAKE_CXX_SOURCE_FILE_EXTENSIONS ,"cpp")
 
 #-------------------------------------------------------------------

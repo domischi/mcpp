@@ -7,7 +7,7 @@
 #include "xy_dipolar.h"
 #include "xy_exchange.h"
 #include "xy_shape_anisotropy.h"
-
+#include "../utilities.h"
 struct Hamiltonian_List {
     
     std::unique_ptr<XY_Dipole<true>>     p_dipolar_disordered;
@@ -17,7 +17,7 @@ struct Hamiltonian_List {
 
     Hamiltonian_List(alps::Parameters const& params) {
         if(params.defined("D") && static_cast<double>(params["D"])!=0.){
-            if((params.defined("Dilution Rate") && static_cast<double>(params["Dilution Rate"])!=0.) || (params.defined("Position Disorder") && static_cast<double>(params["Position Disorder"])!=0.)){
+            if(mcpp::is_disordered(params)){
                 p_dipolar_disordered=std::unique_ptr<XY_Dipole<true>>(new XY_Dipole<true>(params)); 
             }
             else
