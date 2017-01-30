@@ -37,7 +37,7 @@ public :
         L(params["L"]),
         N(num_sites()),
         T(params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"])),
-        HamiltonianList(params),
+        HamiltonianList(get_hl(params)),
         ising(static_cast<bool>(params.value_or_default("Ising", false))),
         Step_Number(0),
         accepted(0),
@@ -46,6 +46,7 @@ public :
         mcrg_it_depth(params.value_or_default("mcrg_iteration_depth",-1)),
         measure_mcrg(static_cast<bool>(static_cast<int>(params.value_or_default("mcrg_iteration_depth",-1))>0)),
         measure_structure_factor(static_cast<bool>(params.value_or_default("structure_factor",false))),
+        measure_llg(static_cast<bool>(params.value_or_default("llg",false))),
         measure_spin_autocorrelation(static_cast<bool>(static_cast<int>(params.value_or_default("Spin autocorrelation analysis length",-1))>0)),
         Each_Measurement(params.value_or_default("Each_Measurement",15)),
         targeted_acc_ratio(params.value_or_default("Targeted Acceptance Ratio",0.5)),
@@ -67,6 +68,9 @@ public :
                 mcrg_=std::make_shared<mcrg>(params,0,mcrg_it_depth);
                 std::cout << "\tdone"<<std::endl;
             }
+            //if(measure_llg){
+            //    llg_=std::make_shared<llg>(params,std::make_shared<Hamiltonian_List>(HamiltonianList));
+            //}
             if(measure_structure_factor){
                 std::cout << "\tInitialize Structure Factor Measurement..."<<std::flush;
                 structure_factor_=std::unique_ptr<structure_factor>(new structure_factor(params));
@@ -180,7 +184,7 @@ private:
     const double angle_dev_min, angle_dev_max, angle_dev_fac;
 
     // struct of Hamiltonian pointers -> allows CRTP
-    Hamiltonian_List HamiltonianList;
+    std::shared_ptr<Hamiltonian_List> HamiltonianList;
 
     //Easy observables
     double En;
@@ -191,6 +195,8 @@ private:
     std::shared_ptr<basic_observables> basic_observables_;
     const bool measure_mcrg;
     std::shared_ptr<mcrg> mcrg_;
+    const bool measure_llg;
+    std::shared_ptr<llg> llg_;
     const int mcrg_it_depth; //to which depth the mcrg is done
     const bool measure_structure_factor;
     std::unique_ptr<structure_factor> structure_factor_;
@@ -364,10 +370,10 @@ private:
         return -s/2+s*uniform_01();
     }
     double Energy() const {
-        return HamiltonianList.Energy(spins);
+        return HamiltonianList->Energy(spins);
     }
     double single_site_Energy(int i) const{
-        return HamiltonianList.SingleSiteEnergy(spins, i);
+        return HamiltonianList->SingleSiteEnergy(spins, i);
     }
 };
 

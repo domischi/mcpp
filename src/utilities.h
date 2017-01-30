@@ -3,6 +3,7 @@
 
 #include <alps/lattice.h>
 #include <random>
+#include "hamiltonians/hamiltonian_list.h"
 namespace mcpp{
     typedef typename alps::Parameters parameter_type;
     typedef typename alps::graph_helper<> graph_helper_type;
@@ -10,7 +11,7 @@ namespace mcpp{
     typedef typename alps::graph_helper<>::basis_vector_iterator basis_vector_iterator;
     typedef typename alps::graph_helper<>::site_iterator site_iterator;
     typedef std::vector<std::vector<int>> neighbour_list_type;
-    typedef double spin_t;   
+    typedef double spin_t;
     std::pair<double,double> magnetization_and_staggered_magnetization(const std::vector<spin_t>& spins, const int L) {
         double mx =0.;
         double my =0.;

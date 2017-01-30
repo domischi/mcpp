@@ -9,12 +9,10 @@
 #include "xy_shape_anisotropy.h"
 #include "../utilities.h"
 struct Hamiltonian_List {
-    
     std::unique_ptr<XY_Dipole<true>>     p_dipolar_disordered;
     std::unique_ptr<XY_Dipole<false>>    p_dipolar;
     std::unique_ptr<XY_Exchange>         p_exchange;
     std::unique_ptr<XY_Shape_Anisotropy> p_shape_anisotropy;
-
     Hamiltonian_List(alps::Parameters const& params) {
         if(params.defined("D") && static_cast<double>(params["D"])!=0.){
             if(mcpp::is_disordered(params)){
@@ -61,5 +59,9 @@ struct Hamiltonian_List {
         if(p) e+=p->Energy(spins);
     }
 };
+
+std::shared_ptr<Hamiltonian_List> get_hl(mcpp::parameter_type p) {
+    return std::make_shared<Hamiltonian_List>(p);
+}
 
 #endif //MCPP_HAMILTONIAN_LIST_H
