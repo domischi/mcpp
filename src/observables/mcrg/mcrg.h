@@ -22,11 +22,11 @@ public:
     iteration(Iteration_),
     max_iterations(MCRG_It_),
     L(p["L"]),
-    N(mcpp::init_N(p)),
+    N_adjusted(mcpp::init_N(p)),
     lattice_type(init_lattice_type(static_cast<std::string>(p["LATTICE"]))),
     reduction_type(init_reduction_technique(static_cast<std::string>(p["MCRG Reduction Technique"]))),
     scale_factor_b(init_b(reduction_type)),
-    entry_point(N-1),
+    entry_point(N_adjusted-1),
     interactions(init_interactions(static_cast<std::string>(p["MCRG Interactions"])))
     {
         //If this is not the last iteration, construct the MCRG class for the next smaller lattice 
@@ -38,7 +38,7 @@ public:
     }
                 
     std::tuple<std::valarray<double>,std::valarray<double>> measure(const std::vector<spin_t>& spins, alps::ObservableSet& obs){
-        ++entry_point%=N;//loop over the sites as entry points
+        ++entry_point%=N_adjusted;//loop over the sites as entry points
         //std::valarray<double> OUT(n_interactions());
         std::vector<double> oute, outo;
         int counto=0;
@@ -131,7 +131,7 @@ private:
     std::shared_ptr<mcrg> descendant;
     const int iteration;
     const int max_iterations; 
-    const int L,N;
+    const int L,N_adjusted;
     const LatticeType lattice_type;
     const ReductionTechnique reduction_type;
     //first index: which interaction
@@ -264,7 +264,7 @@ private:
     //for this it iterates over all the lattice sites i. For each of them all the shifts are calculated and taken into consideration with the correlation
     double S_alpha (const std::vector<spin_t>& spins, std::vector<shift_t> shifts) {
         double S_a=0;
-        for(int i =0;i<N;++i){
+        for(int i =0;i<N_adjusted;++i){
             double tmp=1.;
             for(int j = 0; j <shifts.size();++j){ //Pairwise build up the scalar products
                 shift_t s = shifts[j];
