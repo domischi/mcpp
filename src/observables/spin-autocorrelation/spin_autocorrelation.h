@@ -4,14 +4,14 @@
 #include <alps/lattice.h>
 #include <alps/parameter.h>
 #include "../../utilities.h"
-class spin_autocorrelation {
+#include "../observable.h"
+class spin_autocorrelation : public observable {
 public:
     typedef double spin_t;
     typedef std::valarray<spin_t> configuration_t;
 
-    spin_autocorrelation(const alps::Parameters& p) :
-    L(p["L"]),
-    N(mcpp::init_N(p)),
+    spin_autocorrelation(const alps::Parameters& p, std::shared_ptr<alps::graph_helper<>> gh_, std::shared_ptr<Hamiltonian_List> hl_) :
+    observable(p,gh_,hl_),
     filled(false),
     actual_index(0),
     autocorr_analysis_depth(p["Spin autocorrelation analysis length"])
@@ -36,8 +36,7 @@ public:
             filled=(actual_index==autocorr_analysis_depth-1);
         }
         ++actual_index%=autocorr_analysis_depth;
-
-}
+    }
 
     void init_observables(alps::ObservableSet& obs) const {
         obs << alps::RealVectorObservable("Spin Autocorrelation");
@@ -57,7 +56,7 @@ public:
             >> old_configurations;
     }
 private:
-    const int L,N;
+    //const int L,N;
     const int autocorr_analysis_depth;
     int actual_index;
     bool filled;

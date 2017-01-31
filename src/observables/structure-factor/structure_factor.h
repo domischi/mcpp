@@ -6,29 +6,28 @@
 #include <algorithm>
 #include <valarray>
 #include <alps/parameter.h>
+#include "../observable.h"
 #if !NFFTW
     #include <fftw3.h>
 #endif
 #include "../../utilities.h"
-class structure_factor {
+class structure_factor : public observable{
 public:
     typedef double spin_t;
 
-    structure_factor(const alps::Parameters& p) :
+    structure_factor(const alps::Parameters& p, std::shared_ptr<alps::graph_helper<>> gh_, std::shared_ptr<Hamiltonian_List> hl_) :
+    observable(p,gh_,hl_)
     #if !NFFTW 
-    fftw_timelimit_(p.value_or_default("FFTW timelimit for measurement", 10.)),
+    , fftw_timelimit_(p.value_or_default("FFTW timelimit for measurement", 10.))
     #endif //NFFTW
-    L(p["L"]),
-    N(mcpp::init_N(p))
     {
-        alps::graph_helper<> gh(p);
         alps::graph_helper<>::basis_vector_iterator v,v_end;
-        for(std::tie(v,v_end)=gh.reciprocal_basis_vectors() ; v!=v_end ; ++v){
+        for(std::tie(v,v_end)=graph_helper_->reciprocal_basis_vectors() ; v!=v_end ; ++v){
             vector_type vec=*v;
             for(auto& e: vec) e/=L; //calculate the Fouriertransform of the super cell, not the elementary one...
             reciprocal_vectors.push_back(vec);
         }
-        for(std::tie(v,v_end)=gh.basis_vectors() ; v!=v_end ; ++v){
+        for(std::tie(v,v_end)=graph_helper_->basis_vectors() ; v!=v_end ; ++v){
             vector_type vec=*v;
             basis_vectors.push_back(vec);
         } 
@@ -38,16 +37,13 @@ public:
         #if !NFFTW
         fftw_in =(fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N);
         fftw_out=(fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N);
-        //fftw_in =fftw_alloc_complex(N);
-        //fftw_out=fftw_alloc_complex(N);
         fftw_set_timelimit(fftw_timelimit_);
         plan=fftw_plan_dft_2d(L,L,fftw_in, fftw_out, FFTW_FORWARD, FFTW_MEASURE | FFTW_DESTROY_INPUT);
         #endif //NFFTW
     }
     // Rule of 3 already spams, but I dont need move semantics, therefore I can leave the move constructor and the move assign operator default 
     structure_factor(const structure_factor &original) :
-        L(original.L),
-        N(original.N),
+        observable(original),
         #if !NFFTW 
         fftw_timelimit_(original.fftw_timelimit_),
         #endif //NFFTW
@@ -107,7 +103,6 @@ private:
     #endif //NFFTW
 
     static constexpr std::complex<double> I=std::complex<double>(0.,1.);
-    const int L,N;
     
     #if !NFFTW
     // ATTENTION: THIS IS HACKED, THERE DOES NOT EXIST A NICE VERSION OF THAT PART, 

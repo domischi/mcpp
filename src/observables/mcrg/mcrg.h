@@ -9,16 +9,18 @@
 #include "interactions.h"
 #include "reductions.h"
 #include "../../utilities.h"
+#include "../observable.h"
 
 class mcrg; //Needed as it is recursively called
-class mcrg {
+class mcrg : public observable {
 public:
     typedef double spin_t;
     typedef mcrg_utilities::shift_t shift_t; //(dx,dy, component)
     enum ReductionTechnique {Decimation,Blockspin, FerroBlockspin, Blockspin4x4, FerroBlockspin4x4, IsingMajority, BlockspinCubic, DecimationCubic};
     enum LatticeType {SquareLatticeIsh, CubicLatticeIsh};
     
-    mcrg(const alps::Parameters& p, int Iteration_, int MCRG_It_) :
+    mcrg(const alps::Parameters& p, int Iteration_, int MCRG_It_, std::shared_ptr<alps::graph_helper<>> gh_, std::shared_ptr<Hamiltonian_List> hl_) :
+    observable(p,gh_,hl_),
     iteration(Iteration_),
     max_iterations(MCRG_It_),
     L(p["L"]),
@@ -33,11 +35,15 @@ public:
         if(!is_last_iteration()) {
             alps::Parameters p_descendant=p;
             p_descendant["L"]=int(L/scale_factor_b); //probably should check for the sqrt updates
-            descendant=std::make_shared<mcrg>(p_descendant,iteration+1,MCRG_It_);
+            descendant=std::make_shared<mcrg>(p_descendant,iteration+1,MCRG_It_,gh_,hl_);
         }
     }
-                
-    std::tuple<std::valarray<double>,std::valarray<double>> measure(const std::vector<spin_t>& spins, alps::ObservableSet& obs){
+
+    void measure( const std::vector<spin_t>& spins, alps::ObservableSet& obs) {
+        measure_dummy(spins, obs);
+        return;
+    }
+    std::tuple<std::valarray<double>,std::valarray<double>> measure_dummy(const std::vector<spin_t>& spins, alps::ObservableSet& obs){
         ++entry_point%=N_adjusted;//loop over the sites as entry points
         //std::valarray<double> OUT(n_interactions());
         std::vector<double> oute, outo;
@@ -85,7 +91,7 @@ public:
             //reduce the lattice and call the descendant on the renormalized system
             std::vector<spin_t> reduced_spins = reduce(spins, entry_point);
             std::valarray<double> INo(OUTo.size()),INe(OUTe.size());
-            std::tie(INo, INe) =  descendant->measure(reduced_spins,obs);
+            std::tie(INo, INe) =  descendant->measure_dummy(reduced_spins,obs);
             //calculate <S_alpha n-1 S_beta n>
             //and save it into obs
             std::valarray<double> outine(INe.size()*INe.size());
@@ -108,7 +114,7 @@ public:
         return std::tie(OUTo,OUTe);
     }
 
-    void init_observables(alps::ObservableSet& obs){
+    void init_observables(alps::ObservableSet& obs) const {
         obs << alps::RealVectorObservable("MCRGe S_alpha"+ std::to_string(iteration));
         obs << alps::RealVectorObservable("MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration));
         obs << alps::RealVectorObservable("MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1));
@@ -239,7 +245,7 @@ private:
                std::exit(4);
         }
     }
-    bool inline is_last_iteration(){
+    bool inline is_last_iteration() const {
         return max_iterations<=iteration;
     }
     bool inline is_first_iteration(){

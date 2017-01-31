@@ -1,15 +1,15 @@
 #ifndef MCPP_BASIC_OBSERVABLES_H_
 #define MCPP_BASIC_OBSERVABLES_H_
 
-#include <alps/parameter.h>
+#include <alps/parameter.h> 
+#include "../observable.h"
 #include "../../utilities.h"
-class basic_observables {
+class basic_observables : public observable{
 public:
     typedef double spin_t;
 
-    basic_observables(const alps::Parameters& p) :
-    L(p["L"]),
-    N(mcpp::init_N(p))
+    basic_observables(const alps::Parameters& p, std::shared_ptr<alps::graph_helper<>> gh_, std::shared_ptr<Hamiltonian_List> hl_) :
+        observable(p,gh_,hl_)
     {
     }
                 
@@ -36,7 +36,6 @@ public:
     // Intentionally left empty as only const values are inside the class (initialization due to constructor)
     void save(alps::ODump &dump) const{ }
 private:
-    const int L,N;
 
 };
 #endif //MCPP_BASIC_OBSERVABLES_H_

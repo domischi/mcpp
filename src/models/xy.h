@@ -37,18 +37,13 @@ public :
         L(params["L"]),
         N(num_sites()),
         T(params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"])),
-        HamiltonianList(get_hl(params)),
         ising(static_cast<bool>(params.value_or_default("Ising", false))),
         Step_Number(0),
         accepted(0),
-        measure_basic_observables(static_cast<bool>(params.value_or_default("basic_observables",true))),
         measure_last_configuration(static_cast<bool>(params.value_or_default("measure last configuration",false))),
-        mcrg_it_depth(params.value_or_default("mcrg_iteration_depth",-1)),
-        measure_mcrg(static_cast<bool>(static_cast<int>(params.value_or_default("mcrg_iteration_depth",-1))>0)),
-        measure_structure_factor(static_cast<bool>(params.value_or_default("structure_factor",false))),
-        measure_llg(static_cast<bool>(params.value_or_default("llg",false))),
-        measure_spin_autocorrelation(static_cast<bool>(static_cast<int>(params.value_or_default("Spin autocorrelation analysis length",-1))>0)),
         Each_Measurement(params.value_or_default("Each_Measurement",15)),
+        HamiltonianList(get_hl(params)),
+        observables(construct_observables(params, HamiltonianList)),
         targeted_acc_ratio(params.value_or_default("Targeted Acceptance Ratio",0.5)),
         angle_dev(    params.value_or_default("Angle Deviation Start", 0.1*M_PI)),
         angle_dev_fac(params.value_or_default("Angle Deviation Factor",1.2)),
@@ -60,27 +55,6 @@ public :
             En=Energy();
             if(print_debug_information)
                 print_debug();
-            if(measure_basic_observables){
-                basic_observables_=std::unique_ptr<basic_observables>(new basic_observables(params));
-            }
-            if(measure_mcrg){
-                std::cout << "\tInitialize MCRG with iteration depth "<<mcrg_it_depth<<"..."<<std::flush;
-                mcrg_=std::make_shared<mcrg>(params,0,mcrg_it_depth);
-                std::cout << "\tdone"<<std::endl;
-            }
-            //if(measure_llg){
-            //    llg_=std::make_shared<llg>(params,std::make_shared<Hamiltonian_List>(HamiltonianList));
-            //}
-            if(measure_structure_factor){
-                std::cout << "\tInitialize Structure Factor Measurement..."<<std::flush;
-                structure_factor_=std::unique_ptr<structure_factor>(new structure_factor(params));
-                std::cout << "\tdone"<<std::endl;
-            }
-            if(measure_spin_autocorrelation){
-                std::cout << "\tInitialize Spin Autocorrelation Measurement..."<<std::flush;
-                spin_autocorrelation_=std::unique_ptr<spin_autocorrelation>(new spin_autocorrelation(params));
-                std::cout << "\tdone"<<std::endl;
-            }
         }
     
     void init_observables(alps::Parameters const&, alps::ObservableSet& obs){
@@ -90,20 +64,9 @@ public :
         if(measure_last_configuration){
             obs<<alps::RealVectorObservable("Last Configuration");
         }
-        if(measure_mcrg){
-            mcrg_->init_observables(obs);
-        }
-        if(measure_basic_observables){
-            basic_observables_->init_observables(obs);
-        }
-        if(measure_structure_factor){
-            structure_factor_->init_observables(obs);
-        }
-        if(measure_spin_autocorrelation){
-            spin_autocorrelation_->init_observables(obs);
-        }
+        for (auto& o : observables)
+            o->init_observables(obs);
     }
-
     void save(alps::ODump &dump) const{
         dump 
         << Step_Number 
@@ -111,18 +74,8 @@ public :
         << angle_dev
         << En
         << accepted;
-        if(measure_basic_observables){
-            basic_observables_->save(dump);
-        }
-        if(measure_mcrg){
-            mcrg_->save(dump);
-        }
-        if(measure_structure_factor){
-            structure_factor_->save(dump);
-        }
-        if(measure_spin_autocorrelation){
-            spin_autocorrelation_->save(dump);
-        }
+        for(auto & o: observables)
+            o->save(dump);
     }
     void load(alps::IDump &dump){
         dump 
@@ -132,10 +85,8 @@ public :
         >> En
         >> accepted
         ;
-        if(measure_spin_autocorrelation)
-            spin_autocorrelation_->load(dump);
-        if(measure_mcrg)
-            mcrg_->load(dump);
+        for(auto& o : observables)
+            o->load(dump);
     }
     void run(alps::ObservableSet& obs){
         using namespace alps::alea;
@@ -178,30 +129,18 @@ private:
     const int Each_Measurement;
     const bool print_debug_information;
 
-
     const double targeted_acc_ratio;
     double angle_dev;
     const double angle_dev_min, angle_dev_max, angle_dev_fac;
 
     // struct of Hamiltonian pointers -> allows CRTP
     std::shared_ptr<Hamiltonian_List> HamiltonianList;
+    std::vector<std::shared_ptr<observable>> observables;
 
     //Easy observables
     double En;
     int accepted;
     const bool measure_last_configuration;
-    //Observables
-    const bool measure_basic_observables;
-    std::shared_ptr<basic_observables> basic_observables_;
-    const bool measure_mcrg;
-    std::shared_ptr<mcrg> mcrg_;
-    const bool measure_llg;
-    std::shared_ptr<llg> llg_;
-    const int mcrg_it_depth; //to which depth the mcrg is done
-    const bool measure_structure_factor;
-    std::unique_ptr<structure_factor> structure_factor_;
-    const bool measure_spin_autocorrelation;
-    std::unique_ptr<spin_autocorrelation> spin_autocorrelation_;
 
     inline void update(){update(random_int(num_sites()));}
     void update(int site){
@@ -291,14 +230,8 @@ private:
             std::valarray<double> s(spins.data(),spins.size());
             obs["Last Configuration"]<<s;
         }
-        if(measure_basic_observables) 
-            basic_observables_->measure(spins, obs);
-        if(measure_mcrg) 
-            mcrg_->measure(spins, obs);
-        if(measure_structure_factor)
-            structure_factor_->measure(spins, obs);
-        if(measure_spin_autocorrelation)
-            spin_autocorrelation_->measure(spins, obs);
+        for(auto& o: observables) 
+            o->measure(spins, obs);
     }
     inline void init_spins(const alps::Parameters& params){
         if(params.value_or_default("Initialization","GS")=="Random"){
