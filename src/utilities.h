@@ -11,6 +11,7 @@ namespace mcpp{
     typedef typename alps::graph_helper<>::basis_vector_iterator basis_vector_iterator;
     typedef typename alps::graph_helper<>::site_iterator site_iterator;
     typedef std::vector<std::vector<int>> neighbour_list_type;
+    typedef std::vector<std::vector<vector_type>> difference_vector_list_type;
     typedef double spin_t;
     std::pair<double,double> magnetization_and_staggered_magnetization(const std::vector<spin_t>& spins, const int L) {
         double mx =0.;
@@ -128,7 +129,7 @@ namespace mcpp{
         return std::make_pair(neighbour_out, diff_vectors_out);
 }
 
-    std::pair<neighbour_list_type, std::vector<std::vector<vector_type>>> get_neighbours(graph_helper_type const& gh, parameter_type p){
+    std::pair<neighbour_list_type, difference_vector_list_type> get_neighbours(graph_helper_type const& gh, parameter_type p){
         const bool print_debug_information=static_cast<bool>(p.value_or_default("debug dipolar",false));
         const double dilution_rate=p.value_or_default("Dilution Rate", 0.);
         const double position_std_dev=static_cast<double>(p.value_or_default("Position Disorder", 0.))*static_cast<double>(p.value_or_default("a",1.));
