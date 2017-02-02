@@ -9,7 +9,7 @@
 #include "basic-observables/basic_observables.h"
 #include "spin-autocorrelation/spin_autocorrelation.h"
 #include "structure-factor/structure_factor.h"
-//#include "llg/llg.h"
+#include "llg/llg.h"
 
 std::vector<std::shared_ptr<observable>> construct_observables(const alps::Parameters& p, std::shared_ptr<Hamiltonian_List> hl_ ) {
     std::vector<std::shared_ptr<observable>> observables;
@@ -31,6 +31,11 @@ std::vector<std::shared_ptr<observable>> construct_observables(const alps::Param
     if(static_cast<bool>(static_cast<int>(p.value_or_default("Spin autocorrelation analysis length",-1))>0)){
         std::cout << "Initialize Spin autocorrelation measurement..."<<std::flush;
         observables.push_back(std::make_shared<spin_autocorrelation>(p,gh_,hl_));
+        std::cout << "done"<<std::endl;;
+    }
+    if(static_cast<bool>(p.value_or_default("llg",true))) {
+        std::cout << "Initialize LLG measurement..."<<std::flush;
+        observables.push_back(std::make_shared<llg>(p,gh_,hl_));
         std::cout << "done"<<std::endl;;
     }
     return observables;
