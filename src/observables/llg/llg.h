@@ -36,7 +36,7 @@ public:
             }
             double M, Ms, E;
             std::tie(M,Ms)=mcpp::magnetization_and_staggered_magnetization(spins,L);
-            E=hamiltonian_list_->Energy(spins);
+            E=hamiltonian_list_->Energy(spins)/graph_helper_->num_sites();
             obs["LLG M" ] << M; 
             obs["LLG Ms"] << Ms;
             obs["LLG E" ] << E;
