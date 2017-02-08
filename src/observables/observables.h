@@ -33,7 +33,7 @@ std::vector<std::shared_ptr<observable>> construct_observables(const alps::Param
         observables.push_back(std::make_shared<spin_autocorrelation>(p,gh_,hl_));
         std::cout << "done"<<std::endl;;
     }
-    if(static_cast<bool>(p.value_or_default("llg",true))) {
+    if(static_cast<bool>(p.value_or_default("llg",false))) {
         std::cout << "Initialize LLG measurement..."<<std::flush;
         observables.push_back(std::make_shared<llg>(p,gh_,hl_));
         std::cout << "done"<<std::endl;;
