@@ -68,14 +68,14 @@ namespace mcpp{
         return norm(difference_vector(x,y,periodic));
     }
 
-    std::vector<double> positional_disorder(graph_helper_type const& gh, parameter_type p, std::mt19937 rng) {
+    std::vector<double> positional_disorder(graph_helper_type const& gh, parameter_type p, std::mt19937& rng) {
         std::vector<double> dR(gh.dimension()*gh.num_sites());
         std::normal_distribution<double> dist(0,p["Position Disorder"]);
         for(int i=0;i<gh.dimension()*gh.num_sites();++i) dR[i]=dist(rng);
         return dR;
     }
 
-    std::set<int> dilution_disorder(graph_helper_type const& gh, parameter_type p, std::mt19937 rng) {
+    std::set<int> dilution_disorder(graph_helper_type const& gh, parameter_type p, std::mt19937& rng) {
         double dilution_rate=p["Dilution Rate"];
         std::cout << "WARNING: dilution is only implemented for the dipolar interaction!"<<std::endl;
         std::vector<int> site_list(gh.num_sites());
