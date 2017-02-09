@@ -51,7 +51,7 @@ namespace mcpp{
     inline vector_type difference_vector(vector_type const& x, vector_type const& y) {
         return difference_vector(x,y,vector_type(x.size()));
     }
-    inline double norm2(vector_type const& x){
+    inline double norm(vector_type const& x){
         double s=0;
         for (auto& e: x) {
             s+=e*e;
@@ -65,7 +65,7 @@ namespace mcpp{
         return s;
     } 
     inline double distance(vector_type const& x, vector_type const& y, vector_type const& periodic){
-        return norm2(difference_vector(x,y,periodic));
+        return norm(difference_vector(x,y,periodic));
     }
 
     std::vector<double> positional_disorder(graph_helper_type const& gh, parameter_type p, std::mt19937 rng) {
@@ -129,21 +129,16 @@ namespace mcpp{
         return std::make_pair(neighbour_out, diff_vectors_out);
 }
 
-    std::pair<neighbour_list_type, difference_vector_list_type> get_neighbours(graph_helper_type const& gh, parameter_type p){
-        const bool print_debug_information=static_cast<bool>(p.value_or_default("debug dipolar",false));
+    // Returns:
+    // first: vector if site is deleted
+    // second: vector describing the coordinate
+    std::pair<std::vector<bool>,std::vector<vector_type>> get_coordinates(graph_helper_type const& gh, parameter_type const& p){
         const double dilution_rate=p.value_or_default("Dilution Rate", 0.);
         const double position_std_dev=static_cast<double>(p.value_or_default("Position Disorder", 0.))*static_cast<double>(p.value_or_default("a",1.));
         const int DISORDER_SEED=p["DISORDER_SEED"];
         const bool DISORDERED=is_disordered(p);
         const int L=p["L"];
         const int N=gh.num_sites();
-        const double cutoff_distance = static_cast<double>(p.value_or_default("cutoff_distance",3))
-                                      *std::max(static_cast<double>(p.value_or_default("a",1.)),static_cast<double>(p.value_or_default("b",1.))); 
-        neighbour_list_type neighbour_list(N);
-        for(int i=0;i<gh.num_sites();++i) neighbour_list[i]=std::vector<int>();
-        std::vector<std::vector<vector_type>> difference_vector_list(N);
-        const std::vector<vector_type> periodic_translations=get_periodic_translations(gh,p);
-        std::map<int,double> dist_map;
         std::mt19937 rng(DISORDER_SEED);
         //Position disorder 
         std::vector<double> dR(gh.dimension()*gh.num_sites());
@@ -153,26 +148,52 @@ namespace mcpp{
         std::set<int> deleted_sites;
         if(DISORDERED&&dilution_rate>0)
             deleted_sites=mcpp::dilution_disorder(gh,p,rng);
+        std::vector<bool> is_deleted(N);
+        for(site_iterator s = gh.sites().first; s !=gh.sites().second; ++s){
+            if(deleted_sites.find(*s)!=deleted_sites.end()) // *s is deleted
+                is_deleted[*s]=true;
+        }
+        std::vector<vector_type> disordered_coordinates(N);
+        vector_type tmp;
+        for(site_iterator s = gh.sites().first; s !=gh.sites().second; ++s){
+            tmp=gh.coordinate(*s);
+            for(int d = 0 ; d<gh.dimension();++d) {
+                tmp[d]+=dR[(*s)*gh.dimension()+d];
+            }
+            disordered_coordinates[*s]=tmp;
+        }
+        return std::make_pair(is_deleted, disordered_coordinates); 
+    }
+
+    std::pair<neighbour_list_type, difference_vector_list_type> get_neighbours(graph_helper_type const& gh, parameter_type const& p){
+        const bool print_debug_information=static_cast<bool>(p.value_or_default("debug dipolar",false));
+        const int L=p["L"];
+        const int N=gh.num_sites();
+        const double cutoff_distance = static_cast<double>(p.value_or_default("cutoff_distance",3))
+                                      *std::max(static_cast<double>(p.value_or_default("a",1.)),static_cast<double>(p.value_or_default("b",1.))); 
+        neighbour_list_type neighbour_list(N);
+        for(int i=0;i<gh.num_sites();++i) neighbour_list[i]=std::vector<int>();
+        std::vector<std::vector<vector_type>> difference_vector_list(N);
+        const std::vector<vector_type> periodic_translations=get_periodic_translations(gh,p);
+        std::map<int,double> dist_map;
+        std::vector<bool> is_deleted;
+        std::vector<vector_type> coordinates;
+        std::tie(is_deleted, coordinates)=get_coordinates(gh, p);
         for(site_iterator s_iter = gh.sites().first; s_iter !=gh.sites().second; ++s_iter )
         for(site_iterator s_iter2= gh.sites().first; s_iter2!=gh.sites().second; ++s_iter2)
         for(auto& p : periodic_translations)
             if(*s_iter!=*s_iter2 && //same site
-               deleted_sites.find(*s_iter) ==deleted_sites.end() && //s_iter  is not deleted
-               deleted_sites.find(*s_iter2)==deleted_sites.end() ){ //s_iter2 is not deleted
-                vector_type c1(gh.coordinate(*s_iter));
-                vector_type c2(gh.coordinate(*s_iter2));
-                for(int d=0;d<gh.dimension();++d){
-                    c1[d]+=dR[*s_iter +d];
-                    c2[d]+=dR[*s_iter2+d];
-                }
+                !is_deleted[*s_iter ] && //s_iter  is not deleted
+                !is_deleted[*s_iter2] ){ //s_iter2 is not deleted
+                vector_type c1(coordinates[*s_iter ]);
+                vector_type c2(coordinates[*s_iter2]);
                 if(print_debug_information && *s_iter2==1 && p==periodic_translations[0]){
-                    vector_type c(gh.coordinate(*s_iter));
                     std::cout <<"Site: " <<std::setw(3) <<*s_iter<<" with vector ("
                         << std::setw(8) << c1[0]<<","
                         << std::setw(8) << c1[1]<<")"<<std::endl;
                 }
                 const vector_type diff_vec=mcpp::difference_vector(c1,c2,p);
-                const double dist=norm2(diff_vec);
+                const double dist=norm(diff_vec);
                 const int ri = (*s_iter)+N*(*s_iter2);
                 if(dist<=cutoff_distance){
                     if(dist_map[ri]==0.){

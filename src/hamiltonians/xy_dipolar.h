@@ -96,7 +96,7 @@ private:
                 const int j = neighbour_list[i][index];
                 const int ri=reduced_index(i,j);
                 const vector_type d=difference_vector_list[i][index];
-                const double dist=mcpp::norm2(d);
+                const double dist=mcpp::norm(d);
                 dist_3[ri]=std::pow(dist,-3);
                 phi[ri]=std::atan2(-d[1],-d[0]);
             }
