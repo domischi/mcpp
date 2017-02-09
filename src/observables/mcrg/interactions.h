@@ -195,6 +195,15 @@ std::vector<std::vector<shift_t>> dIsing = {
         {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 3, 2} )}, // (00) (60) (32)
         {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 4, 2} )}, // (00) (60) (42)
         {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 0, 3} )}, // (00) (60) (03)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 0, 3} )}, // (00) (60) (03)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {-1, 0} ), std::make_tuple(0,std::vector<int> { 0,-1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 0, 1} )}, // (00) (-10) (0-1) (10) (01)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {-1,-1} ), std::make_tuple(0,std::vector<int> { 1,-1} ), std::make_tuple(0,std::vector<int> {-1, 1} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // (00) (-1-1) (1-1) (-11) (11)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 2, 1} )}, // (00) (01) (10) (11) (21)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 1, 2} )}, // (00) (01) (10) (11) (12)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 0, 2} )}, // (00) (01) (10) (11) (02)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // (00) (01) (10) (11) (20)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 0,-1} )}, // (00) (01) (10) (11) (0-1)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> {-1, 0} )}, // (00) (01) (10) (11) (-10)
     //Even
         //same component
         {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // (10)
@@ -222,7 +231,11 @@ std::vector<std::vector<shift_t>> dIsing = {
         {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {-1, 0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // tetris lightning tile
         {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0,-1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // tetris lightning tile rot
         {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 0, 2} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // tetris L tile 
-        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 2, 0} )}  // tetris L tile rot
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // tetris L tile rot
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 0, 2} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 1, 2} )}, 
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 2, 0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 2, 1} )},
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 2, 0} ), std::make_tuple(0,std::vector<int> { 0, 2} )},
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {-1, 0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> {-1, 1} ), std::make_tuple(0,std::vector<int> {-2, 0} ), std::make_tuple(0,std::vector<int> { 0, 2} )}
 };
 // Do a hand crafted, good set for dXY //TODO understand a good handcrafted interaction set
 std::vector<std::vector<shift_t>> dXY_handcrafted = {
