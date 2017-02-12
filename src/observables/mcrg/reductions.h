@@ -27,6 +27,25 @@ namespace mcrg_utilities{
         return ret; 
 	}
 
+    std::vector<spin_t> ising_tie_breaker(const std::vector<spin_t>& spins, const int& L, const int& EntryPoint) {
+        std::vector<spin_t> ret;
+        for(int dx=0; dx<L;dx+=2)
+            for(int dy=0; dy<L;dy+=2){
+                double angle_sum=
+                    mod2Pi(spins[index_o_neighbour_square(EntryPoint,  dx,  dy,L)]) 
+                   +mod2Pi(spins[index_o_neighbour_square(EntryPoint,1+dx,  dy,L)])
+                   +mod2Pi(spins[index_o_neighbour_square(EntryPoint,  dx,1+dy,L)])
+                   +mod2Pi(spins[index_o_neighbour_square(EntryPoint,1+dx,1+dy,L)]);
+                if(angle_sum>5./2.*M_PI)
+                    ret.push_back(M_PI);
+                else if(angle_sum<3./2.*M_PI)
+                    ret.push_back(0.);
+                else
+                    ret.push_back(spins[index_o_neighbour_square(EntryPoint,  dx,  dy,L)]);
+            }
+        ret.shrink_to_fit();
+        return ret; 
+    }
     std::vector<spin_t> ising_majority(const std::vector<spin_t>& spins, const int& L, const int& EntryPoint) {
         std::vector<spin_t> ret;
         for(int dx=0; dx<L;dx+=3)
