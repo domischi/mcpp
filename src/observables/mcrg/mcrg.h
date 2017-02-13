@@ -38,7 +38,8 @@ public:
     }
                 
     std::tuple<std::valarray<double>,std::valarray<double>> measure(const std::vector<spin_t>& spins, alps::ObservableSet& obs){
-        ++entry_point%=N;//loop over the sites as entry points //TODO implement a true loop...
+        update_entry_point();
+        //++entry_point%=N;//loop over the sites as entry points //TODO implement a true loop...
         //std::valarray<double> OUT(n_interactions());
         std::vector<double> oute, outo;
         int counto=0;
@@ -243,6 +244,15 @@ private:
                std::exit(4);
         }
     }
+    void update_entry_point(){
+		if((entry_point%L)%scale_factor_b==scale_factor_b-1) {
+            entry_point+=L-scale_factor_b;
+        }
+        ++entry_point;
+        if(entry_point==scale_factor_b*L) {
+            entry_point=0;
+        }    
+	}
     bool inline is_last_iteration(){
         return max_iterations<=iteration;
     }
