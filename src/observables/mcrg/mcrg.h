@@ -289,43 +289,36 @@ private:
     }
 
     //this function reduces the spin lattice to a quarter of the size by adding the vectors of 4 neighbouring sites together to one and then calculates the angle back and saves it in OUT
-    std::vector<spin_t> reduce(const std::vector<spin_t>& spins, const int& entry_point){ //TODO formulate as switch
-        if(reduction_type==ReductionTechnique::Decimation){
-            return mcrg_utilities::decimate(spins,L,entry_point);
-        }
-        if(reduction_type==ReductionTechnique::DecimationCubic){
-            return mcrg_utilities::decimate_cubic(spins,L,entry_point);
-        }
-        if(reduction_type==ReductionTechnique::BlockspinCubic){
-            return mcrg_utilities::blockspin_cubic(spins,L,entry_point);
-        }
-        if(reduction_type==ReductionTechnique::Blockspin){
-            return mcrg_utilities::blockspin(spins,L,entry_point);
-        }
-        if(reduction_type==ReductionTechnique::FerroBlockspin){
-            if(is_first_iteration()){
-                std::vector<spin_t> working_data=mcrg_utilities::ferromagnetic_transformation(spins,L,entry_point);
-                return mcrg_utilities::blockspin(working_data,L,entry_point);
-            }
-            else
-                return mcrg_utilities::blockspin(spins,L,entry_point);
-        }
-        if(reduction_type==ReductionTechnique::Blockspin4x4){
-            return mcrg_utilities::blockspin4x4(spins,L,entry_point);
-        }
-        if(reduction_type==ReductionTechnique::IsingMajority){
-            return mcrg_utilities::ising_majority(spins,L,entry_point);
-        }
-        if(reduction_type==ReductionTechnique::IsingTieBreaker){
-            return mcrg_utilities::ising_tie_breaker(spins,L,entry_point);
-        }
-        if(reduction_type==ReductionTechnique::FerroBlockspin4x4){
-            if(is_first_iteration()){
-                std::vector<spin_t> working_data=mcrg_utilities::ferromagnetic_transformation(spins,L,0);
-                return mcrg_utilities::blockspin4x4(working_data,L,entry_point);
-            }
-            else
+    std::vector<spin_t> reduce(const std::vector<spin_t>& spins, const int& entry_point){
+        switch(reduction_type){
+            case ReductionTechnique::Decimation:
+                return mcrg_utilities::decimate(spins,L,entry_point);
+            case ReductionTechnique::DecimationCubic:
+                return mcrg_utilities::decimate_cubic(spins,L,entry_point);
+            case ReductionTechnique::BlockspinCubic: 
+                return mcrg_utilities::blockspin_cubic(spins,L,entry_point);
+            case ReductionTechnique::Blockspin:
+                    return mcrg_utilities::blockspin(spins,L,entry_point);
+            case ReductionTechnique::FerroBlockspin:
+                if(is_first_iteration()){
+                    std::vector<spin_t> working_data=mcrg_utilities::ferromagnetic_transformation(spins,L,entry_point);
+                    return mcrg_utilities::blockspin(working_data,L,entry_point);
+                }
+                else
+                    return mcrg_utilities::blockspin(spins,L,entry_point);
+            case ReductionTechnique::Blockspin4x4:
                 return mcrg_utilities::blockspin4x4(spins,L,entry_point);
+            case ReductionTechnique::IsingMajority:
+                return mcrg_utilities::ising_majority(spins,L,entry_point);
+            case ReductionTechnique::IsingTieBreaker:
+                return mcrg_utilities::ising_tie_breaker(spins,L,entry_point);
+            case ReductionTechnique::FerroBlockspin4x4:
+                if(is_first_iteration()){
+                    std::vector<spin_t> working_data=mcrg_utilities::ferromagnetic_transformation(spins,L,0);
+                    return mcrg_utilities::blockspin4x4(working_data,L,entry_point);
+                }
+                else
+                    return mcrg_utilities::blockspin4x4(spins,L,entry_point);
         }
     }
 };
