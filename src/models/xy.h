@@ -154,7 +154,7 @@ private:
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);
         if(random_real()<=std::exp(-(new_energy-old_energy)/T)){
-            En+=new_energy-old_energy;
+            En+=(new_energy-old_energy)/2.;
             ++accepted;
         }
         else{ //switch back
@@ -347,7 +347,7 @@ public:
             alps::RealObsevaluator E = obs["Energy"];
             alps::RealObsevaluator E2 = obs["Energy^2"];
             alps::RealObsevaluator c_V("c_V");
-            c_V = beta()*beta() * (E2-E*E) * N;
+            c_V = beta()*beta() * (E2-E*E) * 4 * N;
 
             obs.addObservable(c_V); 
         } else std::cerr << "c_V will not be calculated"<<std::endl;
