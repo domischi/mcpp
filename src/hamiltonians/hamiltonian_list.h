@@ -27,7 +27,7 @@ struct Hamiltonian_List {
             p_exchange=std::unique_ptr<XY_Exchange>(new XY_Exchange(params)); 
         }
         if( params.defined("A")     && static_cast<double>(params["A"])    !=0. &&
-            params.defined("p_max") && static_cast<double>(params["p_max"])!=0.){
+            params.defined("Shape Anisotropy p") && static_cast<double>(params["Shape Anisotropy p"])!=0.){
             p_shape_anisotropy=std::unique_ptr<XY_Shape_Anisotropy>(new XY_Shape_Anisotropy(params)); 
         }
         if(!p_dipolar_disordered && !p_dipolar && !p_exchange && !p_shape_anisotropy) {
