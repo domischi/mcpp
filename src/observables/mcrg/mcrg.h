@@ -110,12 +110,12 @@ public:
     }
 
     void init_observables(alps::ObservableSet& obs){
-        obs << alps::RealVectorObservable("MCRGe S_alpha"+ std::to_string(iteration));
-        obs << alps::RealVectorObservable("MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration));
-        obs << alps::RealVectorObservable("MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1));
-        obs << alps::RealVectorObservable("MCRGo S_alpha"+ std::to_string(iteration));
-        obs << alps::RealVectorObservable("MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration));
-        obs << alps::RealVectorObservable("MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1));
+        obs << alps::SimpleRealVectorObservable("MCRGe S_alpha"+ std::to_string(iteration));
+        obs << alps::SimpleRealVectorObservable("MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration));
+        obs << alps::SimpleRealVectorObservable("MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1));
+        obs << alps::SimpleRealVectorObservable("MCRGo S_alpha"+ std::to_string(iteration));
+        obs << alps::SimpleRealVectorObservable("MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration));
+        obs << alps::SimpleRealVectorObservable("MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1));
         if(!is_last_iteration()){
             descendant->init_observables(obs);
         }
