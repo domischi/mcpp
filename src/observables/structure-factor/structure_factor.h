@@ -17,6 +17,7 @@ public:
     structure_factor(const alps::Parameters& p) :
     #if !NFFTW 
     fftw_timelimit_(p.value_or_default("FFTW timelimit for measurement", 10.)),
+    optimized_version(!(p.value_or_default("enforce no FFTW", false))||p["LATTICE"]=="square lattice"),
     #endif //NFFTW
     L(p["L"]),
     N(mcpp::init_N(p)),
@@ -24,7 +25,7 @@ public:
     {
         alps::graph_helper<> gh(p);
         alps::graph_helper<>::basis_vector_iterator v,v_end;
-        for(std::tie(v,v_end)=gh.reciprocal_basis_vectors() ; v!=v_end ; ++v){ //TODO this seems not to be correct...
+        for(std::tie(v,v_end)=gh.reciprocal_basis_vectors() ; v!=v_end ; ++v){ // check if correct for triangular
             vector_type vec=*v;
             for(auto& e: vec) e/=L; //calculate the Fouriertransform of the super cell, not the elementary one...
             reciprocal_vectors.push_back(vec);
@@ -51,6 +52,7 @@ public:
         N(original.N),
         #if !NFFTW 
         fftw_timelimit_(original.fftw_timelimit_),
+        optimized_version(original.optimized_version),
         #endif //NFFTW
         reciprocal_vectors(original.reciprocal_vectors),
         basis_vectors(original.basis_vectors)
@@ -81,7 +83,7 @@ public:
         if(reciprocal_lattice_saved<=1){
             for(int i=0;i<reciprocal_vectors.size();++i){
                 std::valarray<double> v(reciprocal_vectors[i].data(),reciprocal_vectors[i].size());
-                obs["Reciprocal Basis Vector "+std::to_string(i)]<<v;
+                obs["Reciprocal Basis Vector "+std::to_string(i)]<<v; //TODO move this functionality to a utility function
             }
             reciprocal_lattice_saved++;
         }
@@ -120,11 +122,11 @@ private:
     fftw_complex *fftw_out;
     const double fftw_timelimit_; 
     fftw_plan plan; 
+    const bool optimized_version;    
     #endif //NFFTW
     int reciprocal_lattice_saved;
     static constexpr std::complex<double> I=std::complex<double>(0.,1.);
     const int L,N;
-    
     #if !NFFTW
     // ATTENTION: THIS IS HACKED, THERE DOES NOT EXIST A NICE VERSION OF THAT PART, 
     // BUT REMIND THAT THERE IS NO C++ GUARANTEE THAT THIS WILL WORK, 
@@ -139,8 +141,12 @@ private:
     }
     #endif //NFFTW
 
-    #if NFFTW
-    std::valarray<std::complex<double>> fourier_transform(const std::valarray<std::complex<double>>& real, int prefactor=1) const {
+    std::valarray<std::complex<double>> fourier_transform(const std::valarray<std::complex<double>>& real, int prefactor=1){
+        #if !NFFTW
+        if(optimized_version) {
+            return fftw_fourier_transform(real, prefactor);
+        }
+        #endif
         std::valarray<std::complex<double>> reciprocal(N);
         for(int n1=0;n1<L;++n1)
         for(int n2=0;n2<L;++n2)
@@ -155,8 +161,8 @@ private:
         }
         return reciprocal;
     }
-    #else // !NFFTW (FFTW around)
-    std::valarray<std::complex<double>> fourier_transform(const std::valarray<std::complex<double>>& real, int prefactor=1) {
+    #if !NFFTW //(FFTW around)
+    std::valarray<std::complex<double>> fftw_fourier_transform(const std::valarray<std::complex<double>>& real, int prefactor=1) {
         copy_in(real);
         fftw_execute(plan);
         return copy_out();
