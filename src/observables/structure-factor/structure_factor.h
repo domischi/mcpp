@@ -19,11 +19,12 @@ public:
     fftw_timelimit_(p.value_or_default("FFTW timelimit for measurement", 10.)),
     #endif //NFFTW
     L(p["L"]),
-    N(mcpp::init_N(p))
+    N(mcpp::init_N(p)),
+    reciprocal_lattice_saved(0)
     {
         alps::graph_helper<> gh(p);
         alps::graph_helper<>::basis_vector_iterator v,v_end;
-        for(std::tie(v,v_end)=gh.reciprocal_basis_vectors() ; v!=v_end ; ++v){
+        for(std::tie(v,v_end)=gh.reciprocal_basis_vectors() ; v!=v_end ; ++v){ //TODO this seems not to be correct...
             vector_type vec=*v;
             for(auto& e: vec) e/=L; //calculate the Fouriertransform of the super cell, not the elementary one...
             reciprocal_vectors.push_back(vec);
@@ -77,6 +78,13 @@ public:
     }
 
     void measure(const std::vector<spin_t>& spins, alps::ObservableSet& obs) {
+        if(reciprocal_lattice_saved<=1){
+            for(int i=0;i<reciprocal_vectors.size();++i){
+                std::valarray<double> v(reciprocal_vectors[i].data(),reciprocal_vectors[i].size());
+                obs["Reciprocal Basis Vector "+std::to_string(i)]<<v;
+            }
+            reciprocal_lattice_saved++;
+        }
         std::valarray<std::complex<double>> Sx(spins.size());
         std::valarray<std::complex<double>> Sy(spins.size());
         std::transform(spins.begin(),spins.end(),begin(Sx),[](double d) {return std::cos(d);});
@@ -91,9 +99,17 @@ public:
 
     void init_observables(alps::ObservableSet& obs) const {
         obs << alps::RealVectorObservable("|Structure Factor|^2");
+        for(int i=0;i<reciprocal_vectors.size();++i){
+            obs << alps::SimpleRealVectorObservable("Reciprocal Basis Vector "+std::to_string(i));
+        }
     }
     //Intentionally left empty
-    void save(alps::ODump &dump) const{ }
+    void save(alps::ODump &dump) const{ 
+        dump << reciprocal_lattice_saved;
+    }
+    void load(alps::IDump &dump) {
+        dump >> reciprocal_lattice_saved;
+    }
 private:
     typedef typename alps::graph_helper<>::vector_type vector_type;
     std::vector<vector_type> reciprocal_vectors; 
@@ -105,7 +121,7 @@ private:
     const double fftw_timelimit_; 
     fftw_plan plan; 
     #endif //NFFTW
-
+    int reciprocal_lattice_saved;
     static constexpr std::complex<double> I=std::complex<double>(0.,1.);
     const int L,N;
     
