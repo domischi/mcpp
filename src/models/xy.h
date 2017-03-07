@@ -49,6 +49,7 @@ public :
         angle_dev_fac(params.value_or_default("Angle Deviation Factor",1.2)),
         angle_dev_min(params.value_or_default("Angle Deviation Min",   1e-3*M_PI)),
         angle_dev_max(params.value_or_default("Angle Deviation Max",   2*M_PI)),
+        shape_anisotropy_p(params.value_or_default("Shape Anisotropy p",-1)),
         print_debug_information(static_cast<bool>(params.value_or_default("print debug information",false)))
         {
             init_spins(params);
@@ -132,6 +133,7 @@ private:
     const double targeted_acc_ratio;
     double angle_dev;
     const double angle_dev_min, angle_dev_max, angle_dev_fac;
+    const int shape_anisotropy_p;
 
     // struct of Hamiltonian pointers -> allows CRTP
     std::shared_ptr<Hamiltonian_List> HamiltonianList;
@@ -148,6 +150,9 @@ private:
         double old_state=spins[site];
         double old_energy=single_site_Energy(site);
         double new_state=mod2Pi(old_state+random_real_shifted(angle_dev));
+        if(shape_anisotropy_p>0) {
+            new_state=mod2Pi(new_state+random_int(shape_anisotropy_p)*2*M_PI/shape_anisotropy_p); 
+        }
         if(ising) {
             new_state= (old_state>0.5*M_PI ? 0 : M_PI); //Only allow Spin Flip updates
         }

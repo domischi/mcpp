@@ -16,7 +16,7 @@ class mcrg : public observable {
 public:
     typedef double spin_t;
     typedef mcrg_utilities::shift_t shift_t; //(dx,dy, component)
-    enum ReductionTechnique {Decimation,Blockspin, FerroBlockspin, Blockspin4x4, FerroBlockspin4x4, IsingMajority, BlockspinCubic, DecimationCubic};
+    enum ReductionTechnique {Decimation,Blockspin, FerroBlockspin, Blockspin4x4, FerroBlockspin4x4, IsingMajority, IsingTieBreaker, BlockspinCubic, DecimationCubic};
     enum LatticeType {SquareLatticeIsh, CubicLatticeIsh};
     
     mcrg(const alps::Parameters& p, int Iteration_, int MCRG_It_, std::shared_ptr<alps::graph_helper<>> gh_, std::shared_ptr<Hamiltonian_List> hl_) :
@@ -115,12 +115,12 @@ public:
     }
 
     void init_observables(alps::ObservableSet& obs) const {
-        obs << alps::RealVectorObservable("MCRGe S_alpha"+ std::to_string(iteration));
-        obs << alps::RealVectorObservable("MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration));
-        obs << alps::RealVectorObservable("MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1));
-        obs << alps::RealVectorObservable("MCRGo S_alpha"+ std::to_string(iteration));
-        obs << alps::RealVectorObservable("MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration));
-        obs << alps::RealVectorObservable("MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1));
+        obs << alps::SimpleRealVectorObservable("MCRGe S_alpha"+ std::to_string(iteration));
+        obs << alps::SimpleRealVectorObservable("MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration));
+        obs << alps::SimpleRealVectorObservable("MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1));
+        obs << alps::SimpleRealVectorObservable("MCRGo S_alpha"+ std::to_string(iteration));
+        obs << alps::SimpleRealVectorObservable("MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration));
+        obs << alps::SimpleRealVectorObservable("MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1));
         if(!is_last_iteration()){
             descendant->init_observables(obs);
         }
@@ -165,6 +165,8 @@ private:
             return ReductionTechnique::FerroBlockspin4x4;
         } else if(s=="IsingMajority"){
             return ReductionTechnique::IsingMajority;
+        } else if(s=="IsingTieBreaker"){
+            return ReductionTechnique::IsingTieBreaker;
         } else {
             std::cerr << "Did not recognise the reduction process to use for MCRG, aborting..."<<std::endl;
             std::exit(21); 
@@ -200,8 +202,8 @@ private:
             i=mcrg_utilities::dXY_handcrafted;
         } else if(s=="dIsing" ){
             i=mcrg_utilities::dIsing;
-        //} else if(s=="dIsing2"){
-        //    i=mcrg_utilities::dIsing2;
+        } else if(s=="wilson"){
+            i=mcrg_utilities::wilson1975;
         } else if(s=="ising"){
             i=mcrg_utilities::small_Ising;
         } else if(s=="xy-3d-small"){
@@ -226,6 +228,8 @@ private:
         switch (rt) {
             case ReductionTechnique::Decimation:
                return 2; 
+            case ReductionTechnique::IsingTieBreaker:
+               return 2;
             case ReductionTechnique::DecimationCubic:
                return 2; 
             case ReductionTechnique::Blockspin:
@@ -245,7 +249,16 @@ private:
                std::exit(4);
         }
     }
-    bool inline is_last_iteration() const {
+    void update_entry_point(){
+		if((entry_point%L)%scale_factor_b==scale_factor_b-1) {
+            entry_point+=L-scale_factor_b;
+        }
+        ++entry_point;
+        if(entry_point==scale_factor_b*L) {
+            entry_point=0;
+        }    
+	}
+    bool inline is_last_iteration() const{
         return max_iterations<=iteration;
     }
     bool inline is_first_iteration(){
@@ -292,39 +305,35 @@ private:
 
     //this function reduces the spin lattice to a quarter of the size by adding the vectors of 4 neighbouring sites together to one and then calculates the angle back and saves it in OUT
     std::vector<spin_t> reduce(const std::vector<spin_t>& spins, const int& entry_point){
-        if(reduction_type==ReductionTechnique::Decimation){
-            return mcrg_utilities::decimate(spins,L,entry_point);//TODO make the entry point random
-        }
-        if(reduction_type==ReductionTechnique::DecimationCubic){
-            return mcrg_utilities::decimate_cubic(spins,L,entry_point);//TODO make the entry point random
-        }
-        if(reduction_type==ReductionTechnique::BlockspinCubic){
-            return mcrg_utilities::blockspin_cubic(spins,L,entry_point);//TODO make the entry point random
-        }
-        if(reduction_type==ReductionTechnique::Blockspin){
-            return mcrg_utilities::blockspin(spins,L,entry_point);//TODO make the entry point random
-        }
-        if(reduction_type==ReductionTechnique::FerroBlockspin){
-            if(is_first_iteration()){
-                std::vector<spin_t> working_data=mcrg_utilities::ferromagnetic_transformation(spins,L,entry_point); //TODO make entry point random
-                return mcrg_utilities::blockspin(working_data,L,entry_point);
-            }
-            else
-                return mcrg_utilities::blockspin(spins,L,entry_point);//TODO make the entry point random
-        }
-        if(reduction_type==ReductionTechnique::Blockspin4x4){
-            return mcrg_utilities::blockspin4x4(spins,L,entry_point);//TODO make the entry point random
-        }
-        if(reduction_type==ReductionTechnique::IsingMajority){
-            return mcrg_utilities::ising_majority(spins,L,entry_point);//TODO make the entry point random
-        }
-        if(reduction_type==ReductionTechnique::FerroBlockspin4x4){
-            if(is_first_iteration()){
-                std::vector<spin_t> working_data=mcrg_utilities::ferromagnetic_transformation(spins,L,0); //TODO make entry point random
-                return mcrg_utilities::blockspin4x4(working_data,L,entry_point);
-            }
-            else
-                return mcrg_utilities::blockspin4x4(spins,L,entry_point);//TODO make the entry point random
+        switch(reduction_type){
+            case ReductionTechnique::Decimation:
+                return mcrg_utilities::decimate(spins,L,entry_point);
+            case ReductionTechnique::DecimationCubic:
+                return mcrg_utilities::decimate_cubic(spins,L,entry_point);
+            case ReductionTechnique::BlockspinCubic: 
+                return mcrg_utilities::blockspin_cubic(spins,L,entry_point);
+            case ReductionTechnique::Blockspin:
+                    return mcrg_utilities::blockspin(spins,L,entry_point);
+            case ReductionTechnique::FerroBlockspin:
+                if(is_first_iteration()){
+                    std::vector<spin_t> working_data=mcrg_utilities::ferromagnetic_transformation(spins,L,entry_point);
+                    return mcrg_utilities::blockspin(working_data,L,entry_point);
+                }
+                else
+                    return mcrg_utilities::blockspin(spins,L,entry_point);
+            case ReductionTechnique::Blockspin4x4:
+                return mcrg_utilities::blockspin4x4(spins,L,entry_point);
+            case ReductionTechnique::IsingMajority:
+                return mcrg_utilities::ising_majority(spins,L,entry_point);
+            case ReductionTechnique::IsingTieBreaker:
+                return mcrg_utilities::ising_tie_breaker(spins,L,entry_point);
+            case ReductionTechnique::FerroBlockspin4x4:
+                if(is_first_iteration()){
+                    std::vector<spin_t> working_data=mcrg_utilities::ferromagnetic_transformation(spins,L,0);
+                    return mcrg_utilities::blockspin4x4(working_data,L,entry_point);
+                }
+                else
+                    return mcrg_utilities::blockspin4x4(spins,L,entry_point);
         }
     }
 };

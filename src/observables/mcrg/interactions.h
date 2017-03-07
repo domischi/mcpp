@@ -38,25 +38,377 @@ std::vector<std::vector<shift_t>> small = {
     {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {-1, 1} )}  //d-11 yx comp
 };
 
+std::vector<std::vector<shift_t>> wilson1975 = {
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) },
+	{ std::make_tuple(0,std::vector<int>{ 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 1}), std::make_tuple(0,std::vector<int>{ 0, 2}), std::make_tuple(0,std::vector<int>{ 1, 0}), std::make_tuple(0,std::vector<int>{ 1, 1}), std::make_tuple(0,std::vector<int>{ 1, 2}), std::make_tuple(0,std::vector<int>{ 2, 0}), std::make_tuple(0,std::vector<int>{ 2, 1}) }
+};
+
 std::vector<std::vector<shift_t>> dIsing = {
     //Odd
         //field term
         {std::make_tuple(0,std::vector<int> {0,0} )},
         //3 body interaction
-        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,1} ), std::make_tuple(0,std::vector<int> {0,2} )}, // (00) (01) (02) 
-        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {1,0} ), std::make_tuple(0,std::vector<int> {2,0} )}, // (00) (10) (20) 
-        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,1} ), std::make_tuple(0,std::vector<int> {1,0} )}, // (00) (01) (10) 
-        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,1} ), std::make_tuple(0,std::vector<int> {2,0} )}, // (00) (01) (20) 
-        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {1,0} ), std::make_tuple(0,std::vector<int> {0,2} )}, // (00) (10) (02) 
-        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,2} ), std::make_tuple(0,std::vector<int> {2,0} )}, // (00) (02) (20)
-        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {1,1} ), std::make_tuple(0,std::vector<int> {2,2} )}, // (00) (11) (22)
-        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {1,1} ), std::make_tuple(0,std::vector<int> {2,1} )}, // (00) (11) (21)
-        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {1,1} ), std::make_tuple(0,std::vector<int> {1,2} )}, // (00) (11) (12)
-        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {1,1} ), std::make_tuple(0,std::vector<int> {2,0} )}, // (00) (11) (20)
-        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {1,1} ), std::make_tuple(0,std::vector<int> {0,2} )}, // (00) (11) (02)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // (00) (01) (10)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // (00) (01) (20)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 3, 0} )}, // (00) (01) (30)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 4, 0} )}, // (00) (01) (40)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 5, 0} )}, // (00) (01) (50)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 6, 0} )}, // (00) (01) (60)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // (00) (01) (11)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 0, 2} )}, // (00) (01) (02)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 3} ), std::make_tuple(0,std::vector<int> { 0, 1} )}, // (00) (03) (01)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 3} ), std::make_tuple(0,std::vector<int> { 0, 2} )}, // (00) (03) (02)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // (00) (10) (11)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 0, 2} )}, // (00) (10) (02)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 0, 3} )}, // (00) (10) (03)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 0, 2} )}, // (00) (11) (02)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 0, 3} )}, // (00) (11) (03)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 2} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // (00) (12) (10)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 2} ), std::make_tuple(0,std::vector<int> { 0, 1} )}, // (00) (12) (01)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 2} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // (00) (12) (11)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 2} ), std::make_tuple(0,std::vector<int> { 0, 2} )}, // (00) (12) (02)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 2} ), std::make_tuple(0,std::vector<int> { 0, 3} )}, // (00) (12) (03)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 0} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // (00) (20) (10)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // (00) (20) (11)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 0} ), std::make_tuple(0,std::vector<int> { 0, 2} )}, // (00) (20) (02)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 0} ), std::make_tuple(0,std::vector<int> { 1, 2} )}, // (00) (20) (12)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 0} ), std::make_tuple(0,std::vector<int> { 0, 3} )}, // (00) (20) (03)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // (00) (21) (10)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 1} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // (00) (21) (20)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 1} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // (00) (21) (11)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 1} ), std::make_tuple(0,std::vector<int> { 0, 2} )}, // (00) (21) (02)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 1} ), std::make_tuple(0,std::vector<int> { 1, 2} )}, // (00) (21) (12)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 1} ), std::make_tuple(0,std::vector<int> { 0, 3} )}, // (00) (21) (03)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 2} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // (00) (22) (10)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 2} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // (00) (22) (20)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 2} ), std::make_tuple(0,std::vector<int> { 0, 1} )}, // (00) (22) (01)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 2} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // (00) (22) (11)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 2} ), std::make_tuple(0,std::vector<int> { 2, 1} )}, // (00) (22) (21)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 2} ), std::make_tuple(0,std::vector<int> { 0, 2} )}, // (00) (22) (02)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 2} ), std::make_tuple(0,std::vector<int> { 1, 2} )}, // (00) (22) (12)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 2} ), std::make_tuple(0,std::vector<int> { 0, 3} )}, // (00) (22) (03)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 0} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // (00) (30) (10)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 0} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // (00) (30) (20)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // (00) (30) (11)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 0} ), std::make_tuple(0,std::vector<int> { 2, 1} )}, // (00) (30) (21)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 0} ), std::make_tuple(0,std::vector<int> { 0, 2} )}, // (00) (30) (02)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 0} ), std::make_tuple(0,std::vector<int> { 1, 2} )}, // (00) (30) (12)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 0} ), std::make_tuple(0,std::vector<int> { 2, 2} )}, // (00) (30) (22)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 0} ), std::make_tuple(0,std::vector<int> { 0, 3} )}, // (00) (30) (03)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // (00) (31) (10)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 1} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // (00) (31) (20)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 1} ), std::make_tuple(0,std::vector<int> { 3, 0} )}, // (00) (31) (30)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 1} ), std::make_tuple(0,std::vector<int> { 0, 1} )}, // (00) (31) (01)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 1} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // (00) (31) (11)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 1} ), std::make_tuple(0,std::vector<int> { 2, 1} )}, // (00) (31) (21)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 1} ), std::make_tuple(0,std::vector<int> { 0, 2} )}, // (00) (31) (02)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 1} ), std::make_tuple(0,std::vector<int> { 1, 2} )}, // (00) (31) (12)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 1} ), std::make_tuple(0,std::vector<int> { 2, 2} )}, // (00) (31) (22)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 1} ), std::make_tuple(0,std::vector<int> { 0, 3} )}, // (00) (31) (03)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 2} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // (00) (32) (10)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 2} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // (00) (32) (20)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 2} ), std::make_tuple(0,std::vector<int> { 3, 0} )}, // (00) (32) (30)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 2} ), std::make_tuple(0,std::vector<int> { 0, 1} )}, // (00) (32) (01)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 2} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // (00) (32) (11)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 2} ), std::make_tuple(0,std::vector<int> { 2, 1} )}, // (00) (32) (21)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 2} ), std::make_tuple(0,std::vector<int> { 3, 1} )}, // (00) (32) (31)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 2} ), std::make_tuple(0,std::vector<int> { 0, 2} )}, // (00) (32) (02)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 2} ), std::make_tuple(0,std::vector<int> { 1, 2} )}, // (00) (32) (12)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 2} ), std::make_tuple(0,std::vector<int> { 2, 2} )}, // (00) (32) (22)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 2} ), std::make_tuple(0,std::vector<int> { 0, 3} )}, // (00) (32) (03)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 0} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // (00) (40) (10)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 0} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // (00) (40) (20)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 0} ), std::make_tuple(0,std::vector<int> { 3, 0} )}, // (00) (40) (30)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // (00) (40) (11)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 0} ), std::make_tuple(0,std::vector<int> { 2, 1} )}, // (00) (40) (21)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 0} ), std::make_tuple(0,std::vector<int> { 3, 1} )}, // (00) (40) (31)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 0} ), std::make_tuple(0,std::vector<int> { 4, 1} )}, // (00) (40) (41)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 0} ), std::make_tuple(0,std::vector<int> { 0, 2} )}, // (00) (40) (02)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 0} ), std::make_tuple(0,std::vector<int> { 1, 2} )}, // (00) (40) (12)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 0} ), std::make_tuple(0,std::vector<int> { 2, 2} )}, // (00) (40) (22)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 0} ), std::make_tuple(0,std::vector<int> { 3, 2} )}, // (00) (40) (32)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 0} ), std::make_tuple(0,std::vector<int> { 0, 3} )}, // (00) (40) (03)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // (00) (41) (10)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 1} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // (00) (41) (20)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 1} ), std::make_tuple(0,std::vector<int> { 3, 0} )}, // (00) (41) (30)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 1} ), std::make_tuple(0,std::vector<int> { 0, 1} )}, // (00) (41) (01)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 1} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // (00) (41) (11)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 1} ), std::make_tuple(0,std::vector<int> { 2, 1} )}, // (00) (41) (21)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 1} ), std::make_tuple(0,std::vector<int> { 3, 1} )}, // (00) (41) (31)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 1} ), std::make_tuple(0,std::vector<int> { 0, 2} )}, // (00) (41) (02)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 1} ), std::make_tuple(0,std::vector<int> { 1, 2} )}, // (00) (41) (12)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 1} ), std::make_tuple(0,std::vector<int> { 2, 2} )}, // (00) (41) (22)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 1} ), std::make_tuple(0,std::vector<int> { 3, 2} )}, // (00) (41) (32)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 1} ), std::make_tuple(0,std::vector<int> { 0, 3} )}, // (00) (41) (03)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 2} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // (00) (42) (10)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 2} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // (00) (42) (20)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 2} ), std::make_tuple(0,std::vector<int> { 3, 0} )}, // (00) (42) (30)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 2} ), std::make_tuple(0,std::vector<int> { 4, 0} )}, // (00) (42) (40)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 2} ), std::make_tuple(0,std::vector<int> { 0, 1} )}, // (00) (42) (01)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 2} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // (00) (42) (11)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 2} ), std::make_tuple(0,std::vector<int> { 2, 1} )}, // (00) (42) (21)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 2} ), std::make_tuple(0,std::vector<int> { 3, 1} )}, // (00) (42) (31)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 2} ), std::make_tuple(0,std::vector<int> { 4, 1} )}, // (00) (42) (41)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 2} ), std::make_tuple(0,std::vector<int> { 0, 2} )}, // (00) (42) (02)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 2} ), std::make_tuple(0,std::vector<int> { 1, 2} )}, // (00) (42) (12)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 2} ), std::make_tuple(0,std::vector<int> { 2, 2} )}, // (00) (42) (22)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 2} ), std::make_tuple(0,std::vector<int> { 3, 2} )}, // (00) (42) (32)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 2} ), std::make_tuple(0,std::vector<int> { 0, 3} )}, // (00) (42) (03)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 0} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // (00) (50) (10)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 0} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // (00) (50) (20)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 0} ), std::make_tuple(0,std::vector<int> { 3, 0} )}, // (00) (50) (30)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 0} ), std::make_tuple(0,std::vector<int> { 4, 0} )}, // (00) (50) (40)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // (00) (50) (11)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 0} ), std::make_tuple(0,std::vector<int> { 2, 1} )}, // (00) (50) (21)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 0} ), std::make_tuple(0,std::vector<int> { 3, 1} )}, // (00) (50) (31)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 0} ), std::make_tuple(0,std::vector<int> { 4, 1} )}, // (00) (50) (41)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 0} ), std::make_tuple(0,std::vector<int> { 5, 1} )}, // (00) (50) (51)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 0} ), std::make_tuple(0,std::vector<int> { 0, 2} )}, // (00) (50) (02)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 0} ), std::make_tuple(0,std::vector<int> { 1, 2} )}, // (00) (50) (12)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 0} ), std::make_tuple(0,std::vector<int> { 2, 2} )}, // (00) (50) (22)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 0} ), std::make_tuple(0,std::vector<int> { 3, 2} )}, // (00) (50) (32)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 0} ), std::make_tuple(0,std::vector<int> { 4, 2} )}, // (00) (50) (42)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 0} ), std::make_tuple(0,std::vector<int> { 0, 3} )}, // (00) (50) (03)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // (00) (51) (10)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 1} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // (00) (51) (20)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 1} ), std::make_tuple(0,std::vector<int> { 3, 0} )}, // (00) (51) (30)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 1} ), std::make_tuple(0,std::vector<int> { 4, 0} )}, // (00) (51) (40)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 1} ), std::make_tuple(0,std::vector<int> { 0, 1} )}, // (00) (51) (01)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 1} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // (00) (51) (11)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 1} ), std::make_tuple(0,std::vector<int> { 2, 1} )}, // (00) (51) (21)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 1} ), std::make_tuple(0,std::vector<int> { 3, 1} )}, // (00) (51) (31)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 1} ), std::make_tuple(0,std::vector<int> { 4, 1} )}, // (00) (51) (41)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 1} ), std::make_tuple(0,std::vector<int> { 0, 2} )}, // (00) (51) (02)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 1} ), std::make_tuple(0,std::vector<int> { 1, 2} )}, // (00) (51) (12)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 1} ), std::make_tuple(0,std::vector<int> { 2, 2} )}, // (00) (51) (22)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 1} ), std::make_tuple(0,std::vector<int> { 3, 2} )}, // (00) (51) (32)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 1} ), std::make_tuple(0,std::vector<int> { 4, 2} )}, // (00) (51) (42)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 1} ), std::make_tuple(0,std::vector<int> { 0, 3} )}, // (00) (51) (03)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // (00) (60) (10)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // (00) (60) (20)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 3, 0} )}, // (00) (60) (30)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 4, 0} )}, // (00) (60) (40)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 5, 0} )}, // (00) (60) (50)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // (00) (60) (11)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 2, 1} )}, // (00) (60) (21)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 3, 1} )}, // (00) (60) (31)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 4, 1} )}, // (00) (60) (41)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 5, 1} )}, // (00) (60) (51)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 0, 2} )}, // (00) (60) (02)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 1, 2} )}, // (00) (60) (12)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 2, 2} )}, // (00) (60) (22)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 3, 2} )}, // (00) (60) (32)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 4, 2} )}, // (00) (60) (42)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 0, 3} )}, // (00) (60) (03)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} ), std::make_tuple(0,std::vector<int> { 0, 3} )}, // (00) (60) (03)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {-1, 0} ), std::make_tuple(0,std::vector<int> { 0,-1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 0, 1} )}, // (00) (-10) (0-1) (10) (01)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {-1,-1} ), std::make_tuple(0,std::vector<int> { 1,-1} ), std::make_tuple(0,std::vector<int> {-1, 1} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // (00) (-1-1) (1-1) (-11) (11)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 2, 1} )}, // (00) (01) (10) (11) (21)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 1, 2} )}, // (00) (01) (10) (11) (12)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 0, 2} )}, // (00) (01) (10) (11) (02)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // (00) (01) (10) (11) (20)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 0,-1} )}, // (00) (01) (10) (11) (0-1)
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> {-1, 0} )}, // (00) (01) (10) (11) (-10)
     //Even
         //same component
-        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 0} )}, // (00)
         {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // (10)
         {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // (20)
         {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 0} )}, // (30)
@@ -82,62 +434,12 @@ std::vector<std::vector<shift_t>> dIsing = {
         {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {-1, 0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // tetris lightning tile
         {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0,-1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // tetris lightning tile rot
         {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 0, 2} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // tetris L tile 
-        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 2, 0} )}  // tetris L tile rot
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // tetris L tile rot
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 0, 2} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 1, 2} )}, 
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 2, 0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 2, 1} )},
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 2, 0} ), std::make_tuple(0,std::vector<int> { 0, 2} )},
+        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {-1, 0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> {-1, 1} ), std::make_tuple(0,std::vector<int> {-2, 0} ), std::make_tuple(0,std::vector<int> { 0, 2} )}
 };
-//std::vector<std::vector<shift_t>> dIsing2 = {
-//    //Odd
-//        //field term
-//        {std::make_tuple(0,std::vector<int> {0,0} )},
-//        //3 body interaction
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,1} ), std::make_tuple(0,std::vector<int> {0,2} )}, // (00) (01) (02) 
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,1} ), std::make_tuple(0,std::vector<int> {1,0} )}, // (00) (01) (10) 
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,1} ), std::make_tuple(0,std::vector<int> {2,0} )}, // (00) (01) (20) 
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,2} ), std::make_tuple(0,std::vector<int> {2,0} )}, // (00) (02) (20)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {1,1} ), std::make_tuple(0,std::vector<int> {2,2} )}, // (00) (11) (22)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {1,1} ), std::make_tuple(0,std::vector<int> {2,1} )}, // (00) (11) (21)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {1,1} ), std::make_tuple(0,std::vector<int> {2,0} )}, // (00) (11) (20)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,2} ), std::make_tuple(0,std::vector<int> {0,4} )}, // (00) (02) (04)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,2} ), std::make_tuple(0,std::vector<int> {1,4} )}, // (00) (02) (14)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {0,1} ), std::make_tuple(0,std::vector<int> {0,3} )}, // (00) (01) (03)
-//    //Even
-//        //same component
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // (10)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // (11)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // (20)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 1} )}, // (21)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 2, 2} )}, // (22)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 0} )}, // (30)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 1} )}, // (31)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 2} )}, // (32)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 3, 3} )}, // (33)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 0} )}, // (40)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 1} )}, // (41)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 2} )}, // (42)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 3} )}, // (43)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 4, 4} )}, // (44)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 0} )}, // (50)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 1} )}, // (51)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 2} )}, // (52)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 3} )}, // (53)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 4} )}, // (54)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 5, 5} )}, // (55)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 0} )}, // (60)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 1} )}, // (61)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 2} )}, // (62)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 3} )}, // (63)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 4} )}, // (64)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 6, 5} )}, // (65)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 7, 0} )}, // (65)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 7, 1} )}, // (71)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 7, 2} )}, // (72)
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 8, 0} )}, // (80)
-//        //quartic terms
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, // plaquette
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 2} ), std::make_tuple(0,std::vector<int> { 2, 0} ), std::make_tuple(0,std::vector<int> { 2, 2} )}, // skip plaquette
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 2} ), std::make_tuple(0,std::vector<int> { 1, 1} ), std::make_tuple(0,std::vector<int> { 2, 0} )}, // lambda tile 
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {-1, 0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, // tetris tile
-//        {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> {-1, 0} ), std::make_tuple(0,std::vector<int> { 0, 1} ), std::make_tuple(0,std::vector<int> { 1, 1} )}  // tetris L tile
-//};
 // Do a hand crafted, good set for dXY //TODO understand a good handcrafted interaction set
 std::vector<std::vector<shift_t>> dXY_handcrafted = {
     //Odd

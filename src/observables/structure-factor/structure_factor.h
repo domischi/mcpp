@@ -16,10 +16,14 @@ public:
     typedef double spin_t;
 
     structure_factor(const alps::Parameters& p, std::shared_ptr<alps::graph_helper<>> gh_, std::shared_ptr<Hamiltonian_List> hl_) :
-    observable(p,gh_,hl_)
+    observable(p,gh_,hl_),
     #if !NFFTW 
-    , fftw_timelimit_(p.value_or_default("FFTW timelimit for measurement", 10.))
+    fftw_timelimit_(p.value_or_default("FFTW timelimit for measurement", 10.)),
+    optimized_version(!(p.value_or_default("enforce no FFTW", false))||p["LATTICE"]=="square lattice"),
     #endif //NFFTW
+    L(p["L"]),
+    N(mcpp::init_N(p)),
+    reciprocal_lattice_saved(0)
     {
         alps::graph_helper<>::basis_vector_iterator v,v_end;
         for(std::tie(v,v_end)=graph_helper_->reciprocal_basis_vectors() ; v!=v_end ; ++v){
@@ -46,9 +50,13 @@ public:
         observable(original),
         #if !NFFTW 
         fftw_timelimit_(original.fftw_timelimit_),
+        optimized_version(original.optimized_version),
         #endif //NFFTW
         reciprocal_vectors(original.reciprocal_vectors),
-        basis_vectors(original.basis_vectors)
+        basis_vectors(original.basis_vectors),
+        L(original.L),
+        N(original.N),
+        reciprocal_lattice_saved(original.reciprocal_lattice_saved)
     {
         #if !NFFTW
         fftw_in =(fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N);
@@ -73,6 +81,13 @@ public:
     }
 
     void measure(const std::vector<spin_t>& spins, alps::ObservableSet& obs) {
+        if(reciprocal_lattice_saved<=1){
+            for(int i=0;i<reciprocal_vectors.size();++i){
+                std::valarray<double> v(reciprocal_vectors[i].data(),reciprocal_vectors[i].size());
+                obs["Reciprocal Basis Vector "+std::to_string(i)]<<v; //TODO move this functionality to a utility function
+            }
+            reciprocal_lattice_saved++;
+        }
         std::valarray<std::complex<double>> Sx(spins.size());
         std::valarray<std::complex<double>> Sy(spins.size());
         std::transform(spins.begin(),spins.end(),begin(Sx),[](double d) {return std::cos(d);});
@@ -87,9 +102,17 @@ public:
 
     void init_observables(alps::ObservableSet& obs) const {
         obs << alps::RealVectorObservable("|Structure Factor|^2");
+        for(int i=0;i<reciprocal_vectors.size();++i){
+            obs << alps::SimpleRealVectorObservable("Reciprocal Basis Vector "+std::to_string(i));
+        }
     }
     //Intentionally left empty
-    void save(alps::ODump &dump) const{ }
+    void save(alps::ODump &dump) const{ 
+        dump << reciprocal_lattice_saved;
+    }
+    void load(alps::IDump &dump) {
+        dump >> reciprocal_lattice_saved;
+    }
 private:
     typedef typename alps::graph_helper<>::vector_type vector_type;
     std::vector<vector_type> reciprocal_vectors; 
@@ -100,9 +123,11 @@ private:
     fftw_complex *fftw_out;
     const double fftw_timelimit_; 
     fftw_plan plan; 
+    const bool optimized_version;    
     #endif //NFFTW
-
+    int reciprocal_lattice_saved;
     static constexpr std::complex<double> I=std::complex<double>(0.,1.);
+    const int L,N;
     
     #if !NFFTW
     // ATTENTION: THIS IS HACKED, THERE DOES NOT EXIST A NICE VERSION OF THAT PART, 
@@ -118,8 +143,12 @@ private:
     }
     #endif //NFFTW
 
-    #if NFFTW
-    std::valarray<std::complex<double>> fourier_transform(const std::valarray<std::complex<double>>& real, int prefactor=1) const {
+    std::valarray<std::complex<double>> fourier_transform(const std::valarray<std::complex<double>>& real, int prefactor=1){
+        #if !NFFTW
+        if(optimized_version) {
+            return fftw_fourier_transform(real, prefactor);
+        }
+        #endif
         std::valarray<std::complex<double>> reciprocal(N);
         for(int n1=0;n1<L;++n1)
         for(int n2=0;n2<L;++n2)
@@ -134,8 +163,8 @@ private:
         }
         return reciprocal;
     }
-    #else // !NFFTW (FFTW around)
-    std::valarray<std::complex<double>> fourier_transform(const std::valarray<std::complex<double>>& real, int prefactor=1) {
+    #if !NFFTW //(FFTW around)
+    std::valarray<std::complex<double>> fftw_fourier_transform(const std::valarray<std::complex<double>>& real, int prefactor=1) {
         copy_in(real);
         fftw_execute(plan);
         return copy_out();
