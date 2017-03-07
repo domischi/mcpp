@@ -80,7 +80,6 @@ private:
         return reduced_index(p.first,p.second);
     }
     void Init_Lookup_Tables(alps::Parameters const& p){
-        const int DISORDER_SEED=1;
         if(DISORDERED) {
             dist_3=std::vector<double>(N*N);
             phi=std::vector<double>(N*N);
