@@ -1,5 +1,6 @@
 # ignore potentially generated files
 *.xml
+*.pyc
 *.xsl
 *.h5
 *.out
@@ -12,3 +13,6 @@ Ideas.txt
 
 #ignore the generated versions file
 src/version/version.h
+
+#ignore the specific options file
+test/options.py

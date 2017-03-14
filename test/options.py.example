@@ -1,0 +1,5 @@
+# change the options in this file to the correct options for your system, to
+# make this work properly. 
+
+# where the build folder is located on your machine (absolute path needed)
+MCPP_TEST_OPTIONS_BUILD_DIR='/home/schildi/src/mc++/build'
