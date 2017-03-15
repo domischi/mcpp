@@ -14,6 +14,9 @@ class ObservableTest(unittest.TestCase):
         from shutil import rmtree
         chdir('..')
         rmtree(self.dir_name)
+    def tearDown(self):
+        import subprocess
+        subprocess.call('rm parm*',shell=True)
 
     def call(self,parm, output=False):
         import pyalps
@@ -27,16 +30,13 @@ class ObservableTest(unittest.TestCase):
         self.assertNotEqual(self.call(parm,output),0)
     def should_work(self,parm, output=False):
         self.assertEqual(self.call(parm,output),0)
-    def check_data_length(self,string,should_be,error_msg, output=False, EQUAL=True, GREATER=False):
+    def check_data_length(self,string,should_be, output=False):
         import pyalps
-        l=len(pyalps.collectXY(pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm'),[string]),x='T',y=string)[0].y)
-        if EQUAL:
-            self.assertEqual(l,should_be,error_msg)
-        if GREATER:
-            self.assertGreater(l,should_be,error_msg)
-    def check_has_observable(self,string,error_msg, output=False):
+        l=len(pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm'),[string])[0][0].y)
+        self.assertEqual(l,should_be)
+    def check_has_observable(self,string, output=False):
         import pyalps
-        self.assertGreater(len(pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm'),[string])[0]), 0, error_msg)
+        self.assertGreater(len(pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm'),[string])[0]), 0)
 
     def test_basic_observables(self):
         parm=[{
@@ -49,6 +49,12 @@ class ObservableTest(unittest.TestCase):
                  'L'              : 4,
             }]
         self.should_work(parm)
+        self.check_has_observable('M')
+        self.check_has_observable('M^2')
+        self.check_has_observable('M^4')
+        self.check_has_observable('M staggered')
+        self.check_has_observable('M staggered^2')
+        self.check_has_observable('M staggered^4')
     def test_last_configuration(self):
         parm=[{
                  'LATTICE'        : "square lattice",
@@ -61,7 +67,8 @@ class ObservableTest(unittest.TestCase):
                  'L'              : 4,
             }]
         self.should_work(parm)
-        self.check_data_length('Last Configuration', 4*4, 'mc++ returned a wrong last configuration (data length)')
+        self.check_has_observable('Last Configuration')
+        self.check_data_length('Last Configuration', 4*4)
     def test_structure_factor(self):
         parm=[{
                  'LATTICE'        : "square lattice",
@@ -74,8 +81,8 @@ class ObservableTest(unittest.TestCase):
                  'L'              : 4,
             }]
         self.should_work(parm)
-        self.check_has_observable('|Structure Factor|^2','mc++ returnd a wrong structure factor (data length)')
-        self.check_has_observable('|Structure Factor|^2','mc++ returnd a wrong structure factor (data length)')
+        self.check_has_observable('|Structure Factor|^2')
+        self.check_data_length('|Structure Factor|^2', 4*4)
     def test_MCRG_nothing_loaded(self):
         parm=[{
                  'LATTICE'        : "square lattice",
@@ -128,9 +135,22 @@ class ObservableTest(unittest.TestCase):
                  'L'              : 32,
             }]
         self.should_work(parm)
-        self.check_data_length('MCRGe S_alpha0',0,'mc++ returnd a wrong MCRG matrix (data length)', EQUAL=False, GREATER=True)
-        self.check_data_length('MCRGo S_alpha0',0,'mc++ returnd a wrong MCRG matrix (data length)', EQUAL=False, GREATER=True)
-        self.check_data_length('MCRGe S_alpha1',0,'mc++ returnd a wrong MCRG matrix (data length)', EQUAL=False, GREATER=True)
+        self.check_has_observable('MCRGe S_alpha0')
+        self.check_has_observable('MCRGe S_alpha0 S_beta0')
+        self.check_has_observable('MCRGe S_alpha0 S_beta1')
+        self.check_has_observable('MCRGe S_alpha1')
+        self.check_has_observable('MCRGe S_alpha1 S_beta1')
+        self.check_has_observable('MCRGe S_alpha1 S_beta2')
+        self.check_has_observable('MCRGe S_alpha2')
+        self.check_has_observable('MCRGe S_alpha2 S_beta2')
+        self.check_has_observable('MCRGo S_alpha0')
+        self.check_has_observable('MCRGo S_alpha0 S_beta0')
+        self.check_has_observable('MCRGo S_alpha0 S_beta1')
+        self.check_has_observable('MCRGo S_alpha1')
+        self.check_has_observable('MCRGo S_alpha1 S_beta1')
+        self.check_has_observable('MCRGo S_alpha1 S_beta2')
+        self.check_has_observable('MCRGo S_alpha2')
+        self.check_has_observable('MCRGo S_alpha2 S_beta2')
     def test_LLG_basic_observables(self):
         parm=[{
                  'LATTICE'        : "square lattice",
@@ -144,6 +164,9 @@ class ObservableTest(unittest.TestCase):
                  'L'              : 10,
             }]
         self.should_work(parm)
+        self.check_has_observable('LLG M')
+        self.check_has_observable('LLG Ms')
+        self.check_has_observable('LLG E')
     def test_LLG_Muon(self):
         parm=[{
                  'LATTICE'        : "square lattice",
@@ -158,6 +181,8 @@ class ObservableTest(unittest.TestCase):
                  'L'              : 10,
             }]
         self.should_work(parm)
+        self.check_has_observable('LLG M')
+        self.check_has_observable('LLG Depolarization')
     def test_spin_autocorrelation(self):
         parm=[{
                  'LATTICE'        : "square lattice",
@@ -166,9 +191,10 @@ class ObservableTest(unittest.TestCase):
                  'Positional Disorder': 0.5,
                  'Spin autocorrelation analysis length' : 5,
                  'THERMALIZATION' : 10,
-                 'SWEEPS'         : 2,
+                 'SWEEPS'         : 20,
                  'UPDATE'         : "ssf",
                  'cutoff_distance': 3.,
                  'L'              : 4,
             }]
         self.should_work(parm)
+        self.check_has_observable('Spin Autocorrelation')
