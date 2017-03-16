@@ -4,7 +4,7 @@ class HamiltonianTest(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         from os import mkdir, chdir,devnull, getcwd
-        self.dir_name='./hamiltoninan_test/'
+        self.dir_name='./hamiltonian_test/'
         mkdir(self.dir_name)
         chdir(self.dir_name)
         self.oblivion=open(devnull, 'w')
