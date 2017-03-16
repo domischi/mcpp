@@ -51,16 +51,16 @@ class my_test_results(unittest.TestResult):
         self.analyze_output(test,self.success_msg)
     def addError(self, test, err):
         import sys
-        print('F',end='')
-        sys.stdout.flush()
-        super(my_test_results, self).addError(test, err) 
-        self.analyze_output(test,self.fail_msg)
-    def addFailure(self, test, err):
-        import sys
         print('E',end='')
         sys.stdout.flush()
-        super(my_test_results, self).addFailure(test, err) 
+        super(my_test_results, self).addError(test, err) 
         self.analyze_output(test,self.err_msg)
+    def addFailure(self, test, err):
+        import sys
+        print('F',end='')
+        sys.stdout.flush()
+        super(my_test_results, self).addFailure(test, err) 
+        self.analyze_output(test,self.fail_msg)
     def get_number_errors(self):
         n_err =len([x for x in self.Result if x == self.err_msg])
         n_fail=len([x for x in self.Result if x == self.fail_msg])

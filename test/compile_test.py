@@ -1,6 +1,6 @@
 import unittest
 import options
-class CompileTest(unittest.TestCase): #TODO setup the class such that it works with a pure git commit
+class CompileTest(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         from os import mkdir, chdir,devnull, getcwd
