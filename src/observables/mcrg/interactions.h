@@ -497,7 +497,7 @@ std::vector<std::vector<shift_t>> very_small = {
     //Odd
     {std::make_tuple(0,std::vector<int> {0,0} )}, // field term along x
     //Even
-    {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(1,std::vector<int> { 1, 0} )}, //NNx x comp
+    {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, //NNx x comp
     {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(1,std::vector<int> { 1, 0} )}, //NNx xy comp
     {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 0, 1} )}, //NNy x comp
     {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, //d11 x comp

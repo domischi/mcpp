@@ -3,9 +3,10 @@ from subprocess import Popen
 class DeepTest(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        from os import mkdir, chdir,devnull
+        from os import mkdir, chdir,devnull, listdir, path
         self.dir_name='./deep_test/'
-        mkdir(self.dir_name)
+        if not path.exists(self.dir_name):
+            mkdir(self.dir_name)
         chdir(self.dir_name)
         self.oblivion=open(devnull, 'w')
     @classmethod
@@ -53,6 +54,12 @@ class DeepTest(unittest.TestCase):
         val=pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm'),[string])[0][0].y.mean[index]
         err=pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm'),[string])[0][0].y.error[index]
         self.assertLess(abs(should_be-val)/max(err,1e-6),significance)
+    def check_no_double_values(self,string, output=False):
+        import pyalps
+        from numpy import diff, sort
+        val=pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm'),[string])[0][0].y
+        if len(val)>1:
+            self.assertGreater(min(diff(sort(abs(val)))),1e-10)
 
     def test_GS_exchange(self):
         parm=[{
@@ -109,4 +116,24 @@ class DeepTest(unittest.TestCase):
             }]
         self.should_work(parm)
         self.check_value_scalar('M',0.165) #value from ALPS/spinmc
-
+    #in python 3.4 they added subTest, which would make the following a lot nicer
+    #TODO implement this test also for the other interaction sets
+    def test_MCRG_no_double_entries_very_small(self):
+        parm=[{
+                 'LATTICE'        : "square lattice",
+                 'T'              : 10.,
+                 'Initialization' : 'Random',
+                 'J'              : 1.,
+                 'THERMALIZATION' : 100,
+                 'SWEEPS'         : 4,
+                 'MCRG Interactions': 'very small',
+                 'MCRG Reduction Technique': 'Blockspin',
+                 'mcrg_iteration_depth' : 1,
+                 'UPDATE'         : "ssf",
+                 'L'              : 8,
+            }]
+        self.should_work(parm)
+        self.check_has_observable('MCRGe S_alpha0')
+        self.check_has_observable('MCRGo S_alpha0')
+        self.check_no_double_values('MCRGe S_alpha0')
+        self.check_no_double_values('MCRGo S_alpha0')
