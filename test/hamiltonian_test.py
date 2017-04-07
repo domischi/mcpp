@@ -37,7 +37,7 @@ class HamiltonianTest(unittest.TestCase):
                  'T'              : 0.,
                  'THERMALIZATION' : 1,
                  'SWEEPS'         : 2,
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'basic_observables': False,
                  'L'              : 6,
             }]
@@ -50,7 +50,7 @@ class HamiltonianTest(unittest.TestCase):
                  'THERMALIZATION' : 10,
                  'basic_observables': False,
                  'SWEEPS'         : 2,
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'L'              : 6,
             }]
         self.should_work(parm)
@@ -62,7 +62,7 @@ class HamiltonianTest(unittest.TestCase):
                  'THERMALIZATION' : 10,
                  'basic_observables': False,
                  'SWEEPS'         : 2,
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'L'              : 6,
             }]
         self.should_work(parm)
@@ -74,7 +74,7 @@ class HamiltonianTest(unittest.TestCase):
                  'D'              : 1.,
                  'THERMALIZATION' : 10,
                  'SWEEPS'         : 2,
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'cutoff_distance': 3.,
                  'L'              : 10,
             }]
@@ -87,7 +87,7 @@ class HamiltonianTest(unittest.TestCase):
                  'D'              : 1.,
                  'THERMALIZATION' : 10,
                  'SWEEPS'         : 2,
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'cutoff_distance': 3.,
                  'L'              : 4,
             }]
@@ -101,7 +101,7 @@ class HamiltonianTest(unittest.TestCase):
                  'Positional Disorder': 0.5,
                  'THERMALIZATION' : 10,
                  'SWEEPS'         : 2,
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'cutoff_distance': 3.,
                  'L'              : 10,
             }]
@@ -115,7 +115,7 @@ class HamiltonianTest(unittest.TestCase):
                  'Dilution Rate'  : 0.5,
                  'THERMALIZATION' : 10,
                  'SWEEPS'         : 2,
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'cutoff_distance': 3.,
                  'L'              : 10,
             }]
@@ -129,7 +129,7 @@ class HamiltonianTest(unittest.TestCase):
                  'Shape Anisotropy p' : 2,
                  'THERMALIZATION' : 10,
                  'SWEEPS'         : 2,
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'cutoff_distance': 3.,
                  'L'              : 4,
             }]

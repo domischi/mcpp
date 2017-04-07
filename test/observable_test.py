@@ -45,7 +45,7 @@ class ObservableTest(unittest.TestCase):
                  'J'              : 1.,
                  'THERMALIZATION' : 1,
                  'SWEEPS'         : 2,
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'L'              : 4,
             }]
         self.should_work(parm)
@@ -62,7 +62,7 @@ class ObservableTest(unittest.TestCase):
                  'J'              : 1.,
                  'THERMALIZATION' : 1,
                  'SWEEPS'         : 2,
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'measure last configuration' : True,
                  'L'              : 4,
             }]
@@ -77,7 +77,7 @@ class ObservableTest(unittest.TestCase):
                  'THERMALIZATION' : 1,
                  'structure_factor' : True,
                  'SWEEPS'         : 2,
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'L'              : 4,
             }]
         self.should_work(parm)
@@ -91,7 +91,7 @@ class ObservableTest(unittest.TestCase):
                  'THERMALIZATION' : 1,
                  'SWEEPS'         : 2,
                  'mcrg_iteration_depth' : 2,
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'L'              : 32,
             }]
         self.should_crash(parm)
@@ -104,7 +104,7 @@ class ObservableTest(unittest.TestCase):
                  'SWEEPS'         : 2,
                  'mcrg_iteration_depth' : 2,
                  'MCRG Reduction Technique': 'Blockspin',
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'L'              : 32,
             }]
         self.should_crash(parm)
@@ -117,7 +117,7 @@ class ObservableTest(unittest.TestCase):
                  'SWEEPS'         : 2,
                  'mcrg_iteration_depth' : 2,
                  'MCRG Interactions': 'small',
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'L'              : 32,
             }]
         self.should_crash(parm)
@@ -131,7 +131,7 @@ class ObservableTest(unittest.TestCase):
                  'MCRG Interactions': 'small',
                  'MCRG Reduction Technique': 'Blockspin',
                  'mcrg_iteration_depth' : 2,
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'L'              : 32,
             }]
         self.should_work(parm)
@@ -159,7 +159,7 @@ class ObservableTest(unittest.TestCase):
                  'THERMALIZATION' : 10,
                  'SWEEPS'         : 2,
                  'llg'            : True,
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'cutoff_distance': 3.,
                  'L'              : 10,
             }]
@@ -176,7 +176,7 @@ class ObservableTest(unittest.TestCase):
                  'SWEEPS'         : 2,
                  'llg'            : True,
                  'LLG Measure Muon': True,
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'cutoff_distance': 3.,
                  'L'              : 10,
             }]
@@ -192,7 +192,7 @@ class ObservableTest(unittest.TestCase):
                  'Spin autocorrelation analysis length' : 5,
                  'THERMALIZATION' : 10,
                  'SWEEPS'         : 20,
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'cutoff_distance': 3.,
                  'L'              : 4,
             }]

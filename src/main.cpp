@@ -1,6 +1,5 @@
-
 #include <alps/parapack/parapack.h>
-
+#include <alps/parapack/exchange.h>
 int main(int argc,char** argv){
     try {
         return alps::parapack::start(argc,argv);

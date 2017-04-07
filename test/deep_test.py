@@ -62,7 +62,7 @@ class DeepTest(unittest.TestCase):
                  'J'              : 1.,
                  'THERMALIZATION' : 100,
                  'SWEEPS'         : 20,
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'L'              : 4,
             }]
         self.should_work(parm)
@@ -76,7 +76,7 @@ class DeepTest(unittest.TestCase):
                  'THERMALIZATION' : 100,
                  'SWEEPS'         : 200,
                  'Spin autocorrelation analysis length':5,
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'L'              : 8,
             }]
         self.should_work(parm)
@@ -90,7 +90,7 @@ class DeepTest(unittest.TestCase):
                  'THERMALIZATION' : 100,
                  'SWEEPS'         : 200,
                  'Spin autocorrelation analysis length':5,
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'L'              : 8,
             }]
         self.should_work(parm)
@@ -104,7 +104,7 @@ class DeepTest(unittest.TestCase):
                  'J'              : 1.,
                  'THERMALIZATION' : 10000,
                  'SWEEPS'         : 50000,
-                 'UPDATE'         : "ssf",
+                 "ALGORITHM"      : "xy",
                  'L'              : 6,
             }]
         self.should_work(parm)

@@ -116,6 +116,12 @@ public :
     double progress() const {
         return Step_Number/(static_cast<double>(Measure_Sweeps*Each_Measurement+Thermalization_Sweeps));
     }
+    
+    //for exmc
+    typedef double weight_parameter_type;
+    void set_beta(double beta_) { beta=beta_; T=1./beta_;}
+    weight_parameter_type weight_parameter() const {return -Energy();} 
+    static double log_weight(weight_parameter_type gw, double beta) {return beta*gw;}
 private:
     //System parameters
     const int Thermalization_Sweeps;
@@ -126,9 +132,10 @@ private:
     bool ising;
     init_t init_type;
     std::vector<double> spins; //saves the spins
-    const double T;
     const int Each_Measurement;
     const bool print_debug_information;
+
+    double T, beta; // non-const because of exmc
 
     const double targeted_acc_ratio;
     double angle_dev;
@@ -295,9 +302,9 @@ private:
                 std::cerr << "Smth went terribly wrong as this line should never be hit"<<std::endl;
         }
     }
-    inline double beta() const { 
-        return 1./T;
-    }
+    //inline double beta() const { 
+    //    return 1./T;
+    //}
     inline int random_int(int j){
         return static_cast<int>(j*uniform_01());
     }
