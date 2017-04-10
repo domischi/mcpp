@@ -130,7 +130,45 @@ class DeepTest(unittest.TestCase):
                  'MCRG Reduction Technique': 'Blockspin',
                  'mcrg_iteration_depth' : 1,
                  'UPDATE'         : "ssf",
-                 'L'              : 8,
+                 'L'              : 8
+            }]
+        self.should_work(parm)
+        self.check_has_observable('MCRGe S_alpha0')
+        self.check_has_observable('MCRGo S_alpha0')
+        self.check_no_double_values('MCRGe S_alpha0')
+        self.check_no_double_values('MCRGo S_alpha0')
+    def test_MCRG_no_double_entries_small(self):
+        parm=[{
+                 'LATTICE'        : "square lattice",
+                 'T'              : 10.,
+                 'Initialization' : 'Random',
+                 'J'              : 1.,
+                 'THERMALIZATION' : 100,
+                 'SWEEPS'         : 4,
+                 'MCRG Interactions': 'small',
+                 'MCRG Reduction Technique': 'Blockspin',
+                 'mcrg_iteration_depth' : 1,
+                 'UPDATE'         : "ssf",
+                 'L'              : 8
+            }]
+        self.should_work(parm)
+        self.check_has_observable('MCRGe S_alpha0')
+        self.check_has_observable('MCRGo S_alpha0')
+        self.check_no_double_values('MCRGe S_alpha0')
+        self.check_no_double_values('MCRGo S_alpha0')
+    def test_MCRG_no_double_entries_very_small(self):
+        parm=[{
+                 'LATTICE'        : "square lattice",
+                 'T'              : 10.,
+                 'Initialization' : 'Random',
+                 'J'              : 1.,
+                 'THERMALIZATION' : 100,
+                 'SWEEPS'         : 4,
+                 'MCRG Interactions': 'ising',
+                 'MCRG Reduction Technique': 'Blockspin',
+                 'mcrg_iteration_depth' : 1,
+                 'UPDATE'         : "ssf",
+                 'L'              : 8
             }]
         self.should_work(parm)
         self.check_has_observable('MCRGe S_alpha0')
