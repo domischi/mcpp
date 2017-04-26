@@ -35,6 +35,16 @@ namespace mcpp{
     int init_N (const alps::Parameters& p){
         return alps::graph_helper<>(p).num_sites();
     }
+    inline double init_T(const alps::Parameters& params) {
+        if(params["ALGORITHM"]=="xy")
+            return params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"]);
+        else if(params["ALGORITHM"]=="exmc")
+            return 1.;// just set it to a value, it anyway gets set afterwards
+        else {
+            std::cerr<< "Cannot initalize T in model xy, because the algorithm is not detected. Aborting..."<<std::endl;
+            std::exit(44);
+        }
+    }
     inline bool is_disordered(parameter_type const& p) {
         return 
             static_cast<double>(p.value_or_default("Position Disorder",0.))>0.||

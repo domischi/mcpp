@@ -36,7 +36,7 @@ public :
         Measure_Sweeps(params.value_or_default("SWEEPS",5000)),
         L(params["L"]),
         N(num_sites()),
-        T(params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"])),
+        T(mcpp::init_T(params)),
         ising(static_cast<bool>(params.value_or_default("Ising", false))),
         Step_Number(0),
         accepted(0),
@@ -333,7 +333,7 @@ private:
     }
 public:
     xy_evaluator(alps::Parameters const& params) : 
-        T(params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"])),
+        T(mcpp::init_T(params)),
         L(params["L"]),
         N(mcpp::init_N(params))
         {
