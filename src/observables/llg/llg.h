@@ -2,8 +2,10 @@
 #define MCPP_LLG_H_
 
 #include <alps/parameter.h>
-#include "../observable.h"
 #include <alps/lattice.h>
+#include "../observable.h"
+#include "llg_autocorrelation.h"
+
 class llg : public observable{
 public:
     typedef std::vector<double> vector_t;
@@ -238,4 +240,4 @@ private:
         return get_field_at_muon(vector_t{x,y,z});
     }
 };
-#endif //MCPP_LLG_OBSERVABLES_H_
+#endif //MCPP_LLG_H_

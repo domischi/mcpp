@@ -32,6 +32,19 @@ namespace mcpp{
         }
         return std::make_pair(std::sqrt(mx*mx+my*my)/spins.size(),std::sqrt(mxs*mxs+mys*mys)/spins.size());
     }
+
+    double spin_config_overlap(std::vector<spin_t> const& spins1, std::vector<spin_t> const& spins2){
+        int N=spins1.size();
+        if(N!=spins2.size()){
+            std::cerr<<"Trying to calculate autocorrelation between different sized arrays. Aborting..." <<std::endl;
+            std::exit(46);
+        }
+        double acs=0.; 
+        for(int j=0;j<N;++j)
+            acs+=std::cos(spins1[j]-spins2[j]);
+        return acs/N;
+    }
+
     int init_N (const alps::Parameters& p){
         return alps::graph_helper<>(p).num_sites();
     }
@@ -67,14 +80,12 @@ namespace mcpp{
     inline double distance(vector_type const& x, vector_type const& y, vector_type const& periodic){
         return norm(difference_vector(x,y,periodic));
     }
-
     std::vector<double> positional_disorder(graph_helper_type const& gh, parameter_type p, std::mt19937& rng) {
         std::vector<double> dR(gh.dimension()*gh.num_sites());
         std::normal_distribution<double> dist(0,p["Position Disorder"]);
         for(int i=0;i<gh.dimension()*gh.num_sites();++i) dR[i]=dist(rng);
         return dR;
     }
-
     std::set<int> dilution_disorder(graph_helper_type const& gh, parameter_type p, std::mt19937& rng) {
         double dilution_rate=p["Dilution Rate"];
         std::cout << "WARNING: dilution is only implemented for the dipolar interaction!"<<std::endl;
