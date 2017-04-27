@@ -150,7 +150,7 @@ namespace mcpp{
             for(int j = 0; j<neighbour_out[i].size();++j) {
                 data.push_back(std::make_pair(neighbours_in[i][j],diff_vectors_in[i][j]));
             }
-            std::sort(data.begin(),data.end(),[](auto& a, auto& b) -> bool {return a.first<b.first; });
+            std::sort(data.begin(),data.end(),[](const std::pair<int,vector_type>& a, const std::pair<int,vector_type>& b) -> bool {return a.first<b.first; }); //c++14 could make this easier with the auto's
             for(int j = 0; j<neighbour_out[i].size();++j) {
                 neighbour_out[i][j]=data[j].first;
                 diff_vectors_out[i][j]=data[j].second;
