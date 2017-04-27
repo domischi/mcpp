@@ -19,7 +19,7 @@ public:
     D(p.value_or_default("D",1)),
     thermalization(p.value_or_default("LLG thermalization",0)),
     measure_frequency(p.value_or_default("LLG measure frequency",1)),
-    measures_per_measure(p.value_or_default("LLG measures per measure",1)),
+    measures_per_measure(p["LLG measures per measure"]),
     measure_muon(p.value_or_default("LLG Measure Muon",false)),
     muon_in_plane_polarized(p.value_or_default("LLG Muon in plane",false)),
     fixed_xy(p.defined("LLG Muon X") || p.defined("LLG Muon Y")),
@@ -43,6 +43,8 @@ public:
     {
         std::tie(nl, difference_vectors) = mcpp::get_neighbours(*graph_helper_, p);
         std::tie(is_deleted, coordinates) = mcpp::get_coordinates(*graph_helper_, p);
+        if(p.value_or_default("LLG Measure Autocorrelation",false))
+            autocorrelation=std::make_shared<llg_autocorrelation>(measures_per_measure);
     }
                 
     void measure(const std::vector<spin_t>& s, alps::ObservableSet& obs) {
@@ -79,10 +81,15 @@ public:
                     << std::setw(15) << muon_location[2]
                     << std::endl;
             }
+            if(autocorrelation) {
+                autocorrelation->measure(spins);
+            }
         }
         if(measure_muon){
             obs["LLG Depolarization"]<< depolarization;
         }
+        if(autocorrelation)
+            autocorrelation->write(obs);
     }
 
     void init_observables(alps::ObservableSet& obs) const {
@@ -92,6 +99,9 @@ public:
         if(measure_muon) {
             obs << alps::RealVectorObservable("LLG Depolarization");
         }
+        if(autocorrelation){
+            autocorrelation->init_observable(obs);
+        }
     }
 
     void save(alps::ODump &dump) const{
@@ -100,6 +110,8 @@ public:
             << muon_spin
             << muon_location
             << depolarization;
+        if(autocorrelation)
+            autocorrelation->save(dump);
     }
     void load(alps::IDump &dump){
         dump
@@ -108,6 +120,8 @@ public:
             >> muon_location
             >> depolarization;
         std::cerr << "WARNING: reload a simulation of LLG, however the internal RNG is not backed up\nThe results are therefore not bitwise reproducible"<<std::endl; //TODO
+        if(autocorrelation)
+            autocorrelation->load(dump);
     }
 private:
     const int measure_frequency;
@@ -137,6 +151,9 @@ private:
 
     vector_t muon_spin, muon_location;
     std::valarray<double> depolarization;
+    
+    std::shared_ptr<llg_autocorrelation> autocorrelation;
+
     void update_spins() {
         if(descending_ascending) for(int i=0  ;i< N;++i) update_one_spin(i);
         else                     for(int i=N-1;i>=0;--i) update_one_spin(i);

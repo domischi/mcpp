@@ -9,9 +9,9 @@ public:
     llg_timeseries(std::string const& name_, const int length) :
     current_index(0),
     values(length),
-    name(name){
+    name(name_){
     }
-    void init_observable_set(alps::ObservableSet& obs){
+    void init_observable(alps::ObservableSet& obs){
         obs<<alps::RealVectorObservable(name);
     }
     virtual void measure(double value) {
@@ -31,10 +31,20 @@ public:
         values=std::valarray<double>(values.size());
         current_index=0;
     }
+    virtual void save(alps::ODump &dump) const{
+        dump
+            << current_index
+            << values;
+    }
+    virtual void load(alps::IDump &dump){
+        dump
+            >> current_index
+            >> values;
+    }
 
 protected:
     int current_index;
     std::valarray<double> values;
-    std::string name;
+    const std::string name;
 };
 #endif//MCPP_LLG_TIMESERIES_H_
