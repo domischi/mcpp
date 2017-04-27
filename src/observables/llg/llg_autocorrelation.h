@@ -11,7 +11,7 @@ public:
     llg_timeseries("LLG Autocorrelation", length_),
     first_spins(0){
     }
-    virtual void measure(std::vector<spin_t> spins){
+    virtual void measure(std::vector<spin_t> const& spins){
         if(current_index==0) {
             first_spins=spins;
             llg_timeseries::measure(1.); //perfect autocorrelation time at t=0

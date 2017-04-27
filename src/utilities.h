@@ -13,6 +13,21 @@ namespace mcpp{
     typedef std::vector<std::vector<int>> neighbour_list_type;
     typedef std::vector<std::vector<vector_type>> difference_vector_list_type;
     typedef double spin_t;
+    typedef std::vector<double> vector_t;
+    
+    inline double norm(vector_type const& x){
+        double s=0;
+        for (auto& e: x) {
+            s+=e*e;
+        }
+        return std::sqrt(s);
+    }
+    inline double dot(vector_type const& x, vector_type const& y) {
+        double s=0;
+        for(int i = 0; i< x.size();++i)
+            s+=x[i]*y[i];
+        return s;
+    } 
     std::pair<double,double> magnetization_and_staggered_magnetization(const std::vector<spin_t>& spins, const int L) {
         double mx =0.;
         double my =0.;
@@ -44,6 +59,23 @@ namespace mcpp{
             acs+=std::cos(spins1[j]-spins2[j]);
         return acs/N;
     }
+    vector_t get_one_dipolar_field(vector_t const& r_ij, vector_t const& s_j, const double D) {
+        double n=norm(r_ij);
+        double r_ij_dot_s_j=dot(r_ij,s_j);
+        vector_type h(r_ij.size());
+        for(int i = 0; i<h.size();++i){ //this version works in 2D as well as in 3D
+            h[i]=(D/(2.*std::pow(n,3)))*(s_j[i]-3*r_ij[i]*r_ij_dot_s_j/(n*n));
+        }
+        return h;
+    }
+    inline vector_t get_one_dipolar_field(vector_t const& r_ij, double const& s, const double D) {
+        return get_one_dipolar_field(r_ij, vector_t{std::cos(s),std::sin(s)}, D);
+    }
+    inline vector_t get_one_dipolar_field(vector_t const& r_i, vector_t const& r_j, double const& s, const double D) {
+        vector_t r_ij=r_i;
+        for(int i =0;i<r_i.size();++i) r_ij[i]-=r_j[i];
+        return get_one_dipolar_field(r_ij, s, D);
+    }
 
     int init_N (const alps::Parameters& p){
         return alps::graph_helper<>(p).num_sites();
@@ -64,19 +96,6 @@ namespace mcpp{
     inline vector_type difference_vector(vector_type const& x, vector_type const& y) {
         return difference_vector(x,y,vector_type(x.size()));
     }
-    inline double norm(vector_type const& x){
-        double s=0;
-        for (auto& e: x) {
-            s+=e*e;
-        }
-        return std::sqrt(s);
-    }
-    inline double dot(vector_type const& x, vector_type const& y) {
-        double s=0;
-        for(int i = 0; i< x.size();++i)
-            s+=x[i]*y[i];
-        return s;
-    } 
     inline double distance(vector_type const& x, vector_type const& y, vector_type const& periodic){
         return norm(difference_vector(x,y,periodic));
     }
