@@ -4,6 +4,7 @@
 #include <alps/parameter.h>
 #include <alps/lattice.h>
 #include "../observable.h"
+#include "llg_energy_timeseries.h"
 #include "llg_autocorrelation.h"
 #include "muon_depolarization.h"
 class llg : public observable{
@@ -26,6 +27,8 @@ public:
     {
         std::tie(nl, difference_vectors) = mcpp::get_neighbours(*graph_helper_, p);
         std::tie(is_deleted, coordinates) = mcpp::get_coordinates(*graph_helper_, p);
+        if(p.value_or_default("LLG Measure Energy Timeseries",false))
+            energy_timeseries=std::make_shared<llg_energy_timeseries>(measures_per_measure, hl_);
         if(p.value_or_default("LLG Measure Autocorrelation",false))
             autocorrelation=std::make_shared<llg_autocorrelation>(measures_per_measure);
         if(p.value_or_default("LLG Measure Muon",false))
@@ -47,16 +50,17 @@ public:
             obs["LLG M" ] << M; 
             obs["LLG Ms"] << Ms;
             obs["LLG E" ] << E;
-            if(muon) {
+            if(energy_timeseries)
+                energy_timeseries->measure(spins);
+            if(muon)
                 muon->measure(spins);
-            }
-            if(autocorrelation) {
+            if(autocorrelation) 
                 autocorrelation->measure(spins);
-            }
         }
-        if(muon){
+        if(energy_timeseries)
+            energy_timeseries->write(obs);
+        if(muon)
             muon->write(obs);
-        }
         if(autocorrelation)
             autocorrelation->write(obs);
     }
@@ -65,12 +69,12 @@ public:
         obs << alps::RealObservable("LLG M");
         obs << alps::RealObservable("LLG Ms");
         obs << alps::RealObservable("LLG E");
-        if(muon) {
+        if(energy_timeseries) 
+            energy_timeseries->init_observable(obs); 
+        if(muon) 
             muon->init_observable(obs); 
-        }
-        if(autocorrelation){
+        if(autocorrelation)
             autocorrelation->init_observable(obs);
-        }
     }
 
     void save(alps::ODump &dump) const{
@@ -81,6 +85,8 @@ public:
             autocorrelation->save(dump);
         if(muon)
             muon->save(dump);
+        if(energy_timeseries)
+            energy_timeseries->save(dump);
     }
     void load(alps::IDump &dump){
         dump
@@ -91,6 +97,8 @@ public:
             autocorrelation->load(dump);
         if(muon)
             muon->load(dump);
+        if(energy_timeseries)
+            energy_timeseries->load(dump);
     }
 private:
     const int measure_frequency;
@@ -111,6 +119,7 @@ private:
     mcpp::neighbour_list_type nl;
     mcpp::difference_vector_list_type difference_vectors;
     
+    std::shared_ptr<llg_energy_timeseries> energy_timeseries;
     std::shared_ptr<llg_autocorrelation> autocorrelation;
     std::shared_ptr<muon_depolarization> muon;
     void update_spins() {
