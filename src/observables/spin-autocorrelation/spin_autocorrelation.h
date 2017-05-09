@@ -8,7 +8,7 @@
 class spin_autocorrelation : public observable {
 public:
     typedef double spin_t;
-    typedef std::valarray<spin_t> configuration_t;
+    typedef std::vector<spin_t> configuration_t;
 
     spin_autocorrelation(const alps::Parameters& p, std::shared_ptr<alps::graph_helper<>> gh_, std::shared_ptr<Hamiltonian_List> hl_) :
     observable(p,gh_,hl_),
@@ -20,17 +20,15 @@ public:
     }
                 
     void measure(const std::vector<spin_t>& spins, alps::ObservableSet& obs) {
-        old_configurations[actual_index]=std::valarray<double>(spins.data(),spins.size());
+        old_configurations[actual_index]=spins;
         if(filled){
             std::valarray<double> acs(autocorr_analysis_depth);
             for(int i =1;i<autocorr_analysis_depth;++i){
                 configuration_t old_configuration=old_configurations[(actual_index-i+autocorr_analysis_depth)%autocorr_analysis_depth];
-                for(int j=0;j<N;++j)
-                    acs[i]+=std::cos(spins[j]-old_configuration[j]);
-                acs[i]/=N;
+                acs[i]=mcpp::spin_config_overlap(old_configuration,spins);
             }
             acs[0]=1; //the spins are perfectly self correlated 
-            obs["Spin Autocorrelation"]<<acs;
+            obs["Spin Autocorrelation"]<<acs; //TODO do this in terms of the mcpp utility function
         }
         else{
             filled=(actual_index==autocorr_analysis_depth-1);

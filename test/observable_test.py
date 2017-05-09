@@ -159,6 +159,7 @@ class ObservableTest(unittest.TestCase):
                  'THERMALIZATION' : 10,
                  'SWEEPS'         : 2,
                  'llg'            : True,
+                 'LLG measures per measure' : 5,
                  'UPDATE'         : "ssf",
                  'cutoff_distance': 3.,
                  'L'              : 10,
@@ -175,6 +176,7 @@ class ObservableTest(unittest.TestCase):
                  'THERMALIZATION' : 10,
                  'SWEEPS'         : 2,
                  'llg'            : True,
+                 'LLG measures per measure' : 5,
                  'LLG Measure Muon': True,
                  'UPDATE'         : "ssf",
                  'cutoff_distance': 3.,
@@ -182,7 +184,7 @@ class ObservableTest(unittest.TestCase):
             }]
         self.should_work(parm)
         self.check_has_observable('LLG M')
-        self.check_has_observable('LLG Depolarization')
+        self.check_has_observable('LLG Muon Depolarization')
     def test_spin_autocorrelation(self):
         parm=[{
                  'LATTICE'        : "square lattice",
