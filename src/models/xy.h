@@ -33,15 +33,16 @@ public :
     xy_worker(const alps::Parameters& params) :
         alps::parapack::lattice_mc_worker<>(params), 
         Thermalization_Sweeps(params.value_or_default("THERMALIZATION",100)),
-        Measure_Sweeps(params.value_or_default("SWEEPS",5000)),
+        Each_Measurement(params.value_or_default("Each_Measurement",15)),
+        Measure_Sweeps(static_cast<int>(params.value_or_default("SWEEPS",5000))*Each_Measurement),
         L(params["L"]),
         N(num_sites()),
         T(mcpp::init_T(params)),
+        exmc_thermalization_correction(init_exmc_thermalization_correction(params)),
         ising(static_cast<bool>(params.value_or_default("Ising", false))),
         Step_Number(0),
         accepted(0),
         measure_last_configuration(static_cast<bool>(params.value_or_default("measure last configuration",false))),
-        Each_Measurement(params.value_or_default("Each_Measurement",15)),
         HamiltonianList(get_hl(params)),
         observables(construct_observables(params, HamiltonianList)),
         targeted_acc_ratio(params.value_or_default("Targeted Acceptance Ratio",0.5)),
@@ -111,10 +112,10 @@ public :
     }
     
     bool is_thermalized() const {
-        return Step_Number >= Thermalization_Sweeps;   
+        return Step_Number > (exmc_thermalization_correction+1)*Thermalization_Sweeps;
     }
     double progress() const {
-        return Step_Number/(static_cast<double>(Measure_Sweeps*Each_Measurement+Thermalization_Sweeps));
+        return Step_Number/(static_cast<double>(Measure_Sweeps+(exmc_thermalization_correction+1)*Thermalization_Sweeps));
     }
     
     //for exmc
@@ -125,6 +126,7 @@ public :
 private:
     //System parameters
     const int Thermalization_Sweeps;
+    const int Each_Measurement;
     const int Measure_Sweeps;
     int Step_Number;
     const int L;
@@ -132,10 +134,10 @@ private:
     bool ising;
     init_t init_type;
     std::vector<double> spins; //saves the spins
-    const int Each_Measurement;
     const bool print_debug_information;
 
     double T, beta; // non-const because of exmc
+    const int exmc_thermalization_correction;
 
     const double targeted_acc_ratio;
     double angle_dev;
@@ -166,7 +168,7 @@ private:
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);
         if(random_real()<=std::exp(-(new_energy-old_energy)/T)){
-            En+=(new_energy-old_energy)/2.;
+            En+=(new_energy-old_energy);
             ++accepted;
         }
         else{ //switch back
@@ -229,7 +231,7 @@ private:
     }
 
     inline bool is_last_MC_step(){
-        return Step_Number==Measure_Sweeps*Each_Measurement+Thermalization_Sweeps;
+        return Step_Number>Measure_Sweeps+(exmc_thermalization_correction+1)*Thermalization_Sweeps-Each_Measurement;
     }
     
     double inline mod2Pi(double const& s) const {
@@ -305,6 +307,20 @@ private:
     //inline double beta() const { 
     //    return 1./T;
     //}
+
+    int init_exmc_thermalization_correction(const alps::Parameters& p) {
+        if(p.value_or_default("ALGORITHM", "xy")=="xy")
+           return 0;
+        else{
+            if(!p.defined("OPTIMIZATION_TYPE") || p["OPTIMIZATION_TYPE"]=="rate"){
+                return static_cast<unsigned int>(p.value_or_default("OPTIMIZATION_ITERATIONS", 1)) + 1;
+            }
+            else{ //OPTIMIZATION_TYPE==population
+                return static_cast<unsigned int>(p.value_or_default("OPTIMIZATION_ITERATIONS", 7)) + 1;
+            }
+        }
+    }
+
     inline int random_int(int j){
         return static_cast<int>(j*uniform_01());
     }

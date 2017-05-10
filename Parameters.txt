@@ -4,7 +4,7 @@
     This file explains you what the parameters are, the default values and sometimes what is useful. I however do not guarantee that this list is complete and/or correct. Where no default value is given, the parameter needs to be given explicitly or the code just doesn't start.
 
     All parameters are given in the format
-    (Parameter Name): short description
+    (only for this algorithm) Parameter Name: short description
     Default: (Default value / none if needed)
     (possible longer description to clarify things)
 
@@ -76,13 +76,21 @@
     a: length of 1st basis vector
     Default: 1.
 
+    b: length of 2nd basis vector
+    Default: a
+
 ---------------------------
 |OTHER PHYSICAL QUANTITIES|
 ---------------------------
+xy:
     beta: inverse Temperature in natural units
     T: Temperature in natural units
     Default: (none)
-    Define only one of them, otherwise undefined behaviour
+    Define only one of them, otherwise undefined behaviour, only needs to be set for ALGORITHM="xy"
+
+exmc:
+    BETA_MIN, BETA_MAX: inverse temperature interval for exmc
+    T_MIN, T_MAX: temperature interval for exmc
 
 ----------------------
 |SIMULATIONAL DETAILS|
@@ -97,9 +105,26 @@
     EACH_MEASUREMENT: Describes the Time between successive measurements
     Default: 15
 
-    UPDATE: Type of Update Procedure to use
+    ALGORITHM: Type of algorithm to use
     Default: (none)
-    at the moment only one update type is allowed, namely 'ssf', which stands for single spin flip. 
+    Possible Choices: xy, exmc
+        xy:   does a fixed temperature single spin flip update algorithm  
+        exmc: does a parallel tempering procedure based on ALPS 
+    
+    (exmc) NUM_REPLICAS: number of exmc replicas to swap with
+    Default: (none)
+    There exist other ways of setting the temperature interval (see the file alps/src/alps/parapack/exchange.h for details)
+
+    (exmc) OPTIMIZE_TEMPERATURE: Should the temperature set be optimized?
+    Default: False 
+    If so, there are more thermalization steps done (OPTIMIZATION_ITERATIONS+2)*THERMALIZATION, such that this can take longer
+
+    (exmc) OPTIMIZATION_TYPE: (rate|population)
+    Default: rate
+
+    (exmc) OPTIMIZATION_ITERATIONS: how often the temperature set is allowed to be optimized before measurement start
+    Default: 1 for rate
+             7 for population 
 
     Targeted Acceptance Ratio: Fraction of accepted steps to aim for
     Default: 0.5

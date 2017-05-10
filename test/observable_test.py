@@ -34,8 +34,10 @@ class ObservableTest(unittest.TestCase):
         import pyalps
         l=len(pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm'),[string])[0][0].y)
         self.assertEqual(l,should_be)
-    def check_has_observable(self,string, output=False):
+    def check_has_observable(self,string, wait=False):
         import pyalps
+        if wait:
+            a=input('wait')
         self.assertGreater(len(pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm'),[string])[0]), 0)
 
     def test_basic_observables(self):
@@ -193,7 +195,6 @@ class ObservableTest(unittest.TestCase):
                  'THERMALIZATION' : 10,
                  'SWEEPS'         : 20,
                  "ALGORITHM"      : "xy",
-                 'cutoff_distance': 3.,
                  'L'              : 4,
             }]
         self.should_work(parm)

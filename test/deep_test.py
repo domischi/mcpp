@@ -43,9 +43,7 @@ class DeepTest(unittest.TestCase):
         err=pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm'),[string])[0][0].y[0].error
         if debug:
             print('\n')
-            print(val)
-            print(err)
-            print(abs(should_be-val)/max([err,1e-6]))
+            print(string+': '+str(val)+' +- '+str(err)+'\t'+str(abs(should_be-val)/max([err,1e-6])))
             print('\n')
         self.assertLess(abs(should_be-val)/max([err,1e-6]),significance)
     def check_value_vector(self, string, index, should_be, significance=8):
@@ -64,6 +62,7 @@ class DeepTest(unittest.TestCase):
                  'SWEEPS'         : 20,
                  "ALGORITHM"      : "xy",
                  'L'              : 4,
+                 'Each_Measurement': 1
             }]
         self.should_work(parm)
         self.check_value_scalar('M',1.)
