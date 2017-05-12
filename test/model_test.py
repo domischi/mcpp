@@ -1,10 +1,10 @@
 import unittest
 from subprocess import Popen
-class AlgorithmTest(unittest.TestCase):
+class ModelTest(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         from os import mkdir, chdir,devnull, getcwd
-        self.dir_name='./algorithm_test/'
+        self.dir_name='./model_test/'
         mkdir(self.dir_name)
         chdir(self.dir_name)
         self.oblivion=open(devnull, 'w')
@@ -31,43 +31,16 @@ class AlgorithmTest(unittest.TestCase):
     def should_work(self,parm, output=False):
         self.assertEqual(self.call(parm,output),0)
 
-    def test_algorithm_xy(self):
+    def test_not_enough_sweeps(self):
         parm=[{
                  'LATTICE'        : "square lattice",
                  'T'              : 0.,
                  'J'              : 1,
                  'THERMALIZATION' : 1,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 3,
                  "ALGORITHM"      : "xy",
                  'basic_observables': False,
-                 'L'              : 4
-            }]
-        self.should_work(parm)
-    def test_algorithm_exmc(self):
-        parm=[{
-                 'LATTICE'        : "square lattice",
-                 'T_MIN'          : 0.1,
-                 'T_MAX'          : 0.2,
-                 'NUM_REPLICAS'   : 2,
-                 'OPTIMIZATION_ITERATIONS':2,
-                 'OPTIMIZE_TEMPERATURE': True,
-                 'J'              : 1,
-                 'THERMALIZATION' : 1000,
-                 'SWEEPS'         : 20,
-                 "ALGORITHM"      : "exmc",
-                 'basic_observables': False,
-                 'L'              : 4
-            }]
-        self.should_work(parm)
-    def test_algorithm_not_detected(self):
-        parm=[{
-                 'LATTICE'        : "square lattice",
-                 'T'              : 0.,
-                 'J'              : 1,
-                 'THERMALIZATION' : 1,
-                 'SWEEPS'         : 20,
-                 "ALGORITHM"      : "something else",
-                 'basic_observables': False,
-                 'L'              : 4
+                 'L'              : 4,
+                 'Each_Measurement' : 5
             }]
         self.should_crash(parm)

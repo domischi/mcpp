@@ -98,9 +98,9 @@ exmc:
     THERMALIZATION: Number of Lattice Sweeps for thermalization
     Default: 100
     
-    SWEEPS: Number of Measurements
+    SWEEPS: Number of Sweeps done to the system
     Default: 5000
-    This is not the number of lattice sweeps but measurements (there is a factor inbetween determining the frequency of measurements)
+    This is only the number of sweeps performed in the system. The number of measurements is given by SWEEPS/EACH_MEASUREMENT
 
     EACH_MEASUREMENT: Describes the Time between successive measurements
     Default: 15

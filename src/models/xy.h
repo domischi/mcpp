@@ -32,13 +32,14 @@ public :
 
     xy_worker(const alps::Parameters& params) :
         alps::parapack::lattice_mc_worker<>(params), 
+        is_exmc(static_cast<bool>(params["ALGORITHM"]!="xy")),
+        exmc_factor(init_exmc_factor(params)),
         Thermalization_Sweeps(params.value_or_default("THERMALIZATION",100)),
         Each_Measurement(params.value_or_default("Each_Measurement",15)),
-        Measure_Sweeps(static_cast<int>(params.value_or_default("SWEEPS",5000))*Each_Measurement),
+        Sweeps(static_cast<int>(params.value_or_default("SWEEPS",5000))),
         L(params["L"]),
         N(num_sites()),
         T(mcpp::init_T(params)),
-        exmc_thermalization_correction(init_exmc_thermalization_correction(params)),
         ising(static_cast<bool>(params.value_or_default("Ising", false))),
         Step_Number(0),
         accepted(0),
@@ -53,6 +54,10 @@ public :
         shape_anisotropy_p(params.value_or_default("Shape Anisotropy p",-1)),
         print_debug_information(static_cast<bool>(params.value_or_default("print debug information",false)))
         {
+            if(Sweeps<Each_Measurement){
+                std::cerr<< "Less Sweeps than measurement frequency set, this does not make sense. Abort..."<<std::endl;
+                std::exit(4);
+            }
             init_spins(params);
             En=Energy();
             if(print_debug_information)
@@ -112,10 +117,10 @@ public :
     }
     
     bool is_thermalized() const {
-        return Step_Number > (exmc_thermalization_correction+1)*Thermalization_Sweeps;
+        return Step_Number > Thermalization_Sweeps*exmc_factor;
     }
     double progress() const {
-        return Step_Number/(static_cast<double>(Measure_Sweeps+(exmc_thermalization_correction+1)*Thermalization_Sweeps));
+        return Step_Number/(static_cast<double>(Sweeps+exmc_factor*Thermalization_Sweeps));
     }
     
     //for exmc
@@ -125,9 +130,11 @@ public :
     static double log_weight(weight_parameter_type gw, double beta) {return beta*gw;}
 private:
     //System parameters
+    const bool is_exmc;
+    const int exmc_factor;
     const int Thermalization_Sweeps;
     const int Each_Measurement;
-    const int Measure_Sweeps;
+    const int Sweeps;
     int Step_Number;
     const int L;
     const int N; //L^2
@@ -137,7 +144,6 @@ private:
     const bool print_debug_information;
 
     double T, beta; // non-const because of exmc
-    const int exmc_thermalization_correction;
 
     const double targeted_acc_ratio;
     double angle_dev;
@@ -231,7 +237,7 @@ private:
     }
 
     inline bool is_last_MC_step(){
-        return Step_Number>Measure_Sweeps+(exmc_thermalization_correction+1)*Thermalization_Sweeps-Each_Measurement;
+        return Step_Number>Sweeps+Thermalization_Sweeps-Each_Measurement;
     }
     
     double inline mod2Pi(double const& s) const {
@@ -246,6 +252,17 @@ private:
         }
         for(auto& o: observables) 
             o->measure(spins, obs);
+    }
+    int init_exmc_factor(const alps::Parameters& params){
+        if(!is_exmc)
+            return 1;
+        else
+            if (!params.defined("OPTIMIZATION_TYPE") || params["OPTIMIZATION_TYPE"]== "rate") {
+                return static_cast<unsigned int>(params.value_or_default("OPTIMIZATION_ITERATIONS", 1)) + 2;
+            }
+            else {
+                return static_cast<unsigned int>(params.value_or_default("OPTIMIZATION_ITERATIONS", 7)) + 2;
+            }
     }
     inline void init_spins(const alps::Parameters& params){
         if(params.value_or_default("Initialization","GS")=="Random"){
@@ -307,19 +324,6 @@ private:
     //inline double beta() const { 
     //    return 1./T;
     //}
-
-    int init_exmc_thermalization_correction(const alps::Parameters& p) {
-        if(p.value_or_default("ALGORITHM", "xy")=="xy")
-           return 0;
-        else{
-            if(!p.defined("OPTIMIZATION_TYPE") || p["OPTIMIZATION_TYPE"]=="rate"){
-                return static_cast<unsigned int>(p.value_or_default("OPTIMIZATION_ITERATIONS", 1)) + 1;
-            }
-            else{ //OPTIMIZATION_TYPE==population
-                return static_cast<unsigned int>(p.value_or_default("OPTIMIZATION_ITERATIONS", 7)) + 1;
-            }
-        }
-    }
 
     inline int random_int(int j){
         return static_cast<int>(j*uniform_01());
