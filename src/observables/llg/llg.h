@@ -130,15 +130,18 @@ private:
         descending_ascending=!descending_ascending;
     }
     void update_one_spin(int i) {
-        update_one_spin_stochastic   (i, dt/2);
+        update_one_spin_stochastic   (i, dt/2);//TODO this splitting is not anything useful
         update_one_spin_deterministic(i, dt  );
         update_one_spin_stochastic   (i, dt/2);
     }
     void update_one_spin_stochastic(int i, double dt){
-        spins[i]+=-gamma*sqrt_mu()*dt*nd(rng);
+        spins[i]+=-gamma*sqrt_mu()*dt*nd(rng);//TODO check this to be non-zero
     }
     inline double sqrt_mu() const {
-        return std::sqrt(2*alpha*T/(gamma*dt));
+        return std::sqrt(2*alpha*T/(gamma*dt));//TODO this cannot be correct with dimensions...
+        //I actually assume there is in the denomiantor an additional D out of dimensinal analysis, s.t.
+        //return std::sqrt(2*k_b*alpha*T/(gamma*dt*D));
+        //where k_b could be solved via one definiton of kb just to be 1 at some point... to save an unnecessary multiplication
     }
     void update_one_spin_deterministic(int i, double dt){
         auto h = get_field_at_site(i);
