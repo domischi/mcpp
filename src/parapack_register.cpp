@@ -10,7 +10,7 @@ PARAPACK_SET_COPYRIGHT("Using mc++\n  copyright (c) by Dominik Schildknecht <dom
 PARAPACK_REGISTER_ALGORITHM(xy_worker, "xy");
 PARAPACK_REGISTER_EVALUATOR(xy_evaluator, "xy");
 PARAPACK_REGISTER_ALGORITHM(alps::parapack::single_exchange_worker<xy_worker>,"exmc");
-PARAPACK_REGISTER_EVALUATOR(xy_evaluator, "exmc");
 #ifdef USE_MPI
-PARAPACK_REGISTER_PARALLEL_WORKER(alps::parapack::parallel_exchange_worker<xy_worker>,"exmc");
-#endif
+PARAPACK_REGISTER_PARALLEL_ALGORITHM(alps::parapack::parallel_exchange_worker<xy_worker>,"exmc");
+#endif// USE_MPI
+PARAPACK_REGISTER_EVALUATOR(xy_evaluator, "exmc");

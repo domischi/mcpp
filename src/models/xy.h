@@ -35,7 +35,7 @@ public :
         is_exmc(static_cast<bool>(params["ALGORITHM"]!="xy")),
         exmc_factor(init_exmc_factor(params)),
         Thermalization_Sweeps(params.value_or_default("THERMALIZATION",100)),
-        Each_Measurement(params.value_or_default("Each_Measurement",15)),
+        Each_Measurement(params.value_or_default("Each_Measurement",10)),
         Sweeps(static_cast<int>(params.value_or_default("SWEEPS",5000))),
         L(params["L"]),
         N(num_sites()),
