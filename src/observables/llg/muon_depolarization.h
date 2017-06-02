@@ -2,6 +2,7 @@
 #define MCPP_LLG_MUON_DEPOLARIZATION_H_
 
 //TODO make this work with more than one muon
+//TODO make use of the new function in utilities that does this in a fully fashioned way
 class muon_depolarization : public llg_timeseries{
 public:
     typedef std::vector<double> vector_t;

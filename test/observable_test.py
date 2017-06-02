@@ -200,3 +200,27 @@ class ObservableTest(unittest.TestCase):
             }]
         self.should_work(parm)
         self.check_has_observable('Spin Autocorrelation')
+    def test_field_histogram(self):
+        nbins=64
+        parm=[{
+		 'LATTICE'        : "square lattice",
+		 'T'              : 0.,
+		 'D'              : 1.,
+		 'THERMALIZATION' : 10,
+		 'SWEEPS'         : 20,
+		 'Field Histogram': True,
+		 'Field Histogram fixed z': False,
+		 'Field Histogram diameter split': 3,
+	         'Field Histogram n_bins' : nbins,
+		 'UPDATE'         : "ssf",
+		 'cutoff_distance': 3.,
+		 'L'              : 8,
+            }]
+        self.should_work(parm)
+        self.check_has_observable('Field Histogram Absolute Value')
+        self.check_has_observable('Field Histogram xy'            )
+        self.check_has_observable('Field Histogram z'             )
+        self.check_has_observable('Field Histogram MaxField')
+        self.check_data_length('Field Histogram Absolute Value', nbins)
+        self.check_data_length('Field Histogram xy'            , nbins)
+        self.check_data_length('Field Histogram z'             , nbins)

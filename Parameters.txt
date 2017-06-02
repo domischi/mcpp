@@ -179,4 +179,62 @@
     Last Configuration
     -------------------------
     measure last configuration: boolean to determine if it should measure the last configuration or not
-    Default: False 
+    Default: False
+
+    Field Histogram
+    ---------------
+    Field Histogram: 
+    Default: False
+    Measure Field Histogram?
+    	
+    Field Histogram Measures per Measure: 
+    Default: 1024
+    Determines how many points get sampled for each configuration
+    
+    Field Histogram fixed z: 
+    Default: true
+    If set then each sample is drawn at same height, with a Gaussian
+    distribution set by lower parameters If not set, then Field Histogram z
+    determines the height
+
+    Field Histogram z: 
+    Default: 0.75
+    Two fold parameter: if fixed z, this is the height of all samples, if not
+    fixed z this is the mean of the Gaussian
+
+    Field Histogram z stddev: 
+    Default: 0.5
+    Standard deviation for the Gaussian
+
+    Field Histogram z cutoff: 
+    Default: 0.1
+    A truncation should be made (field to close in the layer of the dots leads
+    to huge sample) it's controlled by this parameter. 
+
+    Field Histogram cutoff: 
+    Default: 3.
+    Dots further away from the sampling site as this radius get ignored (this
+    should shift the total field, however not the qualitative dependence due to
+    short rangedness of the field in the quasi 2D set-up)
+
+    Field Histogram diameter split: 
+    Default: 1
+    The dot can be split up into several parts to attribute the finite width of
+    the experimental realization. The dot will be assumed circular. The dot
+    will be split up in several parts, such that along the diameter in
+    x-direction (and equivalently in y-direction) are this number of parts. The
+    overal number of part contributing to the dipole of a single dot is given
+    by as many dots that are inside the circle of this diameter.
+
+    Dot Radius: 
+    Default: 0.35
+    This parameter describes the extension of the dot in parameters of the
+    lattice periodicity a. The default value arises from one of the
+    experimental realizations.
+
+    M: The magnetization of each dot.
+    Default: 1.
+            
+    Field Histogram number of bins: 
+    Default: 128
+    How many bins should the resulting histograms consist of?
