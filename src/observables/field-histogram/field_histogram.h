@@ -89,7 +89,7 @@ private:
         return mcpp::get_field_at_position(graph_helper_, s, xyz, coordinates, is_deleted, periodic_translations_, cutoff, diameter_split, radius, M);
     }
     inline double maxfield() const {
-        return 3*mcpp::norm(mcpp::get_field_one_dot(vector_type {0.,0.,0.} , vector_type{0.,0.,(fixed_z?z_mean:z_cutoff)}, 0., M, diameter_split,radius)); // The 3 in front seems more to be of a phenomenological structure taking into account the neighbours withour really calculating them
+        return 3*mcpp::norm(mcpp::get_field_one_dot(vector_type {0.,0.,0.} , vector_type{0.,0.,z_mean}, 0., M, diameter_split,radius)); // The 3 in front seems more to be of a phenomenological structure taking into account the neighbours withour really calculating them
     }
 
     inline double get_x(){
