@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "observable.h"
+#include "datatypes/histogram.h"
 #include "mcrg/mcrg.h"
 #include "basic-observables/basic_observables.h"
 #include "spin-autocorrelation/spin_autocorrelation.h"
