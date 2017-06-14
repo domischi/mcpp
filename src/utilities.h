@@ -123,6 +123,10 @@ namespace mcpp{
         return h;
     }
 
+    inline double maxfield(const double M, const double z, const double radius, const int diameter_split) {
+        // The 3 in front seems more to be of a phenomenological structure taking into account the neighbours without really calculating them
+        return 3*norm(get_field_one_dot(vector_type {0.,0.,0.} , vector_type{0.,0.,z}, 0., M, diameter_split,radius)); 
+    }
     int init_N (const alps::Parameters& p){
         return alps::graph_helper<>(p).num_sites();
     }

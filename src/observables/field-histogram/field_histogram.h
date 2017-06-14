@@ -12,13 +12,13 @@ public:
     graph_helper_(gh_),
     measures_per_measure(p.value_or_default("Field Histogram Measures per Measure",1024)),
     fixed_z(p.value_or_default("Field Histogram fixed z", true)),
-    z_mean(p.value_or_default("Field Histogram z", 0.75)),
+    z_mean(p.value_or_default("Field Histogram z", 0.75)), // in units of a
     z_std (p.value_or_default("Field Histogram z stddev", 0.5)),
     z_cutoff(p.value_or_default("Field Histogram z cutoff", 0.1)),
     cutoff(p.value_or_default("Field Histogram cutoff" ,3.)),
     diameter_split(p.value_or_default("Field Histogram diameter split" ,1)),
     radius(static_cast<double>(p.value_or_default("a",1.))*static_cast<double>(p.value_or_default("Dot Radius" ,0.35))), // one of the samples has this configuration
-    M(p.value_or_default("M" ,1.)),
+    M(1.),// we bother with units in the evaluator
     urd(0.,static_cast<double>(p.value_or_default("a",1.))*static_cast<double>(p["L"])),
     nd(0.,1.),
     rng(static_cast<int>(p["SEED"]))
@@ -26,7 +26,7 @@ public:
         std::tie(is_deleted, coordinates) = mcpp::get_coordinates(*graph_helper_, p);
         periodic_translations_=mcpp::get_periodic_translations(*graph_helper_, p);
         
-        maxfield_=maxfield();
+        maxfield_=mcpp::maxfield(M,z_mean,radius,diameter_split);
         bool log=p.value_or_default("Field Histogram Log Scale", false);
         if(log) {
             histogram_abs=std::make_shared<histogram>("Field Histogram Absolute Value", maxfield_/1024, 256*maxfield_, p.value_or_default("Field Histogram number of bins",p.value_or_default("Field Histogram n_bins", 128)),histogram::hist_type::log);
@@ -96,9 +96,6 @@ private:
     vector_type get_field_at_position(const std::vector<spin_t>& s, vector_type xyz) const{
         return mcpp::get_field_at_position(graph_helper_, s, xyz, coordinates, is_deleted, periodic_translations_, cutoff, diameter_split, radius, M);
     }
-    inline double maxfield() const {
-        return 3*mcpp::norm(mcpp::get_field_one_dot(vector_type {0.,0.,0.} , vector_type{0.,0.,z_mean}, 0., M, diameter_split,radius)); // The 3 in front seems more to be of a phenomenological structure taking into account the neighbours withour really calculating them
-    }
 
     inline double get_x(){
         return urd(rng);
@@ -118,5 +115,5 @@ private:
         }
     }
 };
-
+#include "field_histogram_evaluator.h"
 #endif//MCPP_FIELD_HISTOGRAM_H_

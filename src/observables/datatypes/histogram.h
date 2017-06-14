@@ -56,6 +56,7 @@ public:
                         bins[int((1+(std::log(value)-std::log(min))/(std::log(max)-std::log(min)))*(bins.size()/2-2)+3)]+=1.;
                     else
                         bins[-std::floor((std::log(-value)-std::log(max))/(std::log(max)-std::log(min))*(bins.size()/2-2))]+=1.;
+                break;
         }
     }
     virtual void write(alps::ObservableSet& obs){
@@ -83,5 +84,5 @@ protected:
     const hist_type type;
 };
 
-//#include "histogram_evaluator.h"
+#include "histogram_evaluator.h"
 #endif//MCPP_HISTOGRAM_H_
