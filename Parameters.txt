@@ -1,7 +1,10 @@
 --------------
 |INTRODUCTION|
 --------------
-    This file explains you what the parameters are, the default values and sometimes what is useful. I however do not guarantee that this list is complete and/or correct. Where no default value is given, the parameter needs to be given explicitly or the code just doesn't start.
+    This file explains you what the parameters are, the default values and
+    sometimes what is useful. I however do not guarantee that this list is
+    complete and/or correct. Where no default value is given, the parameter
+    needs to be given explicitly or the code just doesn't start.
 
     All parameters are given in the format
     (Parameter Name): short description
@@ -16,18 +19,21 @@
 
     cutoff_distance: Distance at where the dipolar interaction shall be truncated
     Default: 3.
-    This is measured in units of a, therefore just changing a doesn't change anything about the truncation 
+    This is measured in units of a, therefore just changing a doesn't change
+    anything about the truncation 
 
     Dilution Rate: Vacancy concentration for dipolar interaction
     Default: 0.
 
     Positional Disorder: Describes the position disorder of sites
     Default: 0.
-    The positional disorder is given as a 2D Gaussian with standart deviation equal to this parameter centered around 0
+    The positional disorder is given as a 2D Gaussian with standart deviation
+    equal to this parameter centered around 0
 
     debug dipolar: print information about the coordinates in the dipolar case
     Default: false
-    Mainly useful if positional disorder is introduced, otherwise please use "print debug information"
+    Mainly useful if positional disorder is introduced, otherwise please use
+    "print debug information"
 
     J: Exchange Strength
     Default: 0.
@@ -39,7 +45,9 @@
 
     Shape Anisotropy Angle:
     Default: (none)
-    If not set, the angles are randomly distributed over the circle, such that the prefered orientations are uncorrelated, if set they preferrably align in the same direction (up to p)
+    If not set, the angles are randomly distributed over the circle, such that
+    the prefered orientations are uncorrelated, if set they preferrably align
+    in the same direction (up to p)
 
     Shape Anisotropy Distribution Type:
     Default: Fixed
@@ -92,7 +100,8 @@
     
     SWEEPS: Number of Measurements
     Default: 5000
-    This is not the number of lattice sweeps but measurements (there is a factor inbetween determining the frequency of measurements)
+    This is not the number of lattice sweeps but measurements (there is a
+    factor inbetween determining the frequency of measurements)
 
     EACH_MEASUREMENT: Describes the Time between successive measurements
     Default: 15
@@ -125,7 +134,8 @@
 
     NUM_CLONES: Number of copies of simulation
     Default: 1
-    This allows to use more compuation power for the same task, gather faster statistics, however the thermalization is not able to speed up with this
+    This allows to use more compuation power for the same task, gather faster
+    statistics, however the thermalization is not able to speed up with this
 
     SEED: Number seeding the RNG responsible for standart actions
     Default: (given by ALPS)
@@ -137,7 +147,9 @@
 
     print debug information:
     Default: False
-    Prints the periodic translations as well as the coordinates of each site, only use this for short tests, as otherwise the ouput files explode in length
+    Prints the periodic translations as well as the coordinates of each site,
+    only use this for short tests, as otherwise the ouput files explode in
+    length
 
 -------------
 |OBSERVABLES|
@@ -174,12 +186,16 @@
     -------------------------
     Spin Autocorrelation analysis length: In which depth to analyse the spin autocorrelation
     Default: -1
-    As the full configuration get saved, this can be a time and mostly time consuming task, consider that the class contains (this parameter) * N doubles and in every measurement compare a configuration to all the old ones. Use smaller lattices to still have a fast access to the data
+    As the full configuration get saved, this can be a time and mostly time
+    consuming task, consider that the class contains (this parameter) * N
+    doubles and in every measurement compare a configuration to all the old
+    ones. Use smaller lattices to still have a fast access to the data
     
     Last Configuration
     -------------------------
-    measure last configuration: boolean to determine if it should measure the last configuration or not
+    measure last configuration: 
     Default: False
+    boolean to determine if it should measure the last configuration or not
 
     Field Histogram
     ---------------
@@ -231,6 +247,18 @@
     This parameter describes the extension of the dot in parameters of the
     lattice periodicity a. The default value arises from one of the
     experimental realizations.
+
+    Field Histogram lower histogram truncation:
+    Default: 4096
+    In the case of log binning, where to truncate against too small values. It
+    will calculate the maxfield and divide it by this number as a lower
+    truncation.
+
+    Field Histogram higher histogram truncation:
+    Default: 64 (log) / 3 (lin)
+    What should be the highest resolvable bin for the field histogram. It will
+    calculate the maxfield and multiply it by this factor, this will result in
+    the upper bound.
 
     M: The magnetization of each dot.
     Default: 1.

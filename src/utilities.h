@@ -89,7 +89,7 @@ namespace mcpp{
             double offset_x=i*2.*radius/diameter_split+radius/diameter_split-radius;
             double offset_y=j*2.*radius/diameter_split+radius/diameter_split-radius;
             vector_t c= {coor[0]-offset_x, coor[1]-offset_y, coor[2]};
-            vector_t tmp=get_one_dipolar_field(coor, xyz, s, 1.); // as the magnetization gets split up, I will do this afterwards
+            vector_t tmp=get_one_dipolar_field(c, xyz, s, 1.); // as the magnetization gets split up, I will do this afterwards
             ret[0]+=tmp[0];
             ret[1]+=tmp[1];
             ret[2]+=tmp[2];
