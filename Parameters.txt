@@ -1,10 +1,13 @@
 --------------
 |INTRODUCTION|
 --------------
-    This file explains you what the parameters are, the default values and sometimes what is useful. I however do not guarantee that this list is complete and/or correct. Where no default value is given, the parameter needs to be given explicitly or the code just doesn't start.
+    This file explains you what the parameters are, the default values and
+    sometimes what is useful. I however do not guarantee that this list is
+    complete and/or correct. Where no default value is given, the parameter
+    needs to be given explicitly or the code just doesn't start.
 
     All parameters are given in the format
-    (only for this algorithm) Parameter Name: short description
+    (ALGORITHM, if applicable only in certain cases) Parameter Name: short description
     Default: (Default value / none if needed)
     (possible longer description to clarify things)
 
@@ -16,18 +19,21 @@
 
     cutoff_distance: Distance at where the dipolar interaction shall be truncated
     Default: 3.
-    This is measured in units of a, therefore just changing a doesn't change anything about the truncation 
+    This is measured in units of a, therefore just changing a doesn't change
+    anything about the truncation 
 
     Dilution Rate: Vacancy concentration for dipolar interaction
     Default: 0.
 
     Positional Disorder: Describes the position disorder of sites
     Default: 0.
-    The positional disorder is given as a 2D Gaussian with standart deviation equal to this parameter centered around 0
+    The positional disorder is given as a 2D Gaussian with standart deviation
+    equal to this parameter centered around 0
 
     debug dipolar: print information about the coordinates in the dipolar case
     Default: false
-    Mainly useful if positional disorder is introduced, otherwise please use "print debug information"
+    Mainly useful if positional disorder is introduced, otherwise please use
+    "print debug information"
 
     J: Exchange Strength
     Default: 0.
@@ -39,7 +45,9 @@
 
     Shape Anisotropy Angle:
     Default: (none)
-    If not set, the angles are randomly distributed over the circle, such that the prefered orientations are uncorrelated, if set they preferrably align in the same direction (up to p)
+    If not set, the angles are randomly distributed over the circle, such that
+    the prefered orientations are uncorrelated, if set they preferrably align
+    in the same direction (up to p)
 
     Shape Anisotropy Distribution Type:
     Default: Fixed
@@ -58,7 +66,8 @@
             the number of minima is equally distributed in {1,2,...,p} 
 
     Remarks:
-        - In the program is distinguished by a disordered and a non disordered dipolar class via a template
+        - In the program is distinguished by a disordered and a non disordered
+          dipolar class via a template
         - Shape Anisotropy class gets only loaded if both, A and p_max are defined
         - If no Hamiltonian is loaded an error message should appear and the program terminate
 
@@ -86,7 +95,8 @@ xy:
     beta: inverse Temperature in natural units
     T: Temperature in natural units
     Default: (none)
-    Define only one of them, otherwise undefined behaviour, only needs to be set for ALGORITHM="xy"
+    Define only one of them, otherwise undefined behaviour,
+    only needs to be set for ALGORITHM="xy"
 
 exmc:
     BETA_MIN, BETA_MAX: inverse temperature interval for exmc
@@ -100,7 +110,8 @@ exmc:
     
     SWEEPS: Number of Sweeps done to the system
     Default: 5000
-    This is only the number of sweeps performed in the system. The number of measurements is given by SWEEPS/EACH_MEASUREMENT
+    This is only the number of sweeps performed in the system. The number of
+    measurements is given by SWEEPS/EACH_MEASUREMENT
 
     EACH_MEASUREMENT: Describes the Time between successive measurements
     Default: 15
@@ -113,16 +124,19 @@ exmc:
     
     (exmc) NUM_REPLICAS: number of exmc replicas to swap with
     Default: (none)
-    There exist other ways of setting the temperature interval (see the file alps/src/alps/parapack/exchange.h for details)
+    There exist other ways of setting the temperature interval (see the file
+    alps/src/alps/parapack/exchange.h for details)
 
     (exmc) OPTIMIZE_TEMPERATURE: Should the temperature set be optimized?
     Default: False 
-    If so, there are more thermalization steps done (OPTIMIZATION_ITERATIONS+2)*THERMALIZATION, such that this can take longer
+    If so, there are more thermalization steps done
+    (OPTIMIZATION_ITERATIONS+2)*THERMALIZATION, such that this can take longer
 
     (exmc) OPTIMIZATION_TYPE: (rate|population)
     Default: rate
 
-    (exmc) OPTIMIZATION_ITERATIONS: how often the temperature set is allowed to be optimized before measurement start
+    (exmc) OPTIMIZATION_ITERATIONS: how often the temperature set is allowed to
+    be optimized before measurement start
     Default: 1 for rate
              7 for population 
 
@@ -134,7 +148,8 @@ exmc:
     
     Angle Deviation Factor: Update factor for angle deviation
     Default: 1.2
-    Determines the update factor such that the acceptance ratio will be achieved
+    Determines the update factor such that the acceptance ratio will be
+    achieved
 
     Angle Deviation Min: Lowest acceptable angle deviation
     Default: PI/1000.
@@ -150,7 +165,8 @@ exmc:
 
     NUM_CLONES: Number of copies of simulation
     Default: 1
-    This allows to use more compuation power for the same task, gather faster statistics, however the thermalization is not able to speed up with this
+    This allows to use more compuation power for the same task, gather faster
+    statistics, however the thermalization is not able to speed up with this
 
     SEED: Number seeding the RNG responsible for standart actions
     Default: (given by ALPS)
@@ -162,7 +178,9 @@ exmc:
 
     print debug information:
     Default: False
-    Prints the periodic translations as well as the coordinates of each site, only use this for short tests, as otherwise the ouput files explode in length
+    Prints the periodic translations as well as the coordinates of each site,
+    only use this for short tests, as otherwise the ouput files explode in
+    length
 
 -------------
 |OBSERVABLES|
@@ -183,12 +201,16 @@ exmc:
     MCRG Reduction Technique:
     Default: (none)
     Implemented in the reductions.h file, possible choices at the moment are:
-        "Decimation":           Uses only a 4th of the spins, ignoring the others
-        "Blockspin":            Compute the average over 4 spins in a Block and use these as new ones
-        "FerroBlockspin":       Same as Blockspin but first rotating the spins, such that the GS is transformed the ferromagnetic
-        "Blockspin4x4":         Use the same as Blockspin but with 16(=4*4) spins
-        "FerroBlockspin4x4":    Same as Blockspin4x4/FerroBlockspin, transform then average over 4*4 spins
-    These are randomized in successive measurements over the starting points of the blocks
+        "Decimation":        Uses only a 4th of the spins, ignoring the others
+        "Blockspin":         Compute the average over 4 spins in a Block and
+                             use these as new ones
+        "FerroBlockspin":    Same as Blockspin but first rotating the spins,
+                             such that the GS is transformed the ferromagnetic
+        "Blockspin4x4":      Use the same as Blockspin but with 16(=4*4) spins
+        "FerroBlockspin4x4": Same as Blockspin4x4/FerroBlockspin, transform
+                             then average over 4*4 spins
+    These are randomized in successive measurements over the starting points of
+    the blocks
 
     Structure Factor
     ----------------
@@ -199,9 +221,83 @@ exmc:
     -------------------------
     Spin Autocorrelation analysis length: In which depth to analyse the spin autocorrelation
     Default: -1
-    As the full configuration get saved, this can be a time and mostly time consuming task, consider that the class contains (this parameter) * N doubles and in every measurement compare a configuration to all the old ones. Use smaller lattices to still have a fast access to the data
+    As the full configuration get saved, this can be a time and mostly time
+    consuming task, consider that the class contains (this parameter) * N
+    doubles and in every measurement compare a configuration to all the old
+    ones. Use smaller lattices to still have a fast access to the data
     
     Last Configuration
     -------------------------
-    measure last configuration: boolean to determine if it should measure the last configuration or not
-    Default: False 
+    measure last configuration: 
+    Default: False
+    boolean to determine if it should measure the last configuration or not
+
+    Field Histogram
+    ---------------
+    Field Histogram: 
+    Default: False
+    Measure Field Histogram?
+    	
+    Field Histogram Measures per Measure: 
+    Default: 1024
+    Determines how many points get sampled for each configuration
+    
+    Field Histogram fixed z: 
+    Default: true
+    If set then each sample is drawn at same height, with a Gaussian
+    distribution set by lower parameters If not set, then Field Histogram z
+    determines the height
+
+    Field Histogram z: 
+    Default: 0.75
+    Two fold parameter: if fixed z, this is the height of all samples, if not
+    fixed z this is the mean of the Gaussian
+
+    Field Histogram z stddev: 
+    Default: 0.5
+    Standard deviation for the Gaussian
+
+    Field Histogram z cutoff: 
+    Default: 0.1
+    A truncation should be made (field to close in the layer of the dots leads
+    to huge sample) it's controlled by this parameter. 
+
+    Field Histogram cutoff: 
+    Default: 3.
+    Dots further away from the sampling site as this radius get ignored (this
+    should shift the total field, however not the qualitative dependence due to
+    short rangedness of the field in the quasi 2D set-up)
+
+    Field Histogram diameter split: 
+    Default: 1
+    The dot can be split up into several parts to attribute the finite width of
+    the experimental realization. The dot will be assumed circular. The dot
+    will be split up in several parts, such that along the diameter in
+    x-direction (and equivalently in y-direction) are this number of parts. The
+    overal number of part contributing to the dipole of a single dot is given
+    by as many dots that are inside the circle of this diameter.
+
+    Dot Radius: 
+    Default: 0.35
+    This parameter describes the extension of the dot in parameters of the
+    lattice periodicity a. The default value arises from one of the
+    experimental realizations.
+
+    Field Histogram lower histogram truncation:
+    Default: 4096
+    In the case of log binning, where to truncate against too small values. It
+    will calculate the maxfield and divide it by this number as a lower
+    truncation.
+
+    Field Histogram higher histogram truncation:
+    Default: 64 (log) / 3 (lin)
+    What should be the highest resolvable bin for the field histogram. It will
+    calculate the maxfield and multiply it by this factor, this will result in
+    the upper bound.
+
+    M: The magnetization of each dot.
+    Default: 1.
+            
+    Field Histogram number of bins: 
+    Default: 128
+    How many bins should the resulting histograms consist of?

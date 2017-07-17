@@ -351,12 +351,16 @@ private:
     double beta() const {
         return 1./T;
     }
+    std::shared_ptr<field_histogram_evaluator> fhe;
 public:
     xy_evaluator(alps::Parameters const& params) : 
         T(mcpp::init_T(params)),
         L(params["L"]),
         N(mcpp::init_N(params))
         {
+            if(params.value_or_default("Field Histogram",false)) {
+                fhe=std::make_shared<field_histogram_evaluator>(params);
+            }
         }
     void evaluate(alps::ObservableSet& obs) const {
         // Binder cumulant
@@ -398,6 +402,8 @@ public:
             chi = N*beta() * (M2-M*M); 
             obs.addObservable(chi); 
         } else std::cerr << "susceptibility staggered will not be calculated"<<std::endl;
+        if(fhe)
+            fhe->evaluate(obs);
     }
 
 };

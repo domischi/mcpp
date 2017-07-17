@@ -5,11 +5,13 @@
 #include <memory>
 
 #include "observable.h"
+#include "datatypes/histogram.h"
 #include "mcrg/mcrg.h"
 #include "basic-observables/basic_observables.h"
 #include "spin-autocorrelation/spin_autocorrelation.h"
 #include "structure-factor/structure_factor.h"
 #include "llg/llg.h"
+#include "field-histogram/field_histogram.h"
 
 std::vector<std::shared_ptr<observable>> construct_observables(const alps::Parameters& p, std::shared_ptr<Hamiltonian_List> hl_ ) {
     std::vector<std::shared_ptr<observable>> observables;
@@ -38,8 +40,9 @@ std::vector<std::shared_ptr<observable>> construct_observables(const alps::Param
         observables.push_back(std::make_shared<llg>(p,gh_,hl_));
         std::cout << "done"<<std::endl;;
     }
+    if(static_cast<bool>(p.value_or_default("Field Histogram",false))) {
+        observables.push_back(std::make_shared<field_histogram>(p,gh_,hl_));
+    }
     return observables;
 }
-
-
 #endif //MCPP_OBSERVABLES_H_
