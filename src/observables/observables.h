@@ -8,6 +8,7 @@
 #include "datatypes/histogram.h"
 #include "mcrg/mcrg.h"
 #include "basic-observables/basic_observables.h"
+#include "basic-observables/component_observables.h"
 #include "spin-autocorrelation/spin_autocorrelation.h"
 #include "structure-factor/structure_factor.h"
 #include "llg/llg.h"
@@ -18,6 +19,9 @@ std::vector<std::shared_ptr<observable>> construct_observables(const alps::Param
     std::shared_ptr<alps::graph_helper<>> gh_=std::make_shared<alps::graph_helper<>>(p);
     if(static_cast<bool>(p.value_or_default("basic_observables",true))) {
         observables.push_back(std::make_shared<basic_observables>(p,gh_,hl_));
+    }
+    if(static_cast<bool>(p.value_or_default("component_observables",false))) {
+        observables.push_back(std::make_shared<component_observables>(p,gh_,hl_));
     }
     if(static_cast<bool>(static_cast<int>(p.value_or_default("mcrg_iteration_depth",-1))>0)) {
         int mcrg_it_depth=p["mcrg_iteration_depth"];

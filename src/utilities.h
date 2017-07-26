@@ -48,6 +48,19 @@ namespace mcpp{
         return std::make_pair(std::sqrt(mx*mx+my*my)/spins.size(),std::sqrt(mxs*mxs+mys*mys)/spins.size());
     }
 
+    std::pair<double,double> mxs_and_mys(const std::vector<spin_t>& spins, const int L) {
+        double mxs=0.;
+        double mys=0.;
+        //at least theoretically vectorizable, however should not be the bottleneck
+        for(int i=0;i<spins.size();++i) {
+            spin_t sp=spins[i];
+            const double c=std::cos(sp);
+            const double s=std::sin(sp);
+            mxs+= ((i%L)%2 ? -1 : 1) * c; //for even y sites -1
+            mys+= ((i/L)%2 ? -1 : 1) * s; //for even x sites -1
+        }
+        return std::make_pair(mxs,mys);
+    }
     double spin_config_overlap(std::vector<spin_t> const& spins1, std::vector<spin_t> const& spins2){
         int N=spins1.size();
         if(N!=spins2.size()){

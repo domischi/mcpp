@@ -57,6 +57,20 @@ class ObservableTest(unittest.TestCase):
         self.check_has_observable('M staggered')
         self.check_has_observable('M staggered^2')
         self.check_has_observable('M staggered^4')
+    def test_component_observables(self):
+        parm=[{
+                 'LATTICE'        : "square lattice",
+                 'T'              : 0.,
+                 'J'              : 1.,
+                 'THERMALIZATION' : 1,
+                 'SWEEPS'         : 20,
+                 'component_observables' : True,
+                 "ALGORITHM"      : "xy",
+                 'L'              : 4,
+            }]
+        self.should_work(parm)
+        self.check_has_observable('M striped')
+        self.check_has_observable('M microvortex')
     def test_last_configuration(self):
         parm=[{
                  'LATTICE'        : "square lattice",

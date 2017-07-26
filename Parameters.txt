@@ -185,6 +185,11 @@ exmc:
 -------------
 |OBSERVABLES|
 -------------
+    Component Analysis
+    ------------------
+    component_observables: Boolean if components should be measured
+    Default: False
+    
     MCRG
     ----
     mcrg_iteration_depth: Number of iterations done with MCRG
