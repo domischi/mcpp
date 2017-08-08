@@ -59,6 +59,8 @@ namespace mcpp{
             mxs+= ((i%L)%2 ? -1 : 1) * c; //for even y sites -1
             mys+= ((i/L)%2 ? -1 : 1) * s; //for even x sites -1
         }
+        mxs/=spins.size();
+        mys/=spins.size();
         return std::make_pair(mxs,mys);
     }
     double spin_config_overlap(std::vector<spin_t> const& spins1, std::vector<spin_t> const& spins2){

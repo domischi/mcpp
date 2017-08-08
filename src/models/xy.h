@@ -110,7 +110,7 @@ public :
             }
         }
         obs["Acceptance Ratio"]<<update_angle_deviation(accepted,n_steps);// This is also of interest before thermalization
-        if(is_thermalized()&&(!((Step_Number-Thermalization_Sweeps)%Each_Measurement))){
+        if(is_thermalized()&&(!((Step_Number-Thermalization_Sweeps*exmc_factor)%Each_Measurement))){
             measure(obs);
             accepted=0;
         }
