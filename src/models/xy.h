@@ -33,7 +33,6 @@ public :
     xy_worker(const alps::Parameters& params) :
         alps::parapack::lattice_mc_worker<>(params), 
         is_exmc(static_cast<bool>(params["ALGORITHM"]!="xy")),
-        exmc_factor(init_exmc_factor(params)),
         Thermalization_Sweeps(params.value_or_default("THERMALIZATION",100)),
         Each_Measurement(params.value_or_default("Each_Measurement",10)),
         Sweeps(static_cast<int>(params.value_or_default("SWEEPS",5000))),
@@ -110,17 +109,17 @@ public :
             }
         }
         obs["Acceptance Ratio"]<<update_angle_deviation(accepted,n_steps);// This is also of interest before thermalization
-        if(is_thermalized()&&(!((Step_Number-Thermalization_Sweeps*exmc_factor)%Each_Measurement))){
+        if(is_thermalized()&&(!((Step_Number-Thermalization_Sweeps)%Each_Measurement))){
             measure(obs);
             accepted=0;
         }
     }
     
     bool is_thermalized() const {
-        return Step_Number > Thermalization_Sweeps*exmc_factor;
+        return Step_Number > Thermalization_Sweeps;
     }
     double progress() const {
-        return Step_Number/(static_cast<double>(Sweeps+exmc_factor*Thermalization_Sweeps));
+        return Step_Number/(static_cast<double>(Sweeps+Thermalization_Sweeps));
     }
     
     //for exmc
@@ -131,7 +130,6 @@ public :
 private:
     //System parameters
     const bool is_exmc;
-    const int exmc_factor;
     const int Thermalization_Sweeps;
     const int Each_Measurement;
     const int Sweeps;
@@ -252,17 +250,6 @@ private:
         }
         for(auto& o: observables) 
             o->measure(spins, obs);
-    }
-    int init_exmc_factor(const alps::Parameters& params){
-        if(!is_exmc)
-            return 1;
-        else
-            if (!params.defined("OPTIMIZATION_TYPE") || params["OPTIMIZATION_TYPE"]== "rate") {
-                return static_cast<unsigned int>(params.value_or_default("OPTIMIZATION_ITERATIONS", 1)) + 2;
-            }
-            else {
-                return static_cast<unsigned int>(params.value_or_default("OPTIMIZATION_ITERATIONS", 7)) + 2;
-            }
     }
     inline void init_spins(const alps::Parameters& params){
         if(params.value_or_default("Initialization","GS")=="Random"){
