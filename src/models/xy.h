@@ -28,10 +28,10 @@
 #include "../utilities.h"
 class xy_worker : public alps::parapack::lattice_mc_worker<>{
 public :
-    enum init_t {GS, Random, Ferro, Vortex}; 
+    enum init_t {GS, Random, Ferro, Vortex};
 
     xy_worker(const alps::Parameters& params) :
-        alps::parapack::lattice_mc_worker<>(params), 
+        alps::parapack::lattice_mc_worker<>(params),
         is_exmc(static_cast<bool>(params["ALGORITHM"]!="xy")),
         Thermalization_Sweeps(params.value_or_default("THERMALIZATION",100)),
         Each_Measurement(params.value_or_default("Each_Measurement",10)),
@@ -62,7 +62,7 @@ public :
             if(print_debug_information)
                 print_debug();
         }
-    
+
     void init_observables(alps::Parameters const&, alps::ObservableSet& obs){
         obs << alps::RealObservable("Energy");
         obs << alps::RealObservable("Energy^2");
@@ -74,9 +74,9 @@ public :
             o->init_observables(obs);
     }
     void save(alps::ODump &dump) const{
-        dump 
-        << Step_Number 
-        << spins 
+        dump
+        << Step_Number
+        << spins
         << angle_dev
         << En
         << accepted;
@@ -84,9 +84,9 @@ public :
             o->save(dump);
     }
     void load(alps::IDump &dump){
-        dump 
-        >> Step_Number 
-        >> spins 
+        dump
+        >> Step_Number
+        >> spins
         >> angle_dev
         >> En
         >> accepted
@@ -114,18 +114,18 @@ public :
             accepted=0;
         }
     }
-    
+
     bool is_thermalized() const {
         return Step_Number > Thermalization_Sweeps;
     }
     double progress() const {
         return Step_Number/(static_cast<double>(Sweeps+Thermalization_Sweeps));
     }
-    
+
     //for exmc
     typedef double weight_parameter_type;
     void set_beta(double beta_) { beta=beta_; T=1./beta_;}
-    weight_parameter_type weight_parameter() const {return -Energy();} 
+    weight_parameter_type weight_parameter() const {return -Energy();}
     static double log_weight(weight_parameter_type gw, double beta) {return beta*gw;}
 private:
     //System parameters
@@ -164,7 +164,7 @@ private:
         double old_energy=single_site_Energy(site);
         double new_state=mod2Pi(old_state+random_real_shifted(angle_dev));
         if(shape_anisotropy_p>0) {
-            new_state=mod2Pi(new_state+random_int(shape_anisotropy_p)*2*M_PI/shape_anisotropy_p); 
+            new_state=mod2Pi(new_state+random_int(shape_anisotropy_p)*2*M_PI/shape_anisotropy_p);
         }
         if(ising) {
             new_state= (old_state>0.5*M_PI ? 0 : M_PI); //Only allow Spin Flip updates
@@ -226,18 +226,18 @@ private:
     //this updates the range for the update
     double update_angle_deviation(int accepted, int n_steps){
         double acc_ratio=accepted*1./n_steps;
-        if(targeted_acc_ratio>acc_ratio && angle_dev>angle_dev_min) 
+        if(targeted_acc_ratio>acc_ratio && angle_dev>angle_dev_min)
             angle_dev/=angle_dev_fac;
         if(targeted_acc_ratio<acc_ratio && angle_dev<angle_dev_max)
             angle_dev*=angle_dev_fac;
         accepted=0;
-        return acc_ratio; 
+        return acc_ratio;
     }
 
     inline bool is_last_MC_step(){
         return Step_Number>Sweeps+Thermalization_Sweeps-Each_Measurement;
     }
-    
+
     double inline mod2Pi(double const& s) const {
         return s-std::floor(s/(2*M_PI))*2*M_PI;
     }
@@ -248,7 +248,7 @@ private:
             std::valarray<double> s(spins.data(),spins.size());
             obs["Last Configuration"]<<s;
         }
-        for(auto& o: observables) 
+        for(auto& o: observables)
             o->measure(spins, obs);
     }
     inline void init_spins(const alps::Parameters& params){
@@ -308,7 +308,7 @@ private:
                 std::cerr << "Smth went terribly wrong as this line should never be hit"<<std::endl;
         }
     }
-    //inline double beta() const { 
+    //inline double beta() const {
     //    return 1./T;
     //}
 
@@ -332,62 +332,66 @@ private:
 
 class xy_evaluator : public alps::parapack::simple_evaluator {
 private:
-    double T;
-    int L;
-    int N;
+    const double T;
+    const int L;
+    const int N;
+    const bool components;
     double beta() const {
         return 1./T;
     }
     std::shared_ptr<field_histogram_evaluator> fhe;
+    void binder_cumulant(alps::ObservableSet& obs, std::string start) const{
+        if(obs.has(start+"^4")&&obs.has(start+"^2")){
+            alps::RealObsevaluator m2 = obs[start+"^2"];
+            alps::RealObsevaluator m4 = obs[start+"^4"];
+            alps::RealObsevaluator binder("BinderCumulant "+start);
+            binder = 1.-m4/(m2*m2*3);
+            obs.addObservable(binder);
+        } else std::cerr << "Binder cumulant for "<<start<< " will not be calculated"<<std::endl;
+
+    }
 public:
-    xy_evaluator(alps::Parameters const& params) : 
+    xy_evaluator(alps::Parameters const& params) :
         T(mcpp::init_T(params)),
         L(params["L"]),
-        N(mcpp::init_N(params))
+        N(mcpp::init_N(params)),
+        components(params.value_or_default("component_observables",false))
         {
             if(params.value_or_default("Field Histogram",false)) {
                 fhe=std::make_shared<field_histogram_evaluator>(params);
             }
         }
     void evaluate(alps::ObservableSet& obs) const {
-        // Binder cumulant
-        if(obs.has("M^4")&&obs.has("M^2")){
-            alps::RealObsevaluator m2 = obs["M^2"];
-            alps::RealObsevaluator m4 = obs["M^4"];
-            alps::RealObsevaluator binder("BinderCumulant"); 
-            binder = 1.-m4/(m2*m2*3);
-            obs.addObservable(binder); 
-        } else std::cerr << "Binder cumulant will not be calculated"<<std::endl;
-        if(obs.has("M staggered^4")&&obs.has("M staggered^2")){
-            alps::RealObsevaluator m2 = obs["M staggered^2"];
-            alps::RealObsevaluator m4 = obs["M staggered^4"];
-            alps::RealObsevaluator binder("BinderCumulant staggered"); 
-            binder = 1.-m4/(m2*m2*3);
-            obs.addObservable(binder); 
-        } else std::cerr << "Binder stag cumulant will not be calculated"<<std::endl;
-        // c_V  
+        // Binder cumulants
+        binder_cumulant(obs,"M");
+        binder_cumulant(obs,"M staggered");
+        if(components){
+            binder_cumulant(obs,"M striped");
+            binder_cumulant(obs,"M microvortex");
+        }
+        // c_V
         if(obs.has("Energy")&&obs.has("Energy^2")){
             alps::RealObsevaluator E = obs["Energy"];
             alps::RealObsevaluator E2 = obs["Energy^2"];
             alps::RealObsevaluator c_V("c_V");
             c_V = beta()*beta() * (E2-E*E) * 4 * N;
 
-            obs.addObservable(c_V); 
+            obs.addObservable(c_V);
         } else std::cerr << "c_V will not be calculated"<<std::endl;
-        // susceptibility 
+        // susceptibility
         if(obs.has("M")&&obs.has("M^2")){
             alps::RealObsevaluator M = obs["M"];
             alps::RealObsevaluator M2 = obs["M^2"];
             alps::RealObsevaluator chi("susceptibility");
-            chi = N*beta() * (M2-M*M); 
-            obs.addObservable(chi); 
+            chi = N*beta() * (M2-M*M);
+            obs.addObservable(chi);
         } else std::cerr << "susceptibility will not be calculated"<<std::endl;
         if(obs.has("M staggered")&&obs.has("M staggered^2")){
             alps::RealObsevaluator M = obs["M staggered"];
             alps::RealObsevaluator M2 = obs["M staggered^2"];
             alps::RealObsevaluator chi("susceptibility staggered");
-            chi = N*beta() * (M2-M*M); 
-            obs.addObservable(chi); 
+            chi = N*beta() * (M2-M*M);
+            obs.addObservable(chi);
         } else std::cerr << "susceptibility staggered will not be calculated"<<std::endl;
         if(fhe)
             fhe->evaluate(obs);
