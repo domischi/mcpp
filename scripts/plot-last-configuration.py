@@ -1,7 +1,7 @@
 # ****************************************************************************
 #
-# Plot the last configuration encountered in the simulation of a specific file 
-# 
+# Plot the last configuration encountered in the simulation of a specific file
+#
 # ****************************************************************************
 
 import pyalps
@@ -24,23 +24,34 @@ def plot_spins(spins, a=1., b=1.):
     ax.set_ylim(-1,(L-1)*a+1)
     plt.show()
 
-if (len(sys.argv)!=2 or sys.argv[1]=='-h' or sys.argv[1]=='--help'):
+EXMC=False
+SSF =True
+if ('--exmc' in sys.argv):
+    EXMC=True
+    SSF =False
+if (len(sys.argv)<2 or '-h' in sys.argv or '--help' in sys.argv):
     print("Usage: alpspython "+str(sys.argv[0])+" parm.taskX.out.h5")
 else:
     a=1.
     b=1.
     try:
-        a=pyalps.loadProperties([sys.argv[1]])[0]["a"]
+        a=pyalps.loadProperties([sys.argv[-1]])[0]["a"]
     except KeyError:
         pass
     try:
-        b=pyalps.loadProperties([sys.argv[1]])[0]["b"]
+        b=pyalps.loadProperties([sys.argv[-1]])[0]["b"]
     except KeyError:
         pass
-    if(pyalps.loadProperties([sys.argv[1]])[0]["LATTICE"]!="square lattice" and 
-       pyalps.loadProperties([sys.argv[1]])[0]["LATTICE"]!="anisotropic square lattice"):
+    if(pyalps.loadProperties([sys.argv[-1]])[0]["LATTICE"]!="square lattice" and
+       pyalps.loadProperties([sys.argv[-1]])[0]["LATTICE"]!="anisotropic square lattice"):
         print("Error: at the moment this script only works for square lattice configurations")
         exit()
-    data=pyalps.collectXY(pyalps.loadMeasurements([sys.argv[1]],['Last Configuration']),x='T',y='Last Configuration')[0]
-    spins=data.y
+    if SSF:
+        data=pyalps.ResultsToXY(pyalps.loadMeasurements([sys.argv[-1]],['Last Configuration']),x='EXMC: Temperature',y='Last Configuration')[0]
+        spins=data.y
+    if EXMC:
+        ar=pyalps.h5.archive(sys.argv[-1],'r')
+        data= ar['simulation/results']
+        T=data['EXMC: Temperature']['mean']['value']
+        spins=data['Last Configuration']['mean']['value']
     plot_spins(spins, a,b)

@@ -42,6 +42,8 @@ public :
         ising(static_cast<bool>(params.value_or_default("Ising", false))),
         Step_Number(0),
         accepted(0),
+        coords(init_coords(params)),
+        is_deleted(init_is_deleted(params)),
         measure_last_configuration(static_cast<bool>(params.value_or_default("measure last configuration",false))),
         HamiltonianList(get_hl(params)),
         observables(construct_observables(params, HamiltonianList)),
@@ -63,12 +65,14 @@ public :
                 print_debug();
         }
 
-    void init_observables(alps::Parameters const&, alps::ObservableSet& obs){
+    void init_observables(alps::Parameters const& params, alps::ObservableSet& obs){
         obs << alps::RealObservable("Energy");
         obs << alps::RealObservable("Energy^2");
         obs << alps::RealObservable("Acceptance Ratio"); //Probably very useful for debugging
         if(measure_last_configuration){
             obs<<alps::RealVectorObservable("Last Configuration");
+            obs<<alps::SimpleRealVectorObservable("Coordinates");
+            obs<<alps::SimpleIntVectorObservable("Is Deleted");
         }
         for (auto& o : observables)
             o->init_observables(obs);
@@ -155,7 +159,9 @@ private:
     //Easy observables
     double En;
     int accepted;
-    const bool measure_last_configuration;
+    bool measure_last_configuration;
+    std::valarray<int> is_deleted;
+    std::valarray<double> coords;
 
     inline void update(){update(random_int(num_sites()));}
     void update(int site){
@@ -188,6 +194,36 @@ private:
         ret<<std::setw(8)<<v[dimension()-1];
         ret<<")";
         return ret.str();
+    }
+    std::valarray<int> init_is_deleted(const alps::Parameters& params) const{
+        if(params.value_or_default("measure last configuration",false)){
+            std::vector<bool> is_deleted_vector;
+            std::vector<vector_type> disordered_coords;
+            std::tie(is_deleted_vector, disordered_coords)=mcpp::get_coordinates(*this,params);
+            std::valarray<int> is_deleted_ret(is_deleted_vector.size());
+            for(int i=0;i<is_deleted_vector.size();++i)
+                is_deleted_ret[i]=is_deleted_vector[i];
+            return is_deleted_ret;
+        }
+        else {
+            return std::valarray<int>(0);
+        }
+    }
+    std::valarray<double> init_coords(const alps::Parameters& params) const {
+        if(params.value_or_default("measure last configuration",false)){
+            std::vector<bool> is_deleted_vector;
+            std::vector<vector_type> disordered_coords;
+            std::tie(is_deleted_vector, disordered_coords)=mcpp::get_coordinates(*this,params);
+            std::valarray<double> coords_ret(dimension()*disordered_coords.size());
+            for(int j=0;j< disordered_coords.size();++j) {
+                for(int i=0;i<dimension();++i)
+                    coords_ret[dimension()*j+i]=disordered_coords[j][i];
+            }
+            return coords_ret;
+        }
+        else {
+            return std::valarray<double>(0);
+        }
     }
 
     void print_debug(){
@@ -234,19 +270,22 @@ private:
         return acc_ratio;
     }
 
-    inline bool is_last_MC_step(){
-        return Step_Number>Sweeps+Thermalization_Sweeps-Each_Measurement;
-    }
-
     double inline mod2Pi(double const& s) const {
         return s-std::floor(s/(2*M_PI))*2*M_PI;
     }
     void measure(alps::ObservableSet& obs){
         obs["Energy"]<<En/num_sites();
         obs["Energy^2"]<<std::pow(En/num_sites(),2);
-        if(measure_last_configuration && is_last_MC_step()){
-            std::valarray<double> s(spins.data(),spins.size());
-            obs["Last Configuration"]<<s;
+        if(measure_last_configuration){
+            if(progress()>0.99){
+                for(int i =0;i<16;++i){
+                    obs["Coordinates"]<<coords;
+                    obs["Is Deleted"] <<is_deleted;
+                }
+                measure_last_configuration=false;
+                std::valarray<double> s(spins.data(),spins.size());
+                obs["Last Configuration"]<<s;
+            }
         }
         for(auto& o: observables)
             o->measure(spins, obs);
@@ -308,9 +347,6 @@ private:
                 std::cerr << "Smth went terribly wrong as this line should never be hit"<<std::endl;
         }
     }
-    //inline double beta() const {
-    //    return 1./T;
-    //}
 
     inline int random_int(int j){
         return static_cast<int>(j*uniform_01());
