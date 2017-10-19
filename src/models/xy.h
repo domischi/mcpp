@@ -402,6 +402,8 @@ public:
         binder_cumulant(obs,"M");
         binder_cumulant(obs,"M staggered");
         if(components){
+            binder_cumulant(obs,"M striped unnormalized");
+            binder_cumulant(obs,"M microvortex unnormalized");
             binder_cumulant(obs,"M striped");
             binder_cumulant(obs,"M microvortex");
         }

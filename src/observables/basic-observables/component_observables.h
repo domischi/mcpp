@@ -17,14 +17,22 @@ public:
         double mxs,mys, ms;
         std::tie(mxs,mys)=mcpp::mxs_and_mys(spins,L);
         ms=std::sqrt(mxs*mxs+mys*mys);
-        const double striped=std::abs((mxs*mxs-mys*mys)/ms);
-        const double mv     =std::abs(2*mxs*mys/ms);
-        obs["M striped"      ]<< striped;
-        obs["M striped^2"    ]<< std::pow(striped,2);
-        obs["M striped^4"    ]<< std::pow(striped,4);
-        obs["M microvortex"  ]<< mv;
-        obs["M microvortex^2"]<< std::pow(mv,2);
-        obs["M microvortex^4"]<< std::pow(mv,4);
+        double striped=std::abs(mxs*mxs-mys*mys);
+        double mv     =std::abs(2*mxs*mys);
+        obs["M striped unnormalized"      ]<< std::sqrt(striped);
+        obs["M striped unnormalized^2"    ]<< striped;
+        obs["M striped unnormalized^4"    ]<< std::pow(striped,2);
+        obs["M microvortex unnormalized"  ]<< std::sqrt(mv); 
+        obs["M microvortex unnormalized^2"]<< mv;          
+        obs["M microvortex unnormalized^4"]<< std::pow(mv,2);
+        striped/=ms;
+        mv     /=ms;
+        obs["M striped"                 ]<< striped;
+        obs["M striped^2"               ]<< std::pow(striped,2);
+        obs["M striped^4"               ]<< std::pow(striped,4);
+        obs["M microvortex"             ]<< mv;
+        obs["M microvortex^2"           ]<< std::pow(mv,2);
+        obs["M microvortex^4"           ]<< std::pow(mv,4);
     }
 
     void init_observables(alps::ObservableSet& obs) const {
@@ -34,6 +42,12 @@ public:
         obs <<alps::RealObservable("M microvortex");
         obs <<alps::RealObservable("M microvortex^2");
         obs <<alps::RealObservable("M microvortex^4");
+        obs <<alps::RealObservable("M striped unnormalized");
+        obs <<alps::RealObservable("M striped unnormalized^2");
+        obs <<alps::RealObservable("M striped unnormalized^4");
+        obs <<alps::RealObservable("M microvortex unnormalized");
+        obs <<alps::RealObservable("M microvortex unnormalized^2");
+        obs <<alps::RealObservable("M microvortex unnormalized^4");
     }
 
     // Intentionally left empty as only const values are inside the class (initialization due to constructor)
