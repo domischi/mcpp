@@ -23,7 +23,6 @@ message(STATUS "Found ALPS: ${ALPS_ROOT_DIR} (revision: ${ALPS_VERSION})")
 include(${ALPS_USE_FILE})
 
 set(LIBS "${ALPS_LIBRARIES}")
-
 #-------------------------------------------------------------------
 # FFTW
 #-------------------------------------------------------------------
@@ -46,7 +45,6 @@ endif(USE_FFTW)
 # Flags
 #-------------------------------------------------------------------
 SET(COMMON_FLAGS "-w")
-
 IF(DEBUG)
     SET(COMMON_FLAGS "${COMMON_FLAGS} -pg -g -Wall")
     ELSE(DEBUG)
@@ -103,6 +101,6 @@ configure_file(
 #-------------------------------------------------------------------
 SET(SRCS ${SRCS} src/main.cpp src/parapack_register.cpp)
 ADD_EXECUTABLE(mc++ ${SRCS})
-TARGET_LINK_LIBRARIES(mc++ ${LIBS})
-TARGET_LINK_LIBRARIES(mc++ ${FFTW_LIBS})
+TARGET_LINK_LIBRARIES(mc++ m)
+TARGET_LINK_LIBRARIES(mc++ m ${LIBS} ${FFTW_LIBS})
 INSTALL(TARGETS mc++ DESTINATION $ENV{HOME}/bin)
