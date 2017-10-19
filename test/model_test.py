@@ -21,7 +21,7 @@ class ModelTest(unittest.TestCase):
     def call(self,parm, output=False):
         import pyalps
         import subprocess
-	input_file = pyalps.writeInputFiles('parm',parm)
+        input_file = pyalps.writeInputFiles('parm',parm)
         if not output:
             return subprocess.call('mc++ parm.in.xml', stdout=self.oblivion, stderr=subprocess.STDOUT, shell=True)
         else:
