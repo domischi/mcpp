@@ -71,8 +71,8 @@ public :
         obs << alps::RealObservable("Acceptance Ratio"); //Probably very useful for debugging
         if(measure_last_configuration){
             obs<<alps::RealVectorObservable("Last Configuration");
-            obs<<alps::SimpleRealVectorObservable("Coordinates");
-            obs<<alps::SimpleIntVectorObservable("Is Deleted");
+            obs<<alps::RealVectorObservable("Coordinates");
+            obs<<alps::IntVectorObservable("Is Deleted");
         }
         for (auto& o : observables)
             o->init_observables(obs);
@@ -278,13 +278,13 @@ private:
         obs["Energy^2"]<<std::pow(En/num_sites(),2);
         if(measure_last_configuration){
             if(progress()>0.99){
+                std::valarray<double> s(spins.data(),spins.size());
                 for(int i =0;i<16;++i){
                     obs["Coordinates"]<<coords;
                     obs["Is Deleted"] <<is_deleted;
+                    obs["Last Configuration"]<<s;
                 }
                 measure_last_configuration=false;
-                std::valarray<double> s(spins.data(),spins.size());
-                obs["Last Configuration"]<<s;
             }
         }
         for(auto& o: observables)
