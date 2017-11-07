@@ -60,7 +60,6 @@ public :
                 std::exit(4);
             }
             init_spins(params);
-            En=Energy();
             if(print_debug_information)
                 print_debug();
         }
@@ -82,7 +81,6 @@ public :
         << Step_Number
         << spins
         << angle_dev
-        << En
         << accepted;
         for(auto & o: observables)
             o->save(dump);
@@ -92,7 +90,6 @@ public :
         >> Step_Number
         >> spins
         >> angle_dev
-        >> En
         >> accepted
         ;
         for(auto& o : observables)
@@ -157,7 +154,6 @@ private:
     std::vector<std::shared_ptr<observable>> observables;
 
     //Easy observables
-    double En;
     int accepted;
     bool measure_last_configuration;
     std::valarray<int> is_deleted;
@@ -178,7 +174,6 @@ private:
         spins[site]=new_state;
         double new_energy=single_site_Energy(site);
         if(random_real()<=std::exp(-(new_energy-old_energy)/T)){
-            En+=(new_energy-old_energy);
             ++accepted;
         }
         else{ //switch back
@@ -274,6 +269,7 @@ private:
         return s-std::floor(s/(2*M_PI))*2*M_PI;
     }
     void measure(alps::ObservableSet& obs){
+        double En=Energy();
         obs["Energy"]<<En/num_sites();
         obs["Energy^2"]<<std::pow(En/num_sites(),2);
         if(measure_last_configuration){
