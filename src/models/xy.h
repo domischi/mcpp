@@ -361,15 +361,16 @@ private:
     }
 };
 
-
+template<bool exmc>
 class xy_evaluator : public alps::parapack::simple_evaluator {
 private:
     const double T;
     const int L;
     const int N;
     const bool components;
-    double beta() const {
-        return 1./T;
+    inline double beta(alps::ObservableSet& obs) const {
+        if(!exmc) return 1./T;
+        else return alps::RealObsevaluator(obs["EXMC: Inverse Temperature"]).mean();
     }
     std::shared_ptr<field_histogram_evaluator> fhe;
     void binder_cumulant(alps::ObservableSet& obs, std::string start) const{
@@ -408,7 +409,7 @@ public:
             alps::RealObsevaluator E = obs["Energy"];
             alps::RealObsevaluator E2 = obs["Energy^2"];
             alps::RealObsevaluator c_V("c_V");
-            c_V = beta()*beta() * (E2-E*E) * 4 * N;
+            c_V = beta(obs)*beta(obs) * (E2-E*E) * 4 * N;
 
             obs.addObservable(c_V);
         } else std::cerr << "c_V will not be calculated"<<std::endl;
@@ -417,14 +418,14 @@ public:
             alps::RealObsevaluator M = obs["M"];
             alps::RealObsevaluator M2 = obs["M^2"];
             alps::RealObsevaluator chi("susceptibility");
-            chi = N*beta() * (M2-M*M);
+            chi = N*beta(obs) * (M2-M*M);
             obs.addObservable(chi);
         } else std::cerr << "susceptibility will not be calculated"<<std::endl;
         if(obs.has("M staggered")&&obs.has("M staggered^2")){
             alps::RealObsevaluator M = obs["M staggered"];
             alps::RealObsevaluator M2 = obs["M staggered^2"];
             alps::RealObsevaluator chi("susceptibility staggered");
-            chi = N*beta() * (M2-M*M);
+            chi = N*beta(obs) * (M2-M*M);
             obs.addObservable(chi);
         } else std::cerr << "susceptibility staggered will not be calculated"<<std::endl;
         if(fhe)
