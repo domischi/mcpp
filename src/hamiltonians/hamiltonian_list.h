@@ -14,12 +14,14 @@ struct Hamiltonian_List {
     std::unique_ptr<XY_Exchange>         p_exchange;
     std::unique_ptr<XY_Shape_Anisotropy> p_shape_anisotropy;
     Hamiltonian_List(alps::Parameters const& params) {
+
         if(params.defined("D") && static_cast<double>(params["D"])!=0.){
-            if(mcpp::is_disordered(params)){
+            if(mcpp::is_disordered(params) || static_cast<bool>(params["LATTICE"]!="square lattice")){
                 p_dipolar_disordered=std::unique_ptr<XY_Dipole<true>>(new XY_Dipole<true>(params)); 
             }
-            else
-                p_dipolar=std::unique_ptr<XY_Dipole<false>>(new XY_Dipole<false>(params)); 
+            else{
+                p_dipolar=std::unique_ptr<XY_Dipole<false>>(new XY_Dipole<false>(params));
+            }
         }
         if(params.defined("J") && static_cast<double>(params["J"])!=0.){
             p_exchange=std::unique_ptr<XY_Exchange>(new XY_Exchange(params)); 

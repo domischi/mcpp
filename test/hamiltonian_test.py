@@ -66,6 +66,19 @@ class HamiltonianTest(unittest.TestCase):
                  'L'              : 6,
             }]
         self.should_work(parm)
+    def test_pure_dipolar_w_honeycomb_lattice(self):
+        parm=[{
+                 'LATTICE'        : "honeycomb lattice",
+                 'basic_observables': False,
+                 'T'              : 0.,
+                 'D'              : 1.,
+                 'THERMALIZATION' : 10,
+                 'SWEEPS'         : 200,
+                 "ALGORITHM"      : "xy",
+                 'cutoff_distance': 3.,
+                 'L'              : 10,
+            }]
+        self.should_work(parm)
     def test_pure_dipolar_run(self):
         parm=[{
                  'LATTICE'        : "square lattice",
