@@ -6,7 +6,7 @@
 class field_histogram : public observable{
 public:
     typedef mcpp::vector_type vector_type;
-    
+
     field_histogram(const alps::Parameters& p, std::shared_ptr<alps::graph_helper<>> gh_, std::shared_ptr<Hamiltonian_List> hl_) :
     observable(p,gh_,hl_),
     graph_helper_(gh_),
@@ -21,23 +21,40 @@ public:
     M(1.),// we bother with units in the evaluator
     urd(0.,static_cast<double>(p.value_or_default("a",1.))*static_cast<double>(p["L"])),
     nd(0.,1.),
+    auto_detect_range(p.value_or_default("Field Histogram auto detect range",true)),
     rng(static_cast<int>(p["SEED"]))
     {
         std::tie(is_deleted, coordinates) = mcpp::get_coordinates(*graph_helper_, p);
+        const int n_bins= p.value_or_default("Field Histogram number of bins",p.value_or_default("Field Histogram n_bins", 128));
         periodic_translations_=mcpp::get_periodic_translations(*graph_helper_, p);
-        bool log=p.value_or_default("Field Histogram Log Scale", false);
-        double lower_factor =p.value_or_default("Field Histogram lower histogram truncation" ,4096);
-        double higher_factor=p.value_or_default("Field Histogram higher histogram truncation",(log?64:3));
+        const bool log=p.value_or_default("Field Histogram Log Scale", false);
+        const double lower_factor =p.value_or_default("Field Histogram lower histogram truncation" ,4096);
+        const double higher_factor=p.value_or_default("Field Histogram higher histogram truncation",(log?64:3));
         maxfield_=mcpp::maxfield(M,z_mean,radius,diameter_split);
-        if(log) {
-            histogram_abs=std::make_shared<histogram>("Field Histogram Absolute Value", maxfield_/lower_factor, higher_factor*maxfield_, p.value_or_default("Field Histogram number of bins",p.value_or_default("Field Histogram n_bins", 128)),histogram::hist_type::log);
-            histogram_xy =std::make_shared<histogram>("Field Histogram xy"            , maxfield_/lower_factor, higher_factor*maxfield_, p.value_or_default("Field Histogram number of bins",p.value_or_default("Field Histogram n_bins", 128)),histogram::hist_type::symmetric_log);
-            histogram_z  =std::make_shared<histogram>("Field Histogram z"             , maxfield_/lower_factor, higher_factor*maxfield_, p.value_or_default("Field Histogram number of bins",p.value_or_default("Field Histogram n_bins", 128)),histogram::hist_type::symmetric_log);
-        }                                                                               
+        if(auto_detect_range){
+            const int n_first_values=p.value_or_default("Field Histogram number of first values",1024);
+            if(log) {
+                histogram_abs=std::make_shared<histogram>("Field Histogram Absolute Value", n_bins,  n_first_values,histogram::hist_type::log);
+                histogram_xy =std::make_shared<histogram>("Field Histogram xy"            , n_bins,2*n_first_values,histogram::hist_type::symmetric_log);
+                histogram_z  =std::make_shared<histogram>("Field Histogram z"             , n_bins,  n_first_values,histogram::hist_type::symmetric_log);
+            }
+            else{
+                histogram_abs=std::make_shared<histogram>("Field Histogram Absolute Value", n_bins,   n_first_values,histogram::hist_type::linear);
+                histogram_xy =std::make_shared<histogram>("Field Histogram xy"            , n_bins, 2*n_first_values,histogram::hist_type::linear);
+                histogram_z  =std::make_shared<histogram>("Field Histogram z"             , n_bins,   n_first_values,histogram::hist_type::linear);
+            }
+        }
         else{
-            histogram_abs=std::make_shared<histogram>("Field Histogram Absolute Value", 0.                     , higher_factor*maxfield_, p.value_or_default("Field Histogram number of bins",p.value_or_default("Field Histogram n_bins", 128)),histogram::hist_type::linear);
-            histogram_xy =std::make_shared<histogram>("Field Histogram xy"            , -higher_factor*maxfield_, higher_factor*maxfield_, p.value_or_default("Field Histogram number of bins",p.value_or_default("Field Histogram n_bins", 128)),histogram::hist_type::linear);
-            histogram_z  =std::make_shared<histogram>("Field Histogram z"             , -higher_factor*maxfield_, higher_factor*maxfield_, p.value_or_default("Field Histogram number of bins",p.value_or_default("Field Histogram n_bins", 128)),histogram::hist_type::linear);
+            if(log) {
+                histogram_abs=std::make_shared<histogram>("Field Histogram Absolute Value", maxfield_/lower_factor, higher_factor*maxfield_, n_bins,histogram::hist_type::log);
+                histogram_xy =std::make_shared<histogram>("Field Histogram xy"            , maxfield_/lower_factor, higher_factor*maxfield_, n_bins,histogram::hist_type::symmetric_log);
+                histogram_z  =std::make_shared<histogram>("Field Histogram z"             , maxfield_/lower_factor, higher_factor*maxfield_, n_bins,histogram::hist_type::symmetric_log);
+            }
+            else{
+                histogram_abs=std::make_shared<histogram>("Field Histogram Absolute Value", 0.                     , higher_factor*maxfield_, n_bins,histogram::hist_type::linear);
+                histogram_xy =std::make_shared<histogram>("Field Histogram xy"            , -higher_factor*maxfield_, higher_factor*maxfield_,n_bins ,histogram::hist_type::linear);
+                histogram_z  =std::make_shared<histogram>("Field Histogram z"             , -higher_factor*maxfield_, higher_factor*maxfield_,n_bins ,histogram::hist_type::linear);
+            }
         }
     }
 
@@ -80,6 +97,7 @@ private:
     std::vector<vector_type> periodic_translations_;
    
     const int measures_per_measure;
+    const bool auto_detect_range;
      
     const double cutoff;
     const int diameter_split;
@@ -116,5 +134,4 @@ private:
         }
     }
 };
-#include "field_histogram_evaluator.h"
 #endif//MCPP_FIELD_HISTOGRAM_H_

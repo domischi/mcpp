@@ -13,8 +13,7 @@ public:
     observable(const alps::Parameters& p, std::shared_ptr<alps::graph_helper<>> gh_, std::shared_ptr<Hamiltonian_List> hl_ ) :
         graph_helper_(gh_),
         hamiltonian_list_(hl_),
-        L(p["L"]),
-        N(graph_helper_->num_sites())
+        L(p["L"])
     {
     }
                 
@@ -25,6 +24,6 @@ public:
 protected:
     std::shared_ptr<alps::graph_helper<>> graph_helper_;
     std::shared_ptr<Hamiltonian_List> hamiltonian_list_;
-    const int L,N;
+    const int L;
 };
 #endif //MCPP_OBSERVABLE_H_

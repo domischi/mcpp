@@ -7,7 +7,9 @@ class histogram_evaluator {
 private:
     const int nbins;
     const std::string name;
-    const double min, max;
+    double min, max;
+    const double prefactor;
+    const bool auto_detected_range;
     const histogram::hist_type type;
 
     std::valarray<double> lin_x() const{
@@ -71,22 +73,40 @@ private:
         }
     }
 public:
-    histogram_evaluator(std::string const& name_, const double min_, const double max_, const int n_bins=128, const histogram::hist_type type_ = histogram::hist_type::linear) :
+    // fixed range evaluator
+    histogram_evaluator(std::string const& name_, const double min_, const double max_, const int n_bins=128, const histogram::hist_type type_ = histogram::hist_type::linear, const double prefactor_=1.) :
     nbins(n_bins),
     min(min_),
     max(max_),
+    prefactor(prefactor_),
+    auto_detected_range(false),
     name(name_),
     type(type_){}
 
-    virtual void evaluate(alps::ObservableSet& obs) const {
-       if(obs.has(name)){
+    //auto detect range evaluator
+    histogram_evaluator(std::string const& name_, const int n_bins=128, const histogram::hist_type type_= histogram::hist_type::linear, const double prefactor_=1.) :
+    nbins(n_bins),
+    min(0.),
+    max(0.),
+    prefactor(prefactor_),
+    auto_detected_range(true),
+    name(name_),
+    type(type_){}
+
+    virtual void evaluate(alps::ObservableSet& obs) {
+        if(obs.has(name)){
+            if(auto_detected_range){
+                min=alps::RealObsevaluator(obs[name+ " Min"]).mean();
+                max=alps::RealObsevaluator(obs[name+ " Max"]).mean();
+            }
             alps::RealVectorObservable x_vals(name+" X");
             std::valarray<double> x=init_x();
+            for (auto& y : x ) y*=prefactor;
             for (int i=0;i<4;++i) x_vals<<x;
             obs.addObservable(x_vals);
-       } else{
-           std::cerr<< "x-values for histogram "<< name << " will not be calculated"<<std::endl; 
-       } 
+        } else{
+            std::cerr<< "x-values for histogram "<< name << " will not be calculated"<<std::endl;
+        }
     }
 };
 #endif//MCPP_HISTOGRAM_EVALUATOR_H_

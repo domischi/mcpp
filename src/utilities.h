@@ -15,6 +15,10 @@ namespace mcpp{
     typedef double spin_t;
     typedef std::vector<double> vector_t;
     
+    template<class T>
+    int nearest_integer(T const& x){
+        return static_cast<int>(std::round(x));
+    }
     inline double norm(vector_type const& x){
         double s=0;
         for (auto& e: x) {
@@ -28,6 +32,14 @@ namespace mcpp{
             s+=x[i]*y[i];
         return s;
     } 
+    template< class T>
+    T outer(T const& x, T const& y) {
+        T s(x.size()*y.size());
+        for(int i = 0; i< x.size();++i)
+            for(int j = 0; j< y.size();++j)
+                s[i*y.size()+j]=x[i]*y[j];
+        return s;
+    }
     std::pair<double,double> magnetization_and_staggered_magnetization(const std::vector<spin_t>& spins, const int L) {
         double mx =0.;
         double my =0.;
@@ -146,14 +158,9 @@ namespace mcpp{
         return alps::graph_helper<>(p).num_sites();
     }
     inline double init_T(const alps::Parameters& params) {
-        if(params["ALGORITHM"]=="xy")
-            return params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"]);
-        else if(params["ALGORITHM"]=="exmc")
+        if(params["ALGORITHM"]=="exmc")
             return 1.;// just set it to a value, it anyway gets set afterwards
-        else {
-            std::cerr<< "Cannot initalize T in model xy, because the algorithm is not detected. Aborting..."<<std::endl;
-            std::exit(44);
-        }
+        return params.defined("T") ? static_cast<double>(params["T"]) : 1./static_cast<double>(params["beta"]);
     }
     inline bool is_disordered(parameter_type const& p) {
         return 

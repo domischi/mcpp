@@ -5,10 +5,23 @@
 #include <tuple>
 
 //TODO now bigger sets copy the content of the smaller ones, this is not desirable as you should never do copy paste...
-
-namespace mcrg_utilities {
-typedef std::tuple<int,std::vector<int>> shift_t; //component, (dx,dy,dz,...)
-
+namespace mcpp {
+namespace mcrg {
+    typedef std::tuple<int,std::vector<int>> shift_t; //component, (dx,dy,dz,...)
+std::vector<std::vector<shift_t>> minimal = {
+    //Odd
+    {std::make_tuple(0,std::vector<int> {0,0} )}, // field term along x
+    //Even
+    {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, //NNx x comp
+};
+std::vector<std::vector<shift_t>> close_to_minimal = {
+    //Odd
+    {std::make_tuple(0,std::vector<int> {0,0} )}, // field term along x
+    //Even
+    {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 0} )}, //NNx x comp
+    {std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 1} )}, //NNx x comp
+    //{std::make_tuple(0,std::vector<int> {0,0} ), std::make_tuple(0,std::vector<int> { 1, 1} )},
+};
 /*
     This is only a small set, including NNx, NNy, d11, d-11
     In the components x, y, xy, yx
@@ -931,5 +944,6 @@ std::vector<std::vector<shift_t>> xy_3d_swendsen =
 	{ std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 1, 0}) },
 	{ std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 0, 0, 0}), std::make_tuple(0,std::vector<int>{ 1, 1, 1}) }
 };
-}
+}//mcrg
+}//mcpp
 #endif //MCPP_MCRG_INTERACTIONS_H_

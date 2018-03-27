@@ -123,8 +123,8 @@ private:
     std::shared_ptr<llg_autocorrelation> autocorrelation;
     std::shared_ptr<muon_depolarization> muon;
     void update_spins() {
-        if(descending_ascending) for(int i=0  ;i< N;++i) update_one_spin(i);
-        else                     for(int i=N-1;i>=0;--i) update_one_spin(i);
+        if(descending_ascending) for(int i=0  ;i< spins.size();++i) update_one_spin(i);
+        else                     for(int i=spins.size()-1;i>=0;--i) update_one_spin(i);
         if(muon)
             muon->update_muon_spin(spins);
         descending_ascending=!descending_ascending;

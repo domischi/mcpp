@@ -5,6 +5,9 @@ class ModelTest(unittest.TestCase):
     def setUpClass(self):
         from os import mkdir, chdir,devnull, getcwd
         self.dir_name='./model_test/'
+        from os.path import exists
+        if exists(self.dir_name):
+            rmtree(self.dir_name)
         mkdir(self.dir_name)
         chdir(self.dir_name)
         self.oblivion=open(devnull, 'w')

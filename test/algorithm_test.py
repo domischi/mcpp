@@ -5,6 +5,9 @@ class AlgorithmTest(unittest.TestCase):
     def setUpClass(self):
         from os import mkdir, chdir,devnull, getcwd
         self.dir_name='./algorithm_test/'
+        from os.path import exists
+        if exists(self.dir_name):
+            rmtree(self.dir_name)
         mkdir(self.dir_name)
         chdir(self.dir_name)
         self.oblivion=open(devnull, 'w')
@@ -37,7 +40,7 @@ class AlgorithmTest(unittest.TestCase):
                  'T'              : 0.,
                  'J'              : 1,
                  'THERMALIZATION' : 1,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 200,
                  "ALGORITHM"      : "xy",
                  'basic_observables': False,
                  'L'              : 4
@@ -53,7 +56,7 @@ class AlgorithmTest(unittest.TestCase):
                  'OPTIMIZE_TEMPERATURE': True,
                  'J'              : 1,
                  'THERMALIZATION' : 1000,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 200,
                  "ALGORITHM"      : "exmc",
                  'basic_observables': False,
                  'L'              : 4
@@ -65,7 +68,7 @@ class AlgorithmTest(unittest.TestCase):
                  'T'              : 0.,
                  'J'              : 1,
                  'THERMALIZATION' : 1,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 200,
                  "ALGORITHM"      : "something else",
                  'basic_observables': False,
                  'L'              : 4

@@ -4,6 +4,8 @@
 #include <vector>
 #include <memory>
 
+#include <alps/parapack/logger.h>
+
 #include "observable.h"
 #include "datatypes/histogram.h"
 #include "mcrg/mcrg.h"
@@ -13,6 +15,9 @@
 #include "structure-factor/structure_factor.h"
 #include "llg/llg.h"
 #include "field-histogram/field_histogram.h"
+
+#include "field-histogram/field_histogram_evaluator.h"
+#include "mcrg/mcrg_evaluator.h"
 
 std::vector<std::shared_ptr<observable>> construct_observables(const alps::Parameters& p, std::shared_ptr<Hamiltonian_List> hl_ ) {
     std::vector<std::shared_ptr<observable>> observables;
@@ -25,27 +30,49 @@ std::vector<std::shared_ptr<observable>> construct_observables(const alps::Param
     }
     if(static_cast<bool>(static_cast<int>(p.value_or_default("mcrg_iteration_depth",-1))>0)) {
         int mcrg_it_depth=p["mcrg_iteration_depth"];
-        std::cout << "Initialize MCRG measurement with iteration depth "<<mcrg_it_depth<<"..."<<std::flush;
-        observables.push_back(std::make_shared<mcrg>(p,0,mcrg_it_depth,gh_,hl_));
-        std::cout << "done"<<std::endl;;
+        std::cout 
+            << alps::logger::header()
+            <<"Initialize MCRG measurement with iteration depth "<<mcrg_it_depth<<std::endl;
+        observables.push_back(std::make_shared<mcrg>(p,mcrg_it_depth,gh_,hl_));
+        std::cout 
+            << alps::logger::header()
+            <<"Done initialize MCRG measurement"<<std::endl;
     }
     if(static_cast<bool>(p.value_or_default("structure_factor",false))){
-        std::cout << "Initialize Structure Factor measurement..."<<std::flush;
+        std::cout 
+            << alps::logger::header()
+            << "Initialize Structure Factor measurement"<<std::endl;;
         observables.push_back(std::make_shared<structure_factor>(p,gh_,hl_));
-        std::cout << "done"<<std::endl;;
+        std::cout 
+            << alps::logger::header()
+            << "Done initialize Structure Factor measurement"<<std::endl;;
     }
     if(static_cast<bool>(static_cast<int>(p.value_or_default("Spin autocorrelation analysis length",-1))>0)){
-        std::cout << "Initialize Spin autocorrelation measurement..."<<std::flush;
+        std::cout 
+            << alps::logger::header()
+            << "Initialize Spin autocorrelation measurement"<<std::endl;
         observables.push_back(std::make_shared<spin_autocorrelation>(p,gh_,hl_));
-        std::cout << "done"<<std::endl;;
+        std::cout 
+            << alps::logger::header()
+            << "Done initialize Spin autocorrelation measurement"<<std::endl;
     }
     if(static_cast<bool>(p.value_or_default("llg",false))) {
-        std::cout << "Initialize LLG measurement..."<<std::flush;
+        std::cout 
+            << alps::logger::header()
+            << "Initialize LLG measurement"<<std::endl;
         observables.push_back(std::make_shared<llg>(p,gh_,hl_));
-        std::cout << "done"<<std::endl;;
+        std::cout 
+            << alps::logger::header()
+            << "Done initialize LLG measurement"<<std::endl;
     }
     if(static_cast<bool>(p.value_or_default("Field Histogram",false))) {
+        std::cout 
+            << alps::logger::header()
+            << "Initialize Field Histogram measurement"<<std::endl;
         observables.push_back(std::make_shared<field_histogram>(p,gh_,hl_));
+        std::cout 
+            << alps::logger::header()
+            << "Done initialize Field Histogram measurement"<<std::endl;
     }
     return observables;
 }

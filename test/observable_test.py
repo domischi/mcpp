@@ -5,6 +5,9 @@ class ObservableTest(unittest.TestCase):
     def setUpClass(self):
         from os import mkdir, chdir,devnull
         self.dir_name='./observable_test/'
+        from os.path import exists
+        if exists(self.dir_name):
+            rmtree(self.dir_name)
         mkdir(self.dir_name)
         chdir(self.dir_name)
         self.oblivion=open(devnull, 'w')
@@ -46,7 +49,7 @@ class ObservableTest(unittest.TestCase):
                  'T'              : 0.,
                  'J'              : 1.,
                  'THERMALIZATION' : 1,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 200,
                  "ALGORITHM"      : "xy",
                  'L'              : 4,
             }]
@@ -77,7 +80,7 @@ class ObservableTest(unittest.TestCase):
                  'T'              : 0.,
                  'J'              : 1.,
                  'THERMALIZATION' : 1,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 200,
                  "ALGORITHM"      : "xy",
                  'measure last configuration' : True,
                  'L'              : 4,
@@ -92,7 +95,7 @@ class ObservableTest(unittest.TestCase):
                  'J'              : 1.,
                  'THERMALIZATION' : 1,
                  'structure_factor' : True,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 200,
                  "ALGORITHM"      : "xy",
                  'L'              : 4,
             }]
@@ -105,7 +108,7 @@ class ObservableTest(unittest.TestCase):
                  'T'              : 0.,
                  'J'              : 1.,
                  'THERMALIZATION' : 1,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 1000,
                  'mcrg_iteration_depth' : 2,
                  "ALGORITHM"      : "xy",
                  'L'              : 32,
@@ -117,7 +120,7 @@ class ObservableTest(unittest.TestCase):
                  'T'              : 0.,
                  'J'              : 1.,
                  'THERMALIZATION' : 1,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 1000,
                  'mcrg_iteration_depth' : 2,
                  'MCRG Reduction Technique': 'Blockspin',
                  "ALGORITHM"      : "xy",
@@ -130,7 +133,7 @@ class ObservableTest(unittest.TestCase):
                  'T'              : 0.,
                  'J'              : 1.,
                  'THERMALIZATION' : 1,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 1000,
                  'mcrg_iteration_depth' : 2,
                  'MCRG Interactions': 'small',
                  "ALGORITHM"      : "xy",
@@ -140,13 +143,14 @@ class ObservableTest(unittest.TestCase):
     def test_MCRG_working(self):
         parm=[{
                  'LATTICE'        : "square lattice",
-                 'T'              : 0.,
+                 'T'              : 1.,
                  'J'              : 1.,
-                 'THERMALIZATION' : 1,
-                 'SWEEPS'         : 20,
+                 'Initialization' : "Random",
+                 'THERMALIZATION' : 10,
+                 'SWEEPS'         : 1000,
                  'MCRG Interactions': 'small',
                  'MCRG Reduction Technique': 'Blockspin',
-                 'mcrg_iteration_depth' : 2,
+                 'mcrg_iteration_depth' : 1,
                  "ALGORITHM"      : "xy",
                  'L'              : 32,
             }]
@@ -156,24 +160,18 @@ class ObservableTest(unittest.TestCase):
         self.check_has_observable('MCRGe S_alpha0 S_beta1')
         self.check_has_observable('MCRGe S_alpha1')
         self.check_has_observable('MCRGe S_alpha1 S_beta1')
-        self.check_has_observable('MCRGe S_alpha1 S_beta2')
-        self.check_has_observable('MCRGe S_alpha2')
-        self.check_has_observable('MCRGe S_alpha2 S_beta2')
         self.check_has_observable('MCRGo S_alpha0')
         self.check_has_observable('MCRGo S_alpha0 S_beta0')
         self.check_has_observable('MCRGo S_alpha0 S_beta1')
         self.check_has_observable('MCRGo S_alpha1')
         self.check_has_observable('MCRGo S_alpha1 S_beta1')
-        self.check_has_observable('MCRGo S_alpha1 S_beta2')
-        self.check_has_observable('MCRGo S_alpha2')
-        self.check_has_observable('MCRGo S_alpha2 S_beta2')
     def test_LLG_basic_observables(self):
         parm=[{
                  'LATTICE'        : "square lattice",
                  'T'              : 0.,
                  'J'              : 1.,
                  'THERMALIZATION' : 10,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 200,
                  'llg'            : True,
                  'LLG measures per measure' : 5,
                  "ALGORITHM"      : "xy",
@@ -190,7 +188,7 @@ class ObservableTest(unittest.TestCase):
                  'T'              : 0.,
                  'J'              : 1.,
                  'THERMALIZATION' : 10,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 200,
                  'llg'            : True,
                  'LLG measures per measure' : 5,
                  'LLG Measure Muon': True,
@@ -221,7 +219,7 @@ class ObservableTest(unittest.TestCase):
 		 'T'              : 0.,
 		 'D'              : 1.,
 		 'THERMALIZATION' : 10,
-		 'SWEEPS'         : 20,
+		 'SWEEPS'         : 200,
 		 'Field Histogram': True,
 		 'Field Histogram fixed z': False,
 		 'Field Histogram diameter split': 3,
@@ -234,7 +232,30 @@ class ObservableTest(unittest.TestCase):
         self.check_has_observable('Field Histogram Absolute Value')
         self.check_has_observable('Field Histogram xy'            )
         self.check_has_observable('Field Histogram z'             )
-        self.check_has_observable('Field Histogram MaxField')
+        self.check_data_length('Field Histogram Absolute Value', nbins)
+        self.check_data_length('Field Histogram xy'            , nbins)
+        self.check_data_length('Field Histogram z'             , nbins)
+    def test_field_histogram_log(self):
+        nbins=64
+        parm=[{
+		 'LATTICE'        : "square lattice",
+		 'T'              : 0.,
+		 'D'              : 1.,
+		 'THERMALIZATION' : 10,
+		 'SWEEPS'         : 20,
+		 'Field Histogram': True,
+		 'Field Histogram Log Scale' : True,
+                 'Field Histogram fixed z': False,
+		 'Field Histogram diameter split': 3,
+	         'Field Histogram n_bins' : nbins,
+                 "ALGORITHM"      : "xy",
+		 'cutoff_distance': 3.,
+		 'L'              : 8,
+            }]
+        self.should_work(parm)
+        self.check_has_observable('Field Histogram Absolute Value')
+        self.check_has_observable('Field Histogram xy'            )
+        self.check_has_observable('Field Histogram z'             )
         self.check_data_length('Field Histogram Absolute Value', nbins)
         self.check_data_length('Field Histogram xy'            , nbins)
         self.check_data_length('Field Histogram z'             , nbins)

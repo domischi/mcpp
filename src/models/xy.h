@@ -28,11 +28,12 @@
 #include "../utilities.h"
 class xy_worker : public alps::parapack::lattice_mc_worker<>{
 public :
+    typedef mcpp::spin_t spin_t;
     enum init_t {GS, Random, Ferro, Vortex};
 
     xy_worker(const alps::Parameters& params) :
         alps::parapack::lattice_mc_worker<>(params),
-        is_exmc(static_cast<bool>(params["ALGORITHM"]!="xy")),
+        is_exmc(static_cast<bool>(params["ALGORITHM"]=="exmc")),
         Thermalization_Sweeps(params.value_or_default("THERMALIZATION",100)),
         Each_Measurement(params.value_or_default("Each_Measurement",10)),
         Sweeps(static_cast<int>(params.value_or_default("SWEEPS",5000))),
@@ -115,19 +116,23 @@ public :
             accepted=0;
         }
     }
-
+    
     bool is_thermalized() const {
         return Step_Number > Thermalization_Sweeps;
     }
     double progress() const {
         return Step_Number/(static_cast<double>(Sweeps+Thermalization_Sweeps));
     }
-
+    
     //for exmc
     typedef double weight_parameter_type;
     void set_beta(double beta_) { beta=beta_; T=1./beta_;}
-    weight_parameter_type weight_parameter() const {return -Energy();}
+    weight_parameter_type weight_parameter() const {return -Energy();} 
     static double log_weight(weight_parameter_type gw, double beta) {return beta*gw;}
+
+    const std::vector<spin_t>& get_spins() const{
+        return spins;
+    }
 private:
     //System parameters
     const bool is_exmc;
@@ -137,7 +142,7 @@ private:
     int Step_Number;
     const int L;
     const int N; //L^2
-    bool ising;
+    const bool ising;
     init_t init_type;
     std::vector<double> spins; //saves the spins
     const bool print_debug_information;
@@ -265,6 +270,10 @@ private:
         return acc_ratio;
     }
 
+    inline bool is_last_MC_step(){
+        return Step_Number>Sweeps+Thermalization_Sweeps-Each_Measurement;
+    }
+    
     double inline mod2Pi(double const& s) const {
         return s-std::floor(s/(2*M_PI))*2*M_PI;
     }
@@ -373,6 +382,7 @@ private:
         else return alps::RealObsevaluator(obs["EXMC: Inverse Temperature"]).mean();
     }
     std::shared_ptr<field_histogram_evaluator> fhe;
+    std::shared_ptr<mcrg_evaluator> mcrge;
     void binder_cumulant(alps::ObservableSet& obs, std::string start) const{
         if(obs.has(start+"^4")&&obs.has(start+"^2")){
             alps::RealObsevaluator m2 = obs[start+"^2"];
@@ -392,6 +402,9 @@ public:
         {
             if(params.value_or_default("Field Histogram",false)) {
                 fhe=std::make_shared<field_histogram_evaluator>(params);
+            }
+            if(static_cast<int>(params.value_or_default("mcrg_iteration_depth",-1))>0) {
+                mcrge=std::make_shared<mcrg_evaluator>(params);
             }
         }
     void evaluate(alps::ObservableSet& obs) const {
@@ -430,6 +443,8 @@ public:
         } else std::cerr << "susceptibility staggered will not be calculated"<<std::endl;
         if(fhe)
             fhe->evaluate(obs);
+        if(mcrge)
+            mcrge->evaluate(obs);
     }
 
 };

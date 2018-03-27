@@ -243,6 +243,10 @@ exmc:
     Default: False
     Measure Field Histogram?
     	
+    Field Histogram auto detect range
+    Default:
+    Determines if the range should be detected at runtime
+    
     Field Histogram Measures per Measure: 
     Default: 1024
     Determines how many points get sampled for each configuration
@@ -282,11 +286,6 @@ exmc:
     overal number of part contributing to the dipole of a single dot is given
     by as many dots that are inside the circle of this diameter.
 
-    Dot Radius: 
-    Default: 0.35
-    This parameter describes the extension of the dot in parameters of the
-    lattice periodicity a. The default value arises from one of the
-    experimental realizations.
 
     Field Histogram lower histogram truncation:
     Default: 4096
@@ -300,9 +299,23 @@ exmc:
     calculate the maxfield and multiply it by this factor, this will result in
     the upper bound.
 
-    M: The magnetization of each dot.
-    Default: 1.
-            
     Field Histogram number of bins: 
     Default: 128
     How many bins should the resulting histograms consist of?
+   
+    Field Histogram Use SI:
+    Default: False
+    gives the X-array (for plotting) in SI units, checks if Br, real z and
+    Volume Dot are defined, if not, does not produce the array
+    
+    Field Histogram Br: The magnetization of each dot.
+    Default: 1.
+    Used if SI is enforced
+            
+    Field Histogram real z
+    Default: 0.75 
+    Used if SI is enforced
+    
+    Field Histogram Volume Dot
+    Default: 1.
+    Used if SI is enforced

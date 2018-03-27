@@ -7,13 +7,15 @@ enable_language(C CXX)
 # Options
 #-------------------------------------------------------------------
 #if you don't want the full compiler output, set to "OFF"
-set(CMAKE_VERBOSE_MAKEFILE OFF)
-set(USE_MPI TRUE)
-set(USE_OPENMP TRUE)
-set(USE_FFTW true)
-set(OPTIMIZE TRUE)
-set(DEBUG FALSE)
-set(DEBUG_VECTORIZATION FALSE)
+option(CMAKE_VERBOSE_MAKEFILE "Verbose Makefile" OFF)
+option(USE_MPI "Use distributed memory parallization" ON)
+option(USE_OPENMP "Use shared memory parallelization" ON)
+option(USE_FFTW "Use FFTW" ON)
+option(USE_ARMADILLO "Use Armadillo" ON)
+option(OPTIMIZE "Set optimization flags" ON)
+option(DEBUG "Set debug flags" OFF)
+option(DEBUG_VECTORIZATION "Set vectorization debug flags (attention, verbose)" OFF)
+option(ALPS_HAS_VALARRAY_SET_ZERO "ALPS has valarray set_zero" ON)
 #-------------------------------------------------------------------
 # ALPS
 #-------------------------------------------------------------------
@@ -23,6 +25,9 @@ message(STATUS "Found ALPS: ${ALPS_ROOT_DIR} (revision: ${ALPS_VERSION})")
 include(${ALPS_USE_FILE})
 
 set(LIBS "${ALPS_LIBRARIES}")
+if(ALPS_HAS_VALARRAY_SET_ZERO)
+    add_definitions(-DALPS_HAS_VALARRAY_SET_ZERO)
+endif(ALPS_HAS_VALARRAY_SET_ZERO)
 #-------------------------------------------------------------------
 # FFTW
 #-------------------------------------------------------------------
@@ -42,9 +47,24 @@ else(USE_FFTW)
 endif(USE_FFTW)
 
 #-------------------------------------------------------------------
+# Armadillo
+#-------------------------------------------------------------------
+if(USE_ARMADILLO)
+    find_package(Armadillo)
+    if(${ARMADILLO_FOUND})
+        message(STATUS "Found Armadillo: v${ARMADILLO_VERSION_STRING}")
+        include_directories(${ARMADILLO_INCLUDE_DIRS})
+else(${ARMADILLO_FOUND})
+    add_definitions(-DNARMADILLO)
+endif(${ARMADILLO_FOUND})
+else(USE_ARMADILLO)
+    add_definitions(-DNARMADILLO)
+endif(USE_ARMADILLO)
+#-------------------------------------------------------------------
 # Flags
 #-------------------------------------------------------------------
 SET(COMMON_FLAGS "-w")
+
 IF(DEBUG)
     SET(COMMON_FLAGS "${COMMON_FLAGS} -pg -g -Wall")
     ELSE(DEBUG)
@@ -101,6 +121,7 @@ configure_file(
 #-------------------------------------------------------------------
 SET(SRCS ${SRCS} src/main.cpp src/parapack_register.cpp)
 ADD_EXECUTABLE(mc++ ${SRCS})
-TARGET_LINK_LIBRARIES(mc++ m)
-TARGET_LINK_LIBRARIES(mc++ m ${LIBS} ${FFTW_LIBS})
+TARGET_LINK_LIBRARIES(mc++ ${LIBS})
+TARGET_LINK_LIBRARIES(mc++ ${FFTW_LIBS})
+TARGET_LINK_LIBRARIES(mc++ ${ARMADILLO_LIBRARIES})
 INSTALL(TARGETS mc++ DESTINATION $ENV{HOME}/bin)

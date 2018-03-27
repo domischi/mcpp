@@ -5,6 +5,9 @@ class HamiltonianTest(unittest.TestCase):
     def setUpClass(self):
         from os import mkdir, chdir,devnull, getcwd
         self.dir_name='./hamiltonian_test/'
+        from os.path import exists
+        if exists(self.dir_name):
+            rmtree(self.dir_name)
         mkdir(self.dir_name)
         chdir(self.dir_name)
         self.oblivion=open(devnull, 'w')
@@ -36,7 +39,7 @@ class HamiltonianTest(unittest.TestCase):
                  'LATTICE'        : "square lattice",
                  'T'              : 0.,
                  'THERMALIZATION' : 1,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 200,
                  "ALGORITHM"      : "xy",
                  'basic_observables': False,
                  'L'              : 6,
@@ -49,7 +52,7 @@ class HamiltonianTest(unittest.TestCase):
                  'J'              : 1.,
                  'THERMALIZATION' : 10,
                  'basic_observables': False,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 200,
                  "ALGORITHM"      : "xy",
                  'L'              : 6,
             }]
@@ -61,7 +64,7 @@ class HamiltonianTest(unittest.TestCase):
                  'J'              : 1.,
                  'THERMALIZATION' : 10,
                  'basic_observables': False,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 200,
                  "ALGORITHM"      : "xy",
                  'L'              : 6,
             }]
@@ -86,7 +89,7 @@ class HamiltonianTest(unittest.TestCase):
                  'T'              : 0.,
                  'D'              : 1.,
                  'THERMALIZATION' : 10,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 200,
                  "ALGORITHM"      : "xy",
                  'cutoff_distance': 3.,
                  'L'              : 10,
@@ -99,7 +102,7 @@ class HamiltonianTest(unittest.TestCase):
                  'T'              : 0.,
                  'D'              : 1.,
                  'THERMALIZATION' : 10,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 200,
                  "ALGORITHM"      : "xy",
                  'cutoff_distance': 3.,
                  'L'              : 4,
@@ -113,7 +116,7 @@ class HamiltonianTest(unittest.TestCase):
                  'D'              : 1.,
                  'Positional Disorder': 0.5,
                  'THERMALIZATION' : 10,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 200,
                  "ALGORITHM"      : "xy",
                  'cutoff_distance': 3.,
                  'L'              : 10,
@@ -127,7 +130,7 @@ class HamiltonianTest(unittest.TestCase):
                  'D'              : 1.,
                  'Dilution Rate'  : 0.5,
                  'THERMALIZATION' : 10,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 200,
                  "ALGORITHM"      : "xy",
                  'cutoff_distance': 3.,
                  'L'              : 10,
@@ -141,7 +144,7 @@ class HamiltonianTest(unittest.TestCase):
                  'basic_observables': False,
                  'Shape Anisotropy p' : 2,
                  'THERMALIZATION' : 10,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 200,
                  "ALGORITHM"      : "xy",
                  'cutoff_distance': 3.,
                  'L'              : 4,

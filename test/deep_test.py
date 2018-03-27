@@ -66,7 +66,7 @@ class DeepTest(unittest.TestCase):
                  'T'              : 0.,
                  'J'              : 1.,
                  'THERMALIZATION' : 100,
-                 'SWEEPS'         : 20,
+                 'SWEEPS'         : 200,
                  "ALGORITHM"      : "xy",
                  'L'              : 4,
                  'Each_Measurement': 1
@@ -124,12 +124,12 @@ class DeepTest(unittest.TestCase):
                  'Initialization' : 'Random',
                  'J'              : 1.,
                  'THERMALIZATION' : 100,
-                 'SWEEPS'         : 40,
+                 'SWEEPS'         : 1000,
                  'MCRG Interactions': 'very small',
                  'MCRG Reduction Technique': 'Blockspin',
                  'mcrg_iteration_depth' : 1,
                  "ALGORITHM"      : "xy",
-                 'L'              : 8
+                 'L'              : 32 
             }]
         self.should_work(parm)
         self.check_has_observable('MCRGe S_alpha0')
@@ -143,7 +143,7 @@ class DeepTest(unittest.TestCase):
                  'Initialization' : 'Random',
                  'J'              : 1.,
                  'THERMALIZATION' : 100,
-                 'SWEEPS'         : 40,
+                 'SWEEPS'         : 1000,
                  'MCRG Interactions': 'small',
                  'MCRG Reduction Technique': 'Blockspin',
                  'mcrg_iteration_depth' : 1,
@@ -155,3 +155,25 @@ class DeepTest(unittest.TestCase):
         self.check_has_observable('MCRGo S_alpha0')
         self.check_no_double_values('MCRGe S_alpha0')
         self.check_no_double_values('MCRGo S_alpha0')
+    def test_MCRG_convenience_exponents(self):
+        parm=[{
+                 'LATTICE'        : "square lattice",
+                 'T'              : 2.269,
+                 'J'              : 1.,
+                 'Ising'          : True,
+                 'Initialization' : "Random",
+                 'THERMALIZATION' : 1000,
+                 'SWEEPS'         : 5000,
+                 'MCRG Interactions': 'ising',
+                 'MCRG Reduction Technique': 'IsingTieBreaker',
+                 'mcrg_iteration_depth' : 1,
+                 "ALGORITHM"      : "xy",
+                 'L'              : 32,
+            }]
+        self.should_work(parm)
+        self.check_has_observable('MCRG alpha1')
+        self.check_has_observable('MCRG beta1' )
+        self.check_has_observable('MCRG gamma1')
+        self.check_has_observable('MCRG delta1')
+        self.check_has_observable('MCRG eta1'  )
+        self.check_has_observable('MCRG nu1'   )

@@ -10,134 +10,96 @@
 #include "reductions.h"
 #include "../../utilities.h"
 #include "../observable.h"
-
-class mcrg; //Needed as it is recursively called
 class mcrg : public observable {
 public:
     typedef double spin_t;
-    typedef mcrg_utilities::shift_t shift_t; //(dx,dy, component)
-    enum ReductionTechnique {Decimation,Blockspin, FerroBlockspin, Blockspin4x4, FerroBlockspin4x4, IsingMajority, IsingTieBreaker, BlockspinCubic, DecimationCubic};
-    enum LatticeType {SquareLatticeIsh, CubicLatticeIsh};
-    
-    mcrg(const alps::Parameters& p, int Iteration_, int MCRG_It_, std::shared_ptr<alps::graph_helper<>> gh_, std::shared_ptr<Hamiltonian_List> hl_) :
+    typedef mcpp::mcrg::shift_t shift_t; //(dx,dy, component)
+    typedef mcpp::mcrg::ReductionTechnique ReductionTechnique;
+    typedef mcpp::mcrg::LatticeType LatticeType;
+
+    mcrg(const alps::Parameters& p, const int MCRG_It_, std::shared_ptr<alps::graph_helper<>> gh_, std::shared_ptr<Hamiltonian_List> hl_) :
     observable(p,gh_,hl_),
-    iteration(Iteration_),
+    iteration(0),
     max_iterations(MCRG_It_),
     L(p["L"]),
-    N_adjusted(mcpp::init_N(p)),
-    lattice_type(init_lattice_type(static_cast<std::string>(p["LATTICE"]))),
-    reduction_type(init_reduction_technique(static_cast<std::string>(p["MCRG Reduction Technique"]))),
+    L_adapted(L),
+    N_last(mcpp::init_N(p)),
+    lattice_type(mcpp::mcrg::init_lattice_type(p)),
+    reduction_type(mcpp::mcrg::init_reduction_technique(p)),
     scale_factor_b(init_b(reduction_type)),
-    entry_point(N_adjusted-1),
-    interactions(init_interactions(static_cast<std::string>(p["MCRG Interactions"])))
+    interactions(mcpp::mcrg::init_interactions(p)),
+    entry_point(N_last-1)
     {
-        //If this is not the last iteration, construct the MCRG class for the next smaller lattice 
-        if(!is_last_iteration()) {
-            alps::Parameters p_descendant=p;
-            p_descendant["L"]=int(L/scale_factor_b); //probably should check for the sqrt updates
-            descendant=std::make_shared<mcrg>(p_descendant,iteration+1,MCRG_It_,gh_,hl_);
-        }
     }
 
-    void measure( const std::vector<spin_t>& spins, alps::ObservableSet& obs) {
-        measure_dummy(spins, obs);
+    void measure(const std::vector<spin_t>& spins, alps::ObservableSet& obs){
+        ++entry_point%=N_last;//loop over the sites as entry points
+        std::vector<std::vector<double>> Se,So; 
+        auto reduced_spins=spins;
+        //measure the S_alpha in the not reduced lattice
+        for(int iteration=0;iteration<=max_iterations;++iteration){
+            L_adapted= L/static_cast<int>(std::pow(scale_factor_b,iteration));
+            std::vector<double> oute, outo;
+            std::tie(oute,outo)=mcpp::mcrg::all_S_alphas(reduced_spins, interactions, lattice_type);
+            Se.push_back(oute);
+            So.push_back(outo);
+            if(!is_last_iteration(iteration))
+                reduced_spins=mcpp::mcrg::reduce(reduced_spins, entry_point,L_adapted, reduction_type, is_first_iteration(iteration));
+        }
+        for(int iteration=0;iteration<=max_iterations;++iteration){
+            // Save the correlators <S_alpha>
+            std::valarray<double> OUTe(Se[iteration].data(), Se[iteration].size());
+            std::valarray<double> OUTo(So[iteration].data(), So[iteration].size());
+            std::valarray<double> save_outo=OUTo;//Massive cheat, and I don't exactly know why
+            std::valarray<double> save_oute=OUTe;
+            obs["MCRGe S_alpha"+ std::to_string(iteration)]<<save_oute;
+            obs["MCRGo S_alpha"+ std::to_string(iteration)]<<save_outo;
+            //measure <S_alpha n S_beta n>
+            std::valarray<double> outouto=mcpp::outer(OUTo,OUTo);
+            std::valarray<double> outoute=mcpp::outer(OUTe,OUTe);
+            obs["MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration)]<<outouto;
+            obs["MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration)]<<outoute;
+            if(!is_last_iteration(iteration)){//This is not the last instantation of the mcrg
+                std::valarray<double> INe(Se[iteration+1].data(), Se[iteration+1].size());
+                std::valarray<double> INo(So[iteration+1].data(), So[iteration+1].size());
+                //calculate <S_alpha n-1 S_beta n>
+                //and save it into obs
+                std::valarray<double> outine=mcpp::outer(OUTe, INe);
+                std::valarray<double> outino=mcpp::outer(OUTo, INo);
+                obs["MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1)]<<outine;
+                obs["MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1)]<<outino;
+            }
+        }
         return;
     }
-    std::tuple<std::valarray<double>,std::valarray<double>> measure_dummy(const std::vector<spin_t>& spins, alps::ObservableSet& obs){
-        ++entry_point%=N_adjusted;//loop over the sites as entry points
-        //std::valarray<double> OUT(n_interactions());
-        std::vector<double> oute, outo;
-        int counto=0;
-        int counte=0;
-        //measure the S_alpha in the not reduced lattice
-        for(int i=0;i<n_interactions();++i) {
-            if(interactions[i].size()%2) { //odd
-                outo.push_back(S_alpha(spins, interactions[i]));
-                ++counto;
-            }
-            else{
-                oute.push_back(S_alpha(spins, interactions[i]));
-                ++counte;
-            }
-        }
-        std::valarray<double> OUTe(oute.data(), oute.size()), OUTo(outo.data(), outo.size());
-        
-        std::valarray<double> save_outo=OUTo;
-        //save_outo/=N;
-        std::valarray<double> save_oute=OUTe;
-        //save_oute/=N;
-        obs["MCRGe S_alpha"+ std::to_string(iteration)]<<save_oute;
-        obs["MCRGo S_alpha"+ std::to_string(iteration)]<<save_outo;
-        //measure <S_alpha n S_beta n>
-        std::valarray<double> outouto(OUTo.size()*OUTo.size());
-        std::valarray<double> outoute(OUTe.size()*OUTe.size());
-        
-        for(int i=0;i<counto;++i){
-            for(int j=0;j<counto;++j){
-                outouto[i*counto+j]=OUTo[i]*OUTo[j];
-            }
-        }
-        for(int i=0;i<counte;++i){
-            for(int j=0;j<counte;++j){
-                outoute[i*counte+j]=OUTe[i]*OUTe[j];
-            }
-        }
-        //outoute/=N;
-        //outouto/=N;
-        obs["MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration)]<<outouto;
-        obs["MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration)]<<outoute;
-        
-        if(!is_last_iteration()){//This is not the last instantation of the mcrg
-            //reduce the lattice and call the descendant on the renormalized system
-            std::vector<spin_t> reduced_spins = reduce(spins, entry_point);
-            std::valarray<double> INo(OUTo.size()),INe(OUTe.size());
-            std::tie(INo, INe) =  descendant->measure_dummy(reduced_spins,obs);
-            //calculate <S_alpha n-1 S_beta n>
-            //and save it into obs
-            std::valarray<double> outine(INe.size()*INe.size());
-            for(int i=0;i<INe.size();++i){
-                for(int j=0;j<INe.size();++j){
-                    outine[i*INe.size()+j]=(OUTe[i]*INe[j]);
-                }
-            }
-            //outine/=N;
-            obs["MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1)]<<outine;
-            std::valarray<double> outino(INo.size()*INo.size());
-            for(int i=0;i<INo.size();++i){
-                for(int j=0;j<INo.size();++j){
-                    outino[i*INo.size()+j]=(OUTo[i]*INo[j]);
-                }
-            }
-            //outino/=N;
-            obs["MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1)]<<outino;
-        }
-        return std::tie(OUTo,OUTe);
-    }
-
     void init_observables(alps::ObservableSet& obs) const {
-        obs << alps::SimpleRealVectorObservable("MCRGe S_alpha"+ std::to_string(iteration));
-        obs << alps::SimpleRealVectorObservable("MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration));
-        obs << alps::SimpleRealVectorObservable("MCRGe S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1));
-        obs << alps::SimpleRealVectorObservable("MCRGo S_alpha"+ std::to_string(iteration));
-        obs << alps::SimpleRealVectorObservable("MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration));
-        obs << alps::SimpleRealVectorObservable("MCRGo S_alpha"+std::to_string(iteration) +" S_beta"+std::to_string(iteration+1));
-        if(!is_last_iteration()){
-            descendant->init_observables(obs);
-        }
+        if(is_first_iteration(iteration)) 
+            for(int i = 0; i<=max_iterations;++i) {
+                obs << alps::RealVectorObservable("MCRGe S_alpha"+ std::to_string(i));
+                obs << alps::RealVectorObservable("MCRGe S_alpha"+std::to_string(i) +" S_beta"+std::to_string(i));
+                if(!is_last_iteration(i))
+                    obs << alps::RealVectorObservable("MCRGe S_alpha"+std::to_string(i) +" S_beta"+std::to_string(i+1));
+                obs << alps::RealVectorObservable("MCRGo S_alpha"+ std::to_string(i));
+                obs << alps::RealVectorObservable("MCRGo S_alpha"+std::to_string(i) +" S_beta"+std::to_string(i));
+                if(!is_last_iteration(i))
+                    obs << alps::RealVectorObservable("MCRGo S_alpha"+std::to_string(i) +" S_beta"+std::to_string(i+1));
+            }
     }
     void save(alps::ODump &dump) const{
         dump
-            << entry_point;
+            << entry_point
+            << L_adapted;
     }
     void load(alps::IDump &dump) {
         dump 
-            >> entry_point;
+            >> entry_point
+            >> L_adapted;
     }
 private:
-    std::shared_ptr<mcrg> descendant;
     const int iteration;
-    const int max_iterations; 
-    const int L,N_adjusted;
+    const int max_iterations;
+    const int L,N_last;
+    int L_adapted;
     const LatticeType lattice_type;
     const ReductionTechnique reduction_type;
     //first index: which interaction
@@ -146,195 +108,14 @@ private:
     const std::vector<std::vector<shift_t>> interactions;
     const int scale_factor_b;
     int entry_point;
-    ReductionTechnique init_reduction_technique(std::string s) const {
-        if(s=="Decimation"){
-            if(lattice_type==LatticeType::SquareLatticeIsh)
-                return ReductionTechnique::Decimation;
-            if(lattice_type==LatticeType::CubicLatticeIsh)
-                return ReductionTechnique::DecimationCubic;
-        } else if(s=="Blockspin"){
-            if(lattice_type==LatticeType::SquareLatticeIsh)
-                return ReductionTechnique::Blockspin;
-            if(lattice_type==LatticeType::CubicLatticeIsh)
-                return ReductionTechnique::BlockspinCubic;
-        } else if(s=="FerroBlockspin"){
-            return ReductionTechnique::FerroBlockspin;
-        } else if(s=="Blockspin4x4"){
-            return ReductionTechnique::Blockspin4x4;
-        } else if(s=="FerroBlockspin4x4"){
-            return ReductionTechnique::FerroBlockspin4x4;
-        } else if(s=="IsingMajority"){
-            return ReductionTechnique::IsingMajority;
-        } else if(s=="IsingTieBreaker"){
-            return ReductionTechnique::IsingTieBreaker;
-        } else {
-            std::cerr << "Did not recognise the reduction process to use for MCRG, aborting..."<<std::endl;
-            std::exit(21); 
-        }
-    }
-    LatticeType init_lattice_type(std::string s) const {
-        if(s=="square lattice" or s=="anisotropic square lattice") {
-            return LatticeType::SquareLatticeIsh;
-        }
-        else if(s=="simple cubic lattice" or s=="anisotropic simple cubic lattice") {
-            return LatticeType::CubicLatticeIsh;
-        }
-        else {
-            std::cerr << "Didn't find the latticetype for mcrg, check if your lattice is already implemented for MCRG"<<std::endl;
-            std::exit(4);
-        }
-    }
-    inline int n_interactions(){
-        return interactions.size();
-    }
-    std::vector<std::vector<shift_t>> init_interactions(std::string s) const {
-        std::vector<std::vector<shift_t>> i; 
-        //Choose Interaction Set
-        if(s=="small"){
-            i=mcrg_utilities::small;
-        } else if(s=="very small"){
-            i=mcrg_utilities::very_small;
-        } else if(s=="medium interaction"){
-            i=mcrg_utilities::medium_interaction;
-        } else if(s=="medium range" || s=="medium" ){
-            i=mcrg_utilities::medium_range;
-        } else if(s=="dXY" ){
-            i=mcrg_utilities::dXY_handcrafted;
-        } else if(s=="dIsing" ){
-            i=mcrg_utilities::dIsing;
-        } else if(s=="wilson"){
-            i=mcrg_utilities::wilson1975;
-        } else if(s=="ising"){
-            i=mcrg_utilities::small_Ising;
-        } else if(s=="xy-3d-small"){
-            i=mcrg_utilities::xy_3d_small;
-        } else if(s=="xy-3d-very-small"){
-            i=mcrg_utilities::xy_3d_very_small;
-        } else if(s=="xy-3d-medium"){
-            i=mcrg_utilities::xy_3d_medium;
-        } else if(s=="xy-3d-massive"){
-            i=mcrg_utilities::xy_3d_massive;
-        } else if(s=="xy-3d-swendsen"){
-            i=mcrg_utilities::xy_3d_swendsen;
-        } else {
-            std::cerr<<"Did not recognise the interaction set to use for MCRG, aborting..."<<std::endl;
-            std::exit(20);
-        }
-        for(auto& in : i) in.shrink_to_fit();
-        i.shrink_to_fit();
-        return i;
-    }
-    int init_b(ReductionTechnique rt){
-        switch (rt) {
-            case ReductionTechnique::Decimation:
-               return 2; 
-            case ReductionTechnique::IsingTieBreaker:
-               return 2;
-            case ReductionTechnique::DecimationCubic:
-               return 2; 
-            case ReductionTechnique::Blockspin:
-               return 2; 
-            case ReductionTechnique::BlockspinCubic:
-               return 2; 
-            case ReductionTechnique::FerroBlockspin:
-               return 2;
-            case ReductionTechnique::IsingMajority:
-               return 3;
-            case ReductionTechnique::Blockspin4x4:
-               return 4;
-            case ReductionTechnique::FerroBlockspin4x4:
-               return 4;
-            default:
-               std::cerr<< "Did not recognize the ReductionTechnique. Aborting...."<<std::endl;
-               std::exit(4);
-        }
-    }
     void update_entry_point(){
-		if((entry_point%L)%scale_factor_b==scale_factor_b-1) {
-            entry_point+=L-scale_factor_b;
-        }
-        ++entry_point;
-        if(entry_point==scale_factor_b*L) {
-            entry_point=0;
-        }    
-	}
-    bool inline is_last_iteration() const{
-        return max_iterations<=iteration;
+        entry_point=mcpp::mcrg::new_entry_point(entry_point, L,scale_factor_b);
     }
-    bool inline is_first_iteration(){
-        return !iteration; //if iteration==0 this is true
+    bool inline is_last_iteration(const int i) const{
+        return max_iterations<=i;
     }
-
-    spin_t inline mod2Pi(double s){
-        return mcrg_utilities::mod2Pi(s); 
-    }
-
-
-    inline int index_o_neighbour (const int& i, std::vector<int> const& dxdydz) const { 
-        switch(lattice_type){
-            case SquareLatticeIsh:
-                return mcrg_utilities::index_o_neighbour_square(i,dxdydz[0],dxdydz[1],L);
-            case CubicLatticeIsh:
-                return mcrg_utilities::index_o_neighbour_cubic(i,dxdydz[0],dxdydz[1],dxdydz[2],L);
-        }
-    }
-
-    //This generally calculates all the S_alpha
-    //for this it iterates over all the lattice sites i. For each of them all the shifts are calculated and taken into consideration with the correlation
-    double S_alpha (const std::vector<spin_t>& spins, std::vector<shift_t> shifts) {
-        double S_a=0;
-        for(int i =0;i<N_adjusted;++i){
-            double tmp=1.;
-            for(int j = 0; j <shifts.size();++j){ //Pairwise build up the scalar products
-                shift_t s = shifts[j];
-                double angle=spins[index_o_neighbour(i,std::get<1>(s))];
-                int component=std::get<0>(s);
-                if(component==0){
-                    tmp*=std::cos(angle);
-                } else if(component==1){
-                    tmp*=std::sin(angle);
-                } else {
-                    std::cerr << "In S_alpha with a not recognised component, The values is "<< component<<"... Aborting..."<< std::endl;
-                    std::exit(19);
-                }
-            }
-            S_a+=tmp;
-        }
-        return S_a;
-    }
-
-    //this function reduces the spin lattice to a quarter of the size by adding the vectors of 4 neighbouring sites together to one and then calculates the angle back and saves it in OUT
-    std::vector<spin_t> reduce(const std::vector<spin_t>& spins, const int& entry_point){
-        switch(reduction_type){
-            case ReductionTechnique::Decimation:
-                return mcrg_utilities::decimate(spins,L,entry_point);
-            case ReductionTechnique::DecimationCubic:
-                return mcrg_utilities::decimate_cubic(spins,L,entry_point);
-            case ReductionTechnique::BlockspinCubic: 
-                return mcrg_utilities::blockspin_cubic(spins,L,entry_point);
-            case ReductionTechnique::Blockspin:
-                    return mcrg_utilities::blockspin(spins,L,entry_point);
-            case ReductionTechnique::FerroBlockspin:
-                if(is_first_iteration()){
-                    std::vector<spin_t> working_data=mcrg_utilities::ferromagnetic_transformation(spins,L,entry_point);
-                    return mcrg_utilities::blockspin(working_data,L,entry_point);
-                }
-                else
-                    return mcrg_utilities::blockspin(spins,L,entry_point);
-            case ReductionTechnique::Blockspin4x4:
-                return mcrg_utilities::blockspin4x4(spins,L,entry_point);
-            case ReductionTechnique::IsingMajority:
-                return mcrg_utilities::ising_majority(spins,L,entry_point);
-            case ReductionTechnique::IsingTieBreaker:
-                return mcrg_utilities::ising_tie_breaker(spins,L,entry_point);
-            case ReductionTechnique::FerroBlockspin4x4:
-                if(is_first_iteration()){
-                    std::vector<spin_t> working_data=mcrg_utilities::ferromagnetic_transformation(spins,L,0);
-                    return mcrg_utilities::blockspin4x4(working_data,L,entry_point);
-                }
-                else
-                    return mcrg_utilities::blockspin4x4(spins,L,entry_point);
-        }
+    bool inline is_first_iteration(const int i) const {
+        return !i; //if iteration==0 this is true
     }
 };
 #endif //MCPP_MCRG_H_
