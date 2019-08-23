@@ -1,4 +1,8 @@
-This is mc++, a program mainly used to simulate XY systems in 2D with dipolar interaction. This is the basis for the PhD of Dominik Schildknecht <dominik.schildknecht@psi.ch>
+THIS CODE IS NO LONGER UNDER DEVELOPMENT.
+THIS PROGRAM IS DELIVED WITHOUT ANY GUARANTEES BY THE AUTHOR
+
+
+This is mc++, a program mainly used to simulate XY systems in 2D with dipolar interaction. This is the basis for the PhD of Dominik Schildknecht <dominik.schildknecht@gmail.com>
 The program is not part of the ALPS project (http://alps.comp-phys.org/), however is designed to be linked against it. However for anything surrounding the main simulation as input file generation and evaluation of the raw data alpspython is used. The software is therefore under the ALPS licencse v1.1, distributed with this program.
 
 The papers needed to cite to use this program are displayed in the beginning of a run. Please note that it is mandatory to cite these if the results are published.
